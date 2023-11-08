@@ -9,6 +9,14 @@
 
 ## Libraries
 
-PubSubClient
-ArduinoJson
-Adafruit BME680
+### Available In Arduino IDE
+
+- PubSubClient
+- ArduinoJson
+- Adafruit BME680
+
+### Closed Source
+
+Refer to the [Arduino IDE docs](https://docs.arduino.cc/software/ide-v1/tutorials/installing-libraries) on how to include zip libraries  
+
+- [Bosch Sensortec Environmental Cluster (BSEC)](https://github.com/boschsensortec/BSEC-Arduino-library/releases/)
