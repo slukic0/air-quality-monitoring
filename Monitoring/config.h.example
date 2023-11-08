@@ -1,0 +1,17 @@
+#define AP_SSID     ""
+#define PASSWORD    ""
+
+static const int WIFIPIN = 21;
+static const int MQTTPIN = 14;
+
+static const char* SERVER =     "myDomain.com";
+static const int SERVERPORT =    8883;
+static const char* CLIENT =     "clientId";
+static const char* USERNAME =   "username";
+static const char* KEY =        "password";
+
+// also known as intermediate cert
+static const char* ca PROGMEM = \ 
+"-----BEGIN CERTIFICATE-----\n" \
+"ca_cert_goes_here\n" \
+"-----END CERTIFICATE-----\n";
