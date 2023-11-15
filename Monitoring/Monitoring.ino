@@ -24,6 +24,7 @@ int scanrate = 10000; // send every ten seconds
 void callback(char*, byte*, unsigned int);
 WiFiClientSecure wifiClient;
 PubSubClient client(wifiClient);
+const bool useEnterprise = 1;
 
 void setupPins(){
   pinMode(WIFIPIN, OUTPUT);
@@ -37,10 +38,14 @@ void setupWifi(){
   wifiClient.setCACert(AWS_CERT_CA);
   wifiClient.setCertificate(AWS_CERT_CRT);
   wifiClient.setPrivateKey(AWS_CERT_PRIVATE);
-
-
+  
   WiFi.mode(WIFI_STA);
-  WiFi.begin(AP_SSID, PASSWORD);
+
+  if (useEnterprise) {
+    WiFi.begin(AP_SSID_E, WPA2_AUTH_PEAP, ID_E, USERNAME_E, PASSWORD_E);
+  } else {
+    WiFi.begin(AP_SSID, PASSWORD);
+  }
   Serial.println();
   Serial.print("Waiting for WiFi Connection ...");
   while (WiFi.status() != WL_CONNECTED)

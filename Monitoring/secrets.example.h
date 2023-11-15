@@ -1,8 +1,15 @@
 #include <pgmspace.h>
 #define SECRET
  
+// WPA2 - PSK
 #define AP_SSID     "*****"
 #define PASSWORD    "*****"
+
+// WPA2 - Enterprise
+#define AP_SSID_E   "*****"
+#define ID_E        "*****"
+#define USERNAME_E  "*****"
+#define PASSWORD_E  "*****"
 
 static const int WIFIPIN = 21;
 static const int MQTTPIN = 14;
