@@ -17,8 +17,7 @@ Adafruit_BME680 bme; // I2C
 
 // Sensor Data
 long previousMillis;
-DynamicJsonDocument payload(200);
-int scanrate = 10000; // send every ten seconds
+int scanrate = 30 * 1000; // how often to publish
 
 // Wifi & MQTT Client
 void callback(char*, byte*, unsigned int);
@@ -26,14 +25,14 @@ WiFiClientSecure wifiClient;
 PubSubClient client(wifiClient);
 const bool useEnterprise = 1;
 
-void setupPins(){
+void setupPins() {
   pinMode(WIFIPIN, OUTPUT);
   pinMode(MQTTPIN, OUTPUT);
   digitalWrite(WIFIPIN, LOW);
   digitalWrite(MQTTPIN, LOW);
 }
 
-void setupWifi(){
+void setupWifi() {
   // Connect to Wifi
   wifiClient.setCACert(AWS_CERT_CA);
   wifiClient.setCertificate(AWS_CERT_CRT);
@@ -48,8 +47,7 @@ void setupWifi(){
   }
   Serial.println();
   Serial.print("Waiting for WiFi Connection ...");
-  while (WiFi.status() != WL_CONNECTED)
-  {
+  while (WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
     delay(500);
   }
@@ -62,19 +60,17 @@ void setupWifi(){
 
 void messageHandler(char*, byte*, unsigned int);
 
-void setupMqtt(){
+void setupMqtt() {
   // Connect to MQTT broker
   client.setServer(AWS_IOT_ENDPOINT, 8883);
   client.setCallback(messageHandler);
 
-  while (!client.connect(THINGNAME))
-  {
+  while (!client.connect(THINGNAME)) {
     Serial.print(".");
     delay(100);
   }
  
-  if (!client.connected())
-  {
+  if (!client.connected()) {
     Serial.println("AWS IoT Timeout!");
     Serial.println(client.state());
     return;
@@ -86,7 +82,7 @@ void setupMqtt(){
   client.subscribe(AWS_IOT_SUBSCRIBE_TOPIC);
   Serial.println("AWS IoT Connected!");
 
-  // send hello message
+  // Send hello message
   StaticJsonDocument<200> doc;
   doc["status"] = "OK";
   char jsonBuffer[512];
@@ -95,8 +91,7 @@ void setupMqtt(){
 
 }
 
-void messageHandler(char* topic, byte* payload, unsigned int length)
-{
+void messageHandler(char* topic, byte* payload, unsigned int length) {
   Serial.print("incoming: ");
   Serial.println(topic);
  
@@ -106,7 +101,7 @@ void messageHandler(char* topic, byte* payload, unsigned int length)
   Serial.println(message);
 }
 
-void setupBme(){
+void setupBme() {
    // Set up oversampling and filter initialization
   bme.setTemperatureOversampling(BME680_OS_8X);
   bme.setHumidityOversampling(BME680_OS_2X);
@@ -134,26 +129,31 @@ void setup() {
 
 void loop() {
   client.loop();
-  checkSensors();
+  publishSensors();
   yield();
 }
 
-void checkSensors() {
-  bool timeToCheck = (millis() - previousMillis) > scanrate;
-  if (timeToCheck) {
-    if (! bme.performReading()) {
-      Serial.println("Failed to perform reading :(");
-      return;
-    }
+DynamicJsonDocument getSensorJson() {
+  DynamicJsonDocument payload(200);
+  if (!bme.performReading()) {
+    Serial.println("Failed to perform reading :(");
+    payload["status"] = "FAIL";
+  } else {
+    payload["status"] = "OK";
     payload["pressure"] = bme.pressure / 100.0;
     payload["gasResistance"] = bme.gas_resistance / 1000.0;
     payload["temperature"] = bme.temperature;
     payload["humidity"] = bme.humidity;
+  }
+  return payload;
+}
 
+void publishSensors() {
+  bool timeToCheck = (millis() - previousMillis) > scanrate;
+  if (timeToCheck) {
     String payloadString;
-    serializeJson(payload, payloadString);
+    serializeJson(getSensorJson(), payloadString);
     Serial.println(payloadString);
-
     client.publish(AWS_IOT_PUBLISH_TOPIC, payloadString.c_str());
     previousMillis = millis();
   }
