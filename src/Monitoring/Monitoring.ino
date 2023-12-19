@@ -17,13 +17,13 @@ Adafruit_BME680 bme; // I2C
 
 // Sensor Data
 long previousMillis;
-int scanrate = 30 * 1000; // how often to publish
+int scanrate = 60 * 1000; // how often to publish
 
 // Wifi & MQTT Client
 void callback(char*, byte*, unsigned int);
 WiFiClientSecure wifiClient;
 PubSubClient client(wifiClient);
-const bool useEnterprise = 1;
+const bool useEnterprise = 0;
 
 void setupPins() {
   pinMode(WIFIPIN, OUTPUT);
