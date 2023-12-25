@@ -71,6 +71,7 @@ bsecSensor sensorList[] = {
 };
 
 typedef struct {
+  String device;
   int sensor;
   int timestamp;
   float tiaq;
@@ -82,8 +83,10 @@ typedef struct {
   float tstabilizationStatus;
   float trunInStatus;
 } SensorData;
+const int SENSOR_DATA_LENGTH = 11;
 
 void printSensorData(SensorData val){
+    Serial.print("device=" + String(val.device) + " ");
     Serial.print("sensor=" + String(val.sensor) + " ");
     Serial.print("timestamp=" + String(val.timestamp) + " ");
     Serial.print("tiaq=" + String(val.tiaq) + " ");
@@ -95,6 +98,8 @@ void printSensorData(SensorData val){
     Serial.print("tstabilizationStatus=" + String(val.timestamp) + " ");
     Serial.print("trunInStatus=" + String(val.timestamp) + "\n");
 }
+
+# define SAMPLING_RATE BSEC_SAMPLE_RATE_LP
 
 /* Entry point for the example */
 void setup(void)
@@ -122,7 +127,7 @@ void setup(void)
         }
 
         /* Subscribe to the desired BSEC2 outputs */
-        if (!envSensor[i].updateSubscription(sensorList, ARRAY_LEN(sensorList), BSEC_SAMPLE_RATE_LP))
+        if (!envSensor[i].updateSubscription(sensorList, ARRAY_LEN(sensorList), SAMPLING_RATE))
         {
             checkBsecStatus (envSensor[i]);
         }
@@ -137,13 +142,13 @@ void setup(void)
             + String(envSensor[0].version.major_bugfix) + "." \
             + String(envSensor[0].version.minor_bugfix));
 
-    Serial.println("Sampling rate " + String(BSEC_SAMPLE_RATE_LP));
+    Serial.println("Sampling rate " + String(SAMPLING_RATE));
 }
 
 /* Function that is looped forever */
 void loop(void)
 {
-    /* Call the run function often so that the library can 
+        /* Call the run function often so that the library can 
      * check if it is time to read new data from the sensor  
      * and process it.
      */
@@ -168,7 +173,8 @@ void errLeds(void)
 }
 
 /* Buffer to avoid publishing too many messages */
-const int SENSOR_DATA_BUFFER_LENGTH = NUM_OF_SENS * 4;
+const int SENSOR_DATA_BUFFER_LENGTH = NUM_OF_SENS * 2; // BSEC_SAMPLE_RATE_LP = 1/3 Hz = every 3s
+// TODO: Can't serialize more than 16 elements due to stack overflow
 
 void newDataCallback(const bme68xData data, const bsecOutputs outputs, Bsec2 bsec)
 {
@@ -259,32 +265,38 @@ void checkBsecStatus(Bsec2 bsec)
     }
 }
 
-// example code
-// DynamicJsonDocument getSensorJson() {
-//   DynamicJsonDocument payload(200);
-//   if (!bme.performReading()) {
-//     Serial.println("Failed to perform reading :(");
-//     payload["status"] = "FAIL";
-//   } else {
-//     payload["status"] = "OK";
-//     payload["pressure"] = bme.pressure / 100.0;
-//     payload["gasResistance"] = bme.gas_resistance / 1000.0;
-//     payload["temperature"] = bme.temperature;
-//     payload["humidity"] = bme.humidity;
-//   }
-//   return payload;
-// }
-
 /**
  * Encodes an array of SensorData into a JSON and sends it to AWS
 */
 void publishSensorData(SensorData arr[]) {
-    // String payloadString;
-    // serializeJson(arr, payloadString);
-    // Serial.println(payloadString);
-    // client.publish(AWS_IOT_PUBLISH_TOPIC, payloadString.c_str());
-
     for (int i=0; i<SENSOR_DATA_BUFFER_LENGTH; i++){
         printSensorData(arr[i]);
     }
+    Serial.println("Items: " + String(SENSOR_DATA_BUFFER_LENGTH) + " Size: " + String(SENSOR_DATA_BUFFER_LENGTH * sizeof arr[0]));
+    
+
+    const int capacity = JSON_ARRAY_SIZE(SENSOR_DATA_BUFFER_LENGTH) + SENSOR_DATA_BUFFER_LENGTH * JSON_OBJECT_SIZE(SENSOR_DATA_LENGTH);
+    StaticJsonDocument<capacity> doc;
+
+    JsonArray jsonArr = doc.createNestedArray();
+
+    for (int i=0; i<SENSOR_DATA_BUFFER_LENGTH; i++){
+        JsonObject obj1 = jsonArr.createNestedObject();
+        obj1["device"] = arr[i].device;
+        obj1["sensor"] = arr[i].sensor;
+        obj1["timestamp"] = arr[i].timestamp;
+        obj1["tiaq"] = arr[i].tiaq;
+        obj1["tiaqAccuracy"] = arr[i].tiaqAccuracy;
+        obj1["ttemperature"] = arr[i].ttemperature;
+        obj1["tpressure"] = arr[i].tpressure;
+        obj1["thumidity"] = arr[i].thumidity;
+        obj1["tgasResistance"] = arr[i].tgasResistance;
+        obj1["tstabilizationStatus"] = arr[i].tstabilizationStatus;
+        obj1["trunInStatus"] = arr[i].trunInStatus;
+    }
+    String payloadString;
+    int jsonLength = measureJson(doc);
+    Serial.println("Capacity: " + String(capacity) + " jsonLength: " + String(jsonLength));
+    // serializeJson(doc, payloadString);
+    // Serial.println("");
 }
