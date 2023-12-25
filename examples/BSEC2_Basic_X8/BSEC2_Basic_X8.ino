@@ -25,6 +25,8 @@
 #define NUM_OF_SENS    8
 #define PANIC_LED   LED_BUILTIN
 #define ERROR_DUR   1000
+#define SAMPLING_RATE BSEC_SAMPLE_RATE_LP
+
 
 /* Helper functions declarations */
 /**
@@ -89,7 +91,7 @@ void setup(void)
         }
 
         /* Subscribe to the desired BSEC2 outputs */
-        if (!envSensor[i].updateSubscription(sensorList, ARRAY_LEN(sensorList), BSEC_SAMPLE_RATE_LP))
+        if (!envSensor[i].updateSubscription(sensorList, ARRAY_LEN(sensorList), SAMPLING_RATE))
         {
             checkBsecStatus (envSensor[i]);
         }
@@ -103,6 +105,8 @@ void setup(void)
             + String(envSensor[0].version.minor) + "." \
             + String(envSensor[0].version.major_bugfix) + "." \
             + String(envSensor[0].version.minor_bugfix));
+
+    Serial.println("Sampling rate " + String(SAMPLING_RATE));
 }
 
 /* Function that is looped forever */
@@ -141,37 +145,37 @@ void newDataCallback(const bme68xData data, const bsecOutputs outputs, Bsec2 bse
 
     Serial.println("BSEC outputs:\n\tsensor num = " + String(sensor));
     Serial.println("\ttimestamp = " + String((int) (outputs.output[0].time_stamp / INT64_C(1000000))));
-    for (uint8_t i = 0; i < outputs.nOutputs; i++)
-    {
-        const bsecData output  = outputs.output[i];
-        switch (output.sensor_id)
-        {
-            case BSEC_OUTPUT_IAQ:
-                Serial.println("\tiaq = " + String(output.signal));
-                Serial.println("\tiaq accuracy = " + String((int) output.accuracy));
-                break;
-            case BSEC_OUTPUT_RAW_TEMPERATURE:
-                Serial.println("\ttemperature = " + String(output.signal));
-                break;
-            case BSEC_OUTPUT_RAW_PRESSURE:
-                Serial.println("\tpressure = " + String(output.signal));
-                break;
-            case BSEC_OUTPUT_RAW_HUMIDITY:
-                Serial.println("\thumidity = " + String(output.signal));
-                break;
-            case BSEC_OUTPUT_RAW_GAS:
-                Serial.println("\tgas resistance = " + String(output.signal));
-                break;
-            case BSEC_OUTPUT_STABILIZATION_STATUS:
-                Serial.println("\tstabilization status = " + String(output.signal));
-                break;
-            case BSEC_OUTPUT_RUN_IN_STATUS:
-                Serial.println("\trun in status = " + String(output.signal));
-                break;
-            default:
-                break;
-        }
-    }
+    // for (uint8_t i = 0; i < outputs.nOutputs; i++)
+    // {
+    //     const bsecData output  = outputs.output[i];
+    //     switch (output.sensor_id)
+    //     {
+    //         case BSEC_OUTPUT_IAQ:
+    //             Serial.println("\tiaq = " + String(output.signal));
+    //             Serial.println("\tiaq accuracy = " + String((int) output.accuracy));
+    //             break;
+    //         case BSEC_OUTPUT_RAW_TEMPERATURE:
+    //             Serial.println("\ttemperature = " + String(output.signal));
+    //             break;
+    //         case BSEC_OUTPUT_RAW_PRESSURE:
+    //             Serial.println("\tpressure = " + String(output.signal));
+    //             break;
+    //         case BSEC_OUTPUT_RAW_HUMIDITY:
+    //             Serial.println("\thumidity = " + String(output.signal));
+    //             break;
+    //         case BSEC_OUTPUT_RAW_GAS:
+    //             Serial.println("\tgas resistance = " + String(output.signal));
+    //             break;
+    //         case BSEC_OUTPUT_STABILIZATION_STATUS:
+    //             Serial.println("\tstabilization status = " + String(output.signal));
+    //             break;
+    //         case BSEC_OUTPUT_RUN_IN_STATUS:
+    //             Serial.println("\trun in status = " + String(output.signal));
+    //             break;
+    //         default:
+    //             break;
+    //     }
+    // }
 }
 
 void checkBsecStatus(Bsec2 bsec)
