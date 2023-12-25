@@ -173,8 +173,7 @@ void errLeds(void)
 }
 
 /* Buffer to avoid publishing too many messages */
-const int SENSOR_DATA_BUFFER_LENGTH = NUM_OF_SENS * 2; // BSEC_SAMPLE_RATE_LP = 1/3 Hz = every 3s
-// TODO: Can't serialize more than 16 elements due to stack overflow
+const int SENSOR_DATA_BUFFER_LENGTH = NUM_OF_SENS * 10; // BSEC_SAMPLE_RATE_LP = 1/3 Hz = every 3s
 
 void newDataCallback(const bme68xData data, const bsecOutputs outputs, Bsec2 bsec)
 {
@@ -276,7 +275,7 @@ void publishSensorData(SensorData arr[]) {
     
 
     const int capacity = JSON_ARRAY_SIZE(SENSOR_DATA_BUFFER_LENGTH) + SENSOR_DATA_BUFFER_LENGTH * JSON_OBJECT_SIZE(SENSOR_DATA_LENGTH);
-    StaticJsonDocument<capacity> doc;
+    DynamicJsonDocument doc(capacity);
 
     JsonArray jsonArr = doc.createNestedArray();
 
@@ -294,9 +293,11 @@ void publishSensorData(SensorData arr[]) {
         obj1["tstabilizationStatus"] = arr[i].tstabilizationStatus;
         obj1["trunInStatus"] = arr[i].trunInStatus;
     }
-    String payloadString;
     int jsonLength = measureJson(doc);
     Serial.println("Capacity: " + String(capacity) + " jsonLength: " + String(jsonLength));
-    // serializeJson(doc, payloadString);
-    // Serial.println("");
+
+    char* content = (char*)malloc(jsonLength);
+    serializeJson(doc, content, jsonLength);
+    Serial.println(content);
+    free(content);
 }
