@@ -1,5 +1,7 @@
-import { Api, use, StackContext } from "sst/constructs";
+import { Api, use, StackContext, Auth } from "sst/constructs";
 import { StorageStack } from "./StorageStack";
+
+
 
 export function ApiStack({ stack, app }: StackContext) {
   const { table } = use(StorageStack);
@@ -17,6 +19,19 @@ export function ApiStack({ stack, app }: StackContext) {
       "POST /api/sensorData": "packages/functions/src/sensorData.createData",
     },
   });
+
+  const auth = new Auth(stack, "auth", {
+    authenticator: {
+      handler: "packages/functions/src/auth.handler",
+    },
+  });
+
+  auth.attach(stack, {
+    api,
+    prefix: "/auth",
+  });
+  
+  
 
   // Show the API endpoint in the output
   stack.addOutputs({
