@@ -1,7 +1,7 @@
 import { StackContext, Table } from "sst/constructs";
 
 export function StorageStack({ stack, app }: StackContext) {
-  const table = new Table(stack, "SensorData", {
+  const sensorDataTable = new Table(stack, "SensorData", {
     fields: {
         deviceId: "string",
         timeStamp: "number",
@@ -10,8 +10,15 @@ export function StorageStack({ stack, app }: StackContext) {
     },
     primaryIndex: { partitionKey: "deviceId", sortKey: "timeStamp" },
   });
+  const usersTable = new Table(stack, "Users", {
+    fields: {
+        userId: "string",
+    },
+    primaryIndex: { partitionKey: "userId" },
+  });
 
   return {
-    table,
+    sensorDataTable,
+    usersTable,
   };
 }

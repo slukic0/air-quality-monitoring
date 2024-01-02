@@ -1,5 +1,11 @@
 # SST
 
+## Running
+Run `npm run dev` to test lambda and other services locally  
+
+## Deploying
+Run `npx sst deploy --stage prod` to deploy  
+
 ## Documentation  
 https://docs.sst.dev/start/standalone
 
