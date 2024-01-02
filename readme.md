@@ -7,11 +7,15 @@ Stefan Lukic
 Filip Lukic  
 Pranav Hari
 
-## File Structure
+## File Structure  
 
-- `./src`: Source code  
-- `./examples`: Relevant code examples  
-- `./docs`: Relevant datasheets and documentation  
+- `MonitoringKit`: Code for Monitoring Stations  
+    - `Monitoring_Breakout`: Code for single breakout BME 688 sensor  
+    - `Monitoring_X8`: Code for development board with 8x BME688
+- `air-quality-sst`: SST setup for AWS infrastructure  
+- `examples`: Code examples  
+- `docs`: Relevant datasheets and documentation 
+- `images`: Image files 
 
 ## Setup
 
@@ -35,11 +39,15 @@ These files can then be used to connect the ESP32 to AWS and publish and subscri
 
 ### Monitoring Kit Hardware
 
-#### Current Prototype
+#### Single Sensor
 
-The current prototype of the monitoring kit utilizes a Huzzah ESP32 connected to a BME688 sensor using I2C.
+The current single sensor prototype of the monitoring kit utilizes a Huzzah ESP32 connected to a BME688 sensor using I2C.
 Two LEDs are also used to indicate the WIFI and MQTT broker connection status.
 
 Sensor data is periodically encoded into a JSON format, which is then published to a topic by sending the JSON to AWS IOT Core.  
 
 ![Prototype Picture](./images/prototype.jpg)
+
+#### Dev Board
+
+The Dev board utilizes eight BME688 sensors connected to the stacked headers of the ESP32. Sensor data from each sensor is logged periodically and eventually sent to IoT core.
