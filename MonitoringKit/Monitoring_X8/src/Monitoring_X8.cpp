@@ -83,6 +83,9 @@ typedef struct {
   float tstabilizationStatus;
   float trunInStatus;
 } SensorData;
+
+void publishSensorData(SensorData arr[]);
+
 const int SENSOR_DATA_LENGTH = 11;
 
 void printSensorData(SensorData val){
