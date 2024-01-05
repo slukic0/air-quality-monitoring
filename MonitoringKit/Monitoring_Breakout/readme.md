@@ -3,9 +3,9 @@
 
 ## Instructions
 
-1. Install Libraries
+1. Install the Platfrom IO IDE extension for VS Code
 2. Fill in secrets & rename to secrets.h
-3. Upload
+3. Open project using Plaform IO 
 
 ## Libraries
 
