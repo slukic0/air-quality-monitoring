@@ -22,7 +22,7 @@
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
 
-#include <bsec2.h>
+#include <bsec2.h> // PlatformIO registry for BSEC2 is out of date; this will have to be added manually
 #include "commMux.h"
 
 #include <vector>
@@ -83,6 +83,9 @@ typedef struct {
   float tstabilizationStatus;
   float trunInStatus;
 } SensorData;
+
+void publishSensorData(SensorData arr[]);
+
 const int SENSOR_DATA_LENGTH = 11;
 
 void printSensorData(SensorData val){
