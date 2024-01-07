@@ -10,12 +10,12 @@ Pranav Hari
 ## File Structure  
 
 - `MonitoringKit`: Code for Monitoring Stations  
-    - `Monitoring_Breakout`: Code for single breakout BME 688 sensor  
-    - `Monitoring_X8`: Code for development board with 8x BME688
-- `air-quality-sst`: SST setup for AWS infrastructure  
+  - `Monitoring_Breakout`: Code for single breakout BME 688 sensor  
+  - `Monitoring_X8`: Code for development board with 8x BME688
+- `air-quality-sst`: AWS Infrastructure. Contains backend code and frontend web app.  
+- `docs`: Relevant datasheets and documentation
+- `images`: Image files
 - `examples`: Code examples  
-- `docs`: Relevant datasheets and documentation 
-- `images`: Image files 
 
 ## Setup
 
@@ -29,6 +29,11 @@ Follow the [AWS documentation here](https://docs.aws.amazon.com/singlesignon/lat
 
 3. Once AWS IAM Center has been correctly configured, you should be able to login to your AWS account using your AWS access portal URL, which can be found in the IAM Center dashboard.
 ![IAM Center Dashboard](./images/iamCenterDashboard.png)
+
+### SST Setup
+
+SST is a framework that allows the creation of serverless infrastructure using code. To get started, read the documentation [here](https://docs.sst.dev/start/standalone).  See the readme file in `air-quality-sst` for more information.
+Note that SST using the AWS CLI for authetication. See the AWS documentation [here](https://docs.aws.amazon.com/cli/latest/userguide/sso-configure-profile-token.html) for instructions on configuring the AWS CLI.  
 
 ### Setup AWS IOT Core
 
@@ -46,8 +51,11 @@ Two LEDs are also used to indicate the WIFI and MQTT broker connection status.
 
 Sensor data is periodically encoded into a JSON format, which is then published to a topic by sending the JSON to AWS IOT Core.  
 
-![Prototype Picture](./images/prototype.jpg)
+<img src="./images/prototype.jpg" alt="prototype" width="500"/>
 
 #### Dev Board
 
-The Dev board utilizes eight BME688 sensors connected to the stacked headers of the ESP32. Sensor data from each sensor is logged periodically and eventually sent to IoT core.
+The Dev board utilizes eight BME688 sensors connected to the stacked headers of the ESP32.  
+Sensor data from each sensor is logged periodically and eventually sent to IoT core.  
+
+<img src="./images/x8_prototype.jpg" alt="dev board prototype" width="500"/>

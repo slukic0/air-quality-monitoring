@@ -3,9 +3,9 @@
 
 ## Instructions
 
-1. Install the Platfrom IO IDE extension for VS Code
+1. Install the Platform IO IDE extension for VS Code
 2. Fill in secrets & rename to secrets.h
-3. Open project using Plaform IO 
+3. Open project using Plaform IO
 
 ## Libraries
 
@@ -22,4 +22,3 @@ Refer to the [Arduino IDE docs](https://docs.arduino.cc/software/ide-v1/tutorial
 
 - [Bosch Sensortec Environmental Cluster (BSEC)](https://github.com/boschsensortec/BSEC-Arduino-library/releases/)
 - [Bosch Sensortec Environmental Cluster 2 (BSEC2)](https://github.com/boschsensortec/Bosch-BSEC2-Library/releases/tag/v1.6.2400)
-
