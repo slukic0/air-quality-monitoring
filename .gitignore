@@ -1,4 +1,4 @@
 config.h
 secrets.h
-.vscode/c_cpp_properties.json
-.vscode/settings.json
+c_cpp_properties.json
+settings.json
