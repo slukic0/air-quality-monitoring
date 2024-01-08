@@ -9,14 +9,6 @@
  * example for 24hrs to let the sensor stabilize.
  */
 
-/**
- * basic.ino sketch :
- * This is an example for illustrating the BSEC virtual outputs using BME688 Development Kit,
- * which has been designed to work with Adafruit ESP32 Feather Board
- * For more information visit : 
- * https://www.bosch-sensortec.com/software-tools/software/bme688-software/
- */
-
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <PubSubClient.h>
@@ -26,6 +18,12 @@
 #include "commMux.h"
 
 #include <vector>
+
+#include "secrets.h"
+
+
+#define AWS_IOT_PUBLISH_TOPIC   "esp32/pub"
+#define AWS_IOT_SUBSCRIBE_TOPIC "esp32/sub"
 
 /* Macros used */
 /* Number of sensors to operate*/
@@ -52,6 +50,16 @@ void checkBsecStatus(Bsec2 bsec);
  * @param[in] bsec      : Instance of BSEC2 calling the callback
  */
 void newDataCallback(const bme68xData data, const bsecOutputs outputs, Bsec2 bsec);
+
+
+// Wifi & MQTT
+WiFiClientSecure wifiClient;
+PubSubClient client(wifiClient);
+const bool useEnterprise = 0;
+
+void setupWifi();
+void setupMqtt();
+void messageHandler(char*, byte*, unsigned int);
 
 /* Create an array of objects of the class Bsec2 */
 Bsec2 envSensor[NUM_OF_SENS];
@@ -88,7 +96,7 @@ void publishSensorData(SensorData arr[]);
 
 const int SENSOR_DATA_LENGTH = 11;
 
-void printSensorData(SensorData val){
+void printSensorData(SensorData val) {
     Serial.print("device=" + String(val.device) + " ");
     Serial.print("sensor=" + String(val.sensor) + " ");
     Serial.print("timestamp=" + String(val.timestamp) + " ");
@@ -104,19 +112,84 @@ void printSensorData(SensorData val){
 
 # define SAMPLING_RATE BSEC_SAMPLE_RATE_LP
 
+
+void setupWifi() {
+  // Connect to Wifi
+  wifiClient.setCACert(AWS_CERT_CA);
+  wifiClient.setCertificate(AWS_CERT_CRT);
+  wifiClient.setPrivateKey(AWS_CERT_PRIVATE);
+  
+  WiFi.mode(WIFI_STA);
+
+  if (useEnterprise) {
+    WiFi.begin(AP_SSID_E, WPA2_AUTH_PEAP, ID_E, USERNAME_E, PASSWORD_E);
+  } else {
+    WiFi.begin(AP_SSID, PASSWORD);
+  }
+  Serial.println();
+  Serial.print("Waiting for WiFi Connection ...");
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print(".");
+    delay(500);
+  }
+  Serial.println("");
+  Serial.println("WiFi Connected!");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+}
+
+void setupMqtt() {
+  // Connect to MQTT broker
+  client.setServer(AWS_IOT_ENDPOINT, 8883);
+  client.setCallback(messageHandler);
+
+  while (!client.connect(THINGNAME)) {
+    Serial.print(".");
+    delay(100);
+  }
+ 
+  if (!client.connected()) {
+    Serial.println("AWS IoT Timeout!");
+    Serial.println(client.state());
+    return;
+  }
+ 
+  // Subscribe to a topic
+  client.subscribe(AWS_IOT_SUBSCRIBE_TOPIC);
+  Serial.println("AWS IoT Connected!");
+
+  // Send hello message
+  StaticJsonDocument<200> doc;
+  doc["status"] = "OK";
+  char jsonBuffer[512];
+  serializeJson(doc, jsonBuffer);
+  client.publish(AWS_IOT_PUBLISH_TOPIC, jsonBuffer);
+}
+
+void messageHandler(char* topic, byte* payload, unsigned int length) {
+  Serial.print("incoming: ");
+  Serial.println(topic);
+ 
+  StaticJsonDocument<200> doc;
+  deserializeJson(doc, payload);
+  const char* message = doc["message"];
+  Serial.println(message);
+}
+
 /* Entry point for the example */
-void setup(void)
-{
+void setup(void) {
     /* Initialize the communication interfaces */
     Serial.begin(115200);
     commMuxBegin(Wire, SPI);
     pinMode(PANIC_LED, OUTPUT);
     delay(100);
+    
+    setupWifi();
+    setupMqtt();
     /* Valid for boards with USB-COM. Wait until the port is open */
     while(!Serial) delay(10);
     
-    for (uint8_t i = 0; i < NUM_OF_SENS; i++)
-    {        
+    for (uint8_t i = 0; i < NUM_OF_SENS; i++) {        
         /* Sets the Communication interface for the sensors */
         communicationSetup[i] = commMuxSetConfig(Wire, SPI, i, communicationSetup[i]);
 
@@ -149,14 +222,12 @@ void setup(void)
 }
 
 /* Function that is looped forever */
-void loop(void)
-{
+void loop(void) {
         /* Call the run function often so that the library can 
      * check if it is time to read new data from the sensor  
      * and process it.
      */
-    for (sensor = 0; sensor < NUM_OF_SENS; sensor++)
-    {
+    for (sensor = 0; sensor < NUM_OF_SENS; sensor++) {
         if (!envSensor[sensor].run())
         {
          checkBsecStatus(envSensor[sensor]);
@@ -164,10 +235,8 @@ void loop(void)
     }
 }
 
-void errLeds(void)
-{
-    while(1)
-    {
+void errLeds(void) {
+    while(1) {
         digitalWrite(PANIC_LED, HIGH);
         delay(ERROR_DUR);
         digitalWrite(PANIC_LED, LOW);
@@ -178,8 +247,7 @@ void errLeds(void)
 /* Buffer to avoid publishing too many messages */
 const int SENSOR_DATA_BUFFER_LENGTH = NUM_OF_SENS * 10; // BSEC_SAMPLE_RATE_LP = 1/3 Hz = every 3s
 
-void newDataCallback(const bme68xData data, const bsecOutputs outputs, Bsec2 bsec)
-{
+void newDataCallback(const bme68xData data, const bsecOutputs outputs, Bsec2 bsec) {
     if (!outputs.nOutputs)
     {
         return;
@@ -244,8 +312,7 @@ void newDataCallback(const bme68xData data, const bsecOutputs outputs, Bsec2 bse
     }
 }
 
-void checkBsecStatus(Bsec2 bsec)
-{
+void checkBsecStatus(Bsec2 bsec) {
     if (bsec.status < BSEC_OK)
     {
         Serial.println("BSEC error code : " + String(bsec.status));
@@ -271,9 +338,9 @@ void checkBsecStatus(Bsec2 bsec)
  * Encodes an array of SensorData into a JSON and sends it to AWS
 */
 void publishSensorData(SensorData arr[]) {
-    for (int i=0; i<SENSOR_DATA_BUFFER_LENGTH; i++){
-        printSensorData(arr[i]);
-    }
+    // for (int i=0; i<SENSOR_DATA_BUFFER_LENGTH; i++){
+    //     printSensorData(arr[i]);
+    // }
     Serial.println("Items: " + String(SENSOR_DATA_BUFFER_LENGTH) + " Size: " + String(SENSOR_DATA_BUFFER_LENGTH * sizeof arr[0]));
     
 
@@ -301,6 +368,8 @@ void publishSensorData(SensorData arr[]) {
 
     char* content = (char*)malloc(jsonLength);
     serializeJson(doc, content, jsonLength);
-    Serial.println(content);
+    Serial.print("Sending payload... ");
+    client.publish(AWS_IOT_PUBLISH_TOPIC, content); //todo: this causes a core dump, look at arduinoJSON docs/FAQ
+    Serial.println("Published");
     free(content);
 }
