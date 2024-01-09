@@ -13,6 +13,7 @@
 #include <WiFiClientSecure.h>
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
+#include <StreamUtils.h>
 
 #include <bsec2.h> // PlatformIO registry for BSEC2 is out of date; this will have to be added manually
 #include "commMux.h"
@@ -159,7 +160,7 @@ void setupMqtt() {
   Serial.println("AWS IoT Connected!");
 
   // Send hello message
-  StaticJsonDocument<200> doc;
+  JsonDocument doc;
   doc["status"] = "OK";
   char jsonBuffer[512];
   serializeJson(doc, jsonBuffer);
@@ -170,7 +171,7 @@ void messageHandler(char* topic, byte* payload, unsigned int length) {
   Serial.print("incoming: ");
   Serial.println(topic);
  
-  StaticJsonDocument<200> doc;
+  JsonDocument doc;
   deserializeJson(doc, payload);
   const char* message = doc["message"];
   Serial.println(message);
@@ -186,6 +187,7 @@ void setup(void) {
     
     setupWifi();
     setupMqtt();
+
     /* Valid for boards with USB-COM. Wait until the port is open */
     while(!Serial) delay(10);
     
@@ -219,6 +221,14 @@ void setup(void) {
             + String(envSensor[0].version.minor_bugfix));
 
     Serial.println("Sampling rate " + String(SAMPLING_RATE));
+
+    if(client.setBufferSize(20000)){
+        Serial.println("Set buffer to 20000");
+    } else{
+        Serial.println("Error setting buffer size");
+    }
+
+    Serial.println("");
 }
 
 /* Function that is looped forever */
@@ -344,13 +354,12 @@ void publishSensorData(SensorData arr[]) {
     Serial.println("Items: " + String(SENSOR_DATA_BUFFER_LENGTH) + " Size: " + String(SENSOR_DATA_BUFFER_LENGTH * sizeof arr[0]));
     
 
-    const int capacity = JSON_ARRAY_SIZE(SENSOR_DATA_BUFFER_LENGTH) + SENSOR_DATA_BUFFER_LENGTH * JSON_OBJECT_SIZE(SENSOR_DATA_LENGTH);
-    DynamicJsonDocument doc(capacity);
+    JsonDocument doc;
 
-    JsonArray jsonArr = doc.createNestedArray();
+    JsonArray jsonArr = doc["jsonArr"].to<JsonArray>();
 
     for (int i=0; i<SENSOR_DATA_BUFFER_LENGTH; i++){
-        JsonObject obj1 = jsonArr.createNestedObject();
+        JsonObject obj1 = jsonArr.add<JsonObject>();
         obj1["device"] = arr[i].device;
         obj1["sensor"] = arr[i].sensor;
         obj1["timestamp"] = arr[i].timestamp;
@@ -364,12 +373,30 @@ void publishSensorData(SensorData arr[]) {
         obj1["trunInStatus"] = arr[i].trunInStatus;
     }
     int jsonLength = measureJson(doc);
-    Serial.println("Capacity: " + String(capacity) + " jsonLength: " + String(jsonLength));
+    Serial.println("JsonLength: " + String(jsonLength));
 
     char* content = (char*)malloc(jsonLength);
+    // serializeJson(doc, content, jsonLength);
+    Serial.print("Begining publish...");
+
+    //client.publish(AWS_IOT_PUBLISH_TOPIC, content); //todo: this causes a core dump, look at arduinoJSON docs/FAQ
+
+    client.beginPublish(AWS_IOT_PUBLISH_TOPIC, jsonLength, false);
+    // BufferingPrint bufferedClient(client, 32);
+    // serializeJson(doc, bufferedClient);
+    // bufferedClient.flush();
+    
+    Serial.print("Sending payload...");
+
     serializeJson(doc, content, jsonLength);
-    Serial.print("Sending payload... ");
-    client.publish(AWS_IOT_PUBLISH_TOPIC, content); //todo: this causes a core dump, look at arduinoJSON docs/FAQ
-    Serial.println("Published");
+
+    if (client.endPublish()){
+        Serial.println("Published!");
+    } else {
+        Serial.println("ERROR PUBLISHING!");
+    }
+
+    client.flush();
+
     free(content);
 }
