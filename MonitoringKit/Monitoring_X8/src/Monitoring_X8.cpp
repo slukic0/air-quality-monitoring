@@ -222,10 +222,10 @@ void setup(void) {
 
     Serial.println("Sampling rate " + String(SAMPLING_RATE));
 
-    if(client.setBufferSize(20000)){
-        Serial.println("Set buffer to 20000");
+    if(client.setBufferSize(10240)){ // 10 KB
+        Serial.println("Set pubsub buffer size!");
     } else{
-        Serial.println("Error setting buffer size");
+        Serial.println("ERROR pubsub setting buffer size!");
     }
 
     Serial.println("");
@@ -255,7 +255,7 @@ void errLeds(void) {
 }
 
 /* Buffer to avoid publishing too many messages */
-const int SENSOR_DATA_BUFFER_LENGTH = NUM_OF_SENS * 10; // BSEC_SAMPLE_RATE_LP = 1/3 Hz = every 3s
+const int SENSOR_DATA_BUFFER_LENGTH = NUM_OF_SENS * 5; // BSEC_SAMPLE_RATE_LP = 1/3 Hz = every 3s
 
 void newDataCallback(const bme68xData data, const bsecOutputs outputs, Bsec2 bsec) {
     if (!outputs.nOutputs)
@@ -375,28 +375,24 @@ void publishSensorData(SensorData arr[]) {
     int jsonLength = measureJson(doc);
     Serial.println("JsonLength: " + String(jsonLength));
 
-    char* content = (char*)malloc(jsonLength);
-    // serializeJson(doc, content, jsonLength);
-    Serial.print("Begining publish...");
-
-    //client.publish(AWS_IOT_PUBLISH_TOPIC, content); //todo: this causes a core dump, look at arduinoJSON docs/FAQ
+    Serial.println("Begining publish...");
 
     client.beginPublish(AWS_IOT_PUBLISH_TOPIC, jsonLength, false);
-    // BufferingPrint bufferedClient(client, 32);
-    // serializeJson(doc, bufferedClient);
-    // bufferedClient.flush();
-    
-    Serial.print("Sending payload...");
 
-    serializeJson(doc, content, jsonLength);
+    BufferingPrint bufferedClient(client, 512);
+    Serial.println("Created buffered client");
+
+    serializeJson(doc, bufferedClient);
+    Serial.println("Serialized");
+
+    bufferedClient.flush();
 
     if (client.endPublish()){
-        Serial.println("Published!");
+        Serial.println("Published!\n");
     } else {
-        Serial.println("ERROR PUBLISHING!");
+        Serial.println("ERROR PUBLISHING!\n");
     }
 
     client.flush();
 
-    free(content);
 }
