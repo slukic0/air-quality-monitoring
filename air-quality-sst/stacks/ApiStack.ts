@@ -1,10 +1,9 @@
-import { Api, use, StackContext, Auth, StaticSite } from "sst/constructs";
+import { Api, use, StackContext } from "sst/constructs";
 import { StorageStack } from "./StorageStack";
 
 
-export function AppStack({ stack, app }: StackContext) {
+export function ApiStack({ stack, app }: StackContext) {
   const { sensorDataTable, usersTable } = use(StorageStack);
-
 
   // Create the API
   const api = new Api(stack, "App", {
@@ -21,38 +20,12 @@ export function AppStack({ stack, app }: StackContext) {
     },
   });
 
-  const site = new StaticSite(stack, "ReactSite", {
-    path: "packages/web",
-    buildOutput: "dist",
-    buildCommand: "npm run build",
-    environment: {
-      VITE_APP_API_URL: api.url,
-    },
-  });
-
-
-  const auth = new Auth(stack, "auth", {
-    authenticator: {
-      handler: "packages/functions/src/auth.handler",
-      bind: [site],
-    },
-  });
-
-  auth.attach(stack, {
-    api,
-    prefix: "/auth",
-  });
-  
-  
-
   // Show the API endpoint in the output
   stack.addOutputs({
     ApiEndpoint: api.url,
-    WebAppUrl: site.url || "http://localhost:5173"
   });
 
   return {
     api,
-    site,
   };
 }
