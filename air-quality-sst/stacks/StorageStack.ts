@@ -4,11 +4,11 @@ export function StorageStack({ stack, app }: StackContext) {
   const sensorDataTable = new Table(stack, "SensorData", {
     fields: {
         deviceId: "string",
-        timeStamp: "number",
+        recordedTimestamp: "number",
         lablel: "string",
         sensorNumber: "number",
     },
-    primaryIndex: { partitionKey: "deviceId", sortKey: "timeStamp" },
+    primaryIndex: { partitionKey: "deviceId", sortKey: "recordedTimestamp" },
   });
   const usersTable = new Table(stack, "Users", {
     fields: {
