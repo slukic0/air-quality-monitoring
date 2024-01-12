@@ -13,6 +13,7 @@ export const createData: APIGatewayProxyHandlerV2 = async (event) => {
 
   if (!data || typeof(data.deviceId) !== "string" || typeof(data.recordedTimestamp) !== "number"){
     return {
+      headers: {"content-type": "application/json"},
       statusCode: 400,
       body: JSON.stringify({message: 'Invalid Parameter'}),
     }
@@ -26,6 +27,7 @@ export const createData: APIGatewayProxyHandlerV2 = async (event) => {
   await dynamoDb.put(params).promise();
 
   return {
+    headers: {"content-type": "application/json"},
     statusCode: 200,
     body: JSON.stringify(params.Item),
   };
@@ -44,6 +46,7 @@ export const getData: APIGatewayProxyHandlerV2 = ApiHandler(async (event) => {
 
   if (!deviceId){
     return{
+      headers: {"content-type": "application/json"},
       statusCode: 400,
       body: JSON.stringify({message: 'deviceId is required'}),
     }
@@ -54,6 +57,7 @@ export const getData: APIGatewayProxyHandlerV2 = ApiHandler(async (event) => {
      recordedTimestampNumber = Number(recordedTimestamp);
     if (isNaN(recordedTimestampNumber)){
       return {
+        headers: {"content-type": "application/json"},
         statusCode: 400,
         body: JSON.stringify({message: 'recordedTimestamp must be a number'}),
       } 
@@ -78,6 +82,7 @@ export const getData: APIGatewayProxyHandlerV2 = ApiHandler(async (event) => {
   const results = await dynamoDb.query(params).promise();
 
   return {
+    headers: {"content-type": "application/json"},
     statusCode: 200,
     body: JSON.stringify(results.Items),
   };
