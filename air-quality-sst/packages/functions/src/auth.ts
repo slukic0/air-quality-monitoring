@@ -1,8 +1,9 @@
 import { AuthHandler, GoogleAdapter, Session } from "sst/node/auth";
-import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, PutItemCommand, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
 import { Table } from "sst/node/table";
 import { StaticSite } from "sst/node/site";
+import AWS from "aws-sdk";
 
 const GOOGLE_CLIENT_ID =
   "921966491227-4qg7horhbq49gg7rbas1a9761l2q4p4c.apps.googleusercontent.com";
@@ -24,19 +25,23 @@ export const handler = AuthHandler({
       clientID: GOOGLE_CLIENT_ID,
       onSuccess: async (tokenset) => {
         const claims = tokenset.claims();
+        const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
-        const ddb = new DynamoDBClient({});
-        await ddb.send(
-          new PutItemCommand({
-            TableName: Table.Users.tableName,
-            Item: marshall({
-              userId: claims.sub,
-              email: claims.email,
-              picture: claims.picture,
-              name: claims.given_name,
-            }),
-          })
-        );
+        const params = {
+          TableName: Table.Users.tableName,
+          Key: {userId: claims.sub},
+          UpdateExpression: 'SET email = :email, picture = :picture, #givenName = :givenName',
+          ExpressionAttributeValues: {
+            ':email': claims.email,
+            ':picture': claims.picture,
+            ':givenName': claims.given_name,
+          },
+          ExpressionAttributeNames: {
+            "#givenName": "name"
+          }
+        };
+
+        await dynamoDb.update(params).promise();
 
         return Session.parameter({
           redirect: REDIRECT_URL,
