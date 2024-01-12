@@ -16,5 +16,9 @@ export default {
     app.stack(ApiStack);
     app.stack(WebStack);
     app.stack(AuthStack);
+    // Remove all resources when non-prod stages are removed
+    if (app.stage !== "prod") {
+      app.setDefaultRemovalPolicy("destroy");
+    }
   },
 } satisfies SSTConfig;

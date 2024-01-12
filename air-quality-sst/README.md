@@ -8,7 +8,8 @@ Run `npm run dev` to test lambda and other services locally
 
 ## Deploying
 
-Run `npx sst deploy --stage prod` to deploy  
+Run `npm run deployStage` to deploy to stage  
+Run `npm run deployProd` to deploy to prod  
 
 ## Documentation
 

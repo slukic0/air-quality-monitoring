@@ -15,7 +15,7 @@ export function ApiStack({ stack, app }: StackContext) {
     routes: {
       "GET /": "packages/functions/src/lambda.handler",
       "GET /session": "packages/functions/src/session.handler",
-      "GET /api/sensorData": "packages/functions/src/sensorData.getData",
+      "GET /api/sensorData/{deviceId}": "packages/functions/src/sensorData.getData",
       "POST /api/sensorData": "packages/functions/src/sensorData.createData",
     },
   });

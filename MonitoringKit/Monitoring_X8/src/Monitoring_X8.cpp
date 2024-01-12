@@ -360,9 +360,9 @@ void publishSensorData(SensorData arr[]) {
 
     for (int i=0; i<SENSOR_DATA_BUFFER_LENGTH; i++){
         JsonObject obj1 = jsonArr.add<JsonObject>();
-        obj1["device"] = arr[i].device;
+        obj1["deviceId"] = arr[i].device;
         obj1["sensor"] = arr[i].sensor;
-        obj1["timestamp"] = arr[i].timestamp;
+        obj1["recordedTimestamp"] = arr[i].timestamp;
         obj1["tiaq"] = arr[i].tiaq;
         obj1["tiaqAccuracy"] = arr[i].tiaqAccuracy;
         obj1["ttemperature"] = arr[i].ttemperature;
