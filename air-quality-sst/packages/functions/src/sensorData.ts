@@ -17,7 +17,7 @@ export const createData: APIGatewayProxyHandlerV2 = async (event) => {
       body: JSON.stringify({message: 'Invalid Parameter'}),
     }
   }
-  
+
   const params = {
     TableName: Table.SensorData.tableName,
     Item: data,
@@ -49,23 +49,24 @@ export const getData: APIGatewayProxyHandlerV2 = ApiHandler(async (event) => {
     }
   }
 
-  const recordedTimestampNumber = Number(recordedTimestamp);
-  if (isNaN(recordedTimestampNumber)){
-    return {
-      statusCode: 400,
-      body: JSON.stringify({message: 'recordedTimestamp must be a number'}),
-    } 
+  let recordedTimestampNumber = null;
+  if (recordedTimestamp){
+     recordedTimestampNumber = Number(recordedTimestamp);
+    if (isNaN(recordedTimestampNumber)){
+      return {
+        statusCode: 400,
+        body: JSON.stringify({message: 'recordedTimestamp must be a number'}),
+      } 
+    }
   }
+  
 
   const KeyConditionExpression = !!recordedTimestamp ? 'deviceId = :hkey and recordedTimestamp >= :skey' : 'deviceId = :hkey'
   const ExpressionAttributeValues = {
     ':hkey': deviceId,
-    ':skey': recordedTimestampNumber
+    ...(recordedTimestampNumber && {':skey': recordedTimestampNumber})
   }
 
-  console.log(KeyConditionExpression);
-  console.log(ExpressionAttributeValues);
-  
 
   // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#query-property
   const params = {
