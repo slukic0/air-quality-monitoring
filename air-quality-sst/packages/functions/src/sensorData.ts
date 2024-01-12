@@ -11,17 +11,13 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
 export const createData: APIGatewayProxyHandlerV2 = async (event) => {
   const data = JSON.parse(event?.body || "");
 
-  if (!data || typeof(data.deviceId) !== "string" || typeof(data.recordedTimestamp) !== "number" || typeof(data.sensorNumber) !== "number"){
+  if (!data || typeof(data.deviceId) !== "string" || typeof(data.recordedTimestamp) !== "number"){
     return {
       statusCode: 400,
       body: JSON.stringify({message: 'Invalid Parameter'}),
     }
   }
-
-  if (!data.lablel){
-    data.label = "";
-  }
-
+  
   const params = {
     TableName: Table.SensorData.tableName,
     Item: data,

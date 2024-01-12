@@ -5,8 +5,6 @@ export function StorageStack({ stack, app }: StackContext) {
     fields: {
         deviceId: "string",
         recordedTimestamp: "number",
-        lablel: "string",
-        sensorNumber: "number",
     },
     primaryIndex: { partitionKey: "deviceId", sortKey: "recordedTimestamp" },
   });
