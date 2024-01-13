@@ -2,6 +2,7 @@ import AWS from "aws-sdk";
 import { Table } from "sst/node/table";
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import { ApiHandler, usePathParams, useQueryParams } from "sst/node/api";
+import { createJsonMessage, createJsonBody } from "@air-quality-sst/core/util";
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
@@ -12,11 +13,7 @@ export const createData: APIGatewayProxyHandlerV2 = async (event) => {
   const data = JSON.parse(event?.body || "");
 
   if (!data || typeof(data.deviceId) !== "string" || typeof(data.recordedTimestamp) !== "number"){
-    return {
-      headers: {"content-type": "application/json"},
-      statusCode: 400,
-      body: JSON.stringify({message: 'Invalid Parameter'}),
-    }
+    return createJsonMessage(400, 'Invalid Parameter');
   }
 
   const params = {
@@ -26,11 +23,7 @@ export const createData: APIGatewayProxyHandlerV2 = async (event) => {
 
   await dynamoDb.put(params).promise();
 
-  return {
-    headers: {"content-type": "application/json"},
-    statusCode: 200,
-    body: JSON.stringify(params.Item),
-  };
+  return createJsonBody(201, params.Item)
 };
 
 
@@ -45,22 +38,14 @@ export const getData: APIGatewayProxyHandlerV2 = ApiHandler(async (event) => {
 
 
   if (!deviceId){
-    return{
-      headers: {"content-type": "application/json"},
-      statusCode: 400,
-      body: JSON.stringify({message: 'deviceId is required'}),
-    }
+    return createJsonMessage(400, 'deviceId is required');
   }
 
   let recordedTimestampNumber = null;
   if (recordedTimestamp){
      recordedTimestampNumber = Number(recordedTimestamp);
     if (isNaN(recordedTimestampNumber)){
-      return {
-        headers: {"content-type": "application/json"},
-        statusCode: 400,
-        body: JSON.stringify({message: 'recordedTimestamp must be a number'}),
-      } 
+      return createJsonMessage(400, 'recordedTimestamp must be a number');
     }
   }
   
@@ -81,9 +66,5 @@ export const getData: APIGatewayProxyHandlerV2 = ApiHandler(async (event) => {
 
   const results = await dynamoDb.query(params).promise();
 
-  return {
-    headers: {"content-type": "application/json"},
-    statusCode: 200,
-    body: JSON.stringify(results.Items),
-  };
+  return createJsonBody(200, results.Items);
 });
