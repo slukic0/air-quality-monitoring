@@ -22,7 +22,7 @@ export function ApiStack({ stack, app }: StackContext) {
       // register a device to an owner
       "POST /api/devices/registerDevice": "packages/functions/src/devices.registerDevice",
       // add an authorized user to a device
-      // "POST /api/devices/addUser": "packages/functions/src/devices.addUser",
+      "POST /api/devices/addUser": "packages/functions/src/devices.addUser",
       // remove an authorized user from a device
       // "POST /api/devices/removeUser": "packages/functions/src/devices.removeUser",
     },

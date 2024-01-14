@@ -99,18 +99,16 @@ export const addUser: APIGatewayProxyHandlerV2 = ApiHandler(async (event) => {
         createJsonMessage(400, 'deviceId is required')
     }
 
-
+    
     // Add authorized user to DeviceAdmins if the user is the device admin
     const UpdateDeviceAdmins = {
         TableName: Table.DeviceAdmins.tableName,
         Key: { deviceId: data.deviceId },
+        ConditionExpression:
+            'attribute_exists(deviceId) AND adminId = :adminId',
         UpdateExpression: 'ADD authorizedUsers :authorizedUsers',
         ExpressionAttributeValues: {
             ':authorizedUsers': dynamoDb.createSet([data.userId]),
-        },
-        ConditionExpression:
-            'attribute_exists(deviceId) AND adminId = :adminId',
-        ConditionExpressionAttributeValues: {
             ':adminId': session.properties.userID,
         },
     }
@@ -136,7 +134,7 @@ export const addUser: APIGatewayProxyHandlerV2 = ApiHandler(async (event) => {
     // Return result
     try {
         const results = await dynamoDb.transactWrite(params).promise()
-        return createJsonBody(200, results)
+        return createJsonBody(200, `${data.userId} added as authorized user`)
     } catch (err: any) {
         if (err.CancellationReasons[0].Code === 'ConditionalCheckFailed') {
             // The device is not registered OR the user is not the device admin
