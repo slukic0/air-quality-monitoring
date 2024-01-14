@@ -1,6 +1,4 @@
 import { AuthHandler, GoogleAdapter, Session } from "sst/node/auth";
-import { DynamoDBClient, PutItemCommand, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
-import { marshall } from "@aws-sdk/util-dynamodb";
 import { Table } from "sst/node/table";
 import { StaticSite } from "sst/node/site";
 import AWS from "aws-sdk";
