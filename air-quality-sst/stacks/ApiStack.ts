@@ -30,6 +30,8 @@ export function ApiStack({ stack, app }: StackContext) {
       // TODO change device owner, unregister device
       // "POST /api/devices/changeAdmin": "packages/functions/src/devices.changeAdmin",
       // "POST /api/devices/unregisterDevice": "packages/functions/src/devices.unregisterDevice",
+      // list users by specifiying the start of their email address
+      "GET /api/users/{emailString}": "packages/functions/src/users.getUsers"
     },
   });
 

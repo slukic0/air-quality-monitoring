@@ -28,11 +28,12 @@ export const handler = AuthHandler({
         const params = {
           TableName: Table.Users.tableName,
           Key: {userId: claims.sub},
-          UpdateExpression: 'SET email = :email, picture = :picture, #givenName = :givenName',
+          UpdateExpression: 'SET email = :email, emailFirstLetter = :emailFirstLetter, picture = :picture, #givenName = :givenName',
           ExpressionAttributeValues: {
             ':email': claims.email,
             ':picture': claims.picture,
             ':givenName': claims.given_name,
+            ':emailFirstLetter': claims.email?.at(0)
           },
           ExpressionAttributeNames: {
             "#givenName": "name"

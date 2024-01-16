@@ -15,8 +15,16 @@ export function StorageStack({ stack, app }: StackContext) {
   const usersTable = new Table(stack, "Users", {
     fields: {
         userId: "string",
+        email: "string",
+        emailFirstLetter: "string"
     },
     primaryIndex: { partitionKey: "userId" },
+    globalIndexes:{
+      emailLetterIndex: { 
+        partitionKey: "emailFirstLetter",
+        projection: 'all'
+      }
+    }
   });
 
   // Table to store device owners
