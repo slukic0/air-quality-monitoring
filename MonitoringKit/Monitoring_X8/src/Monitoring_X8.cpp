@@ -177,6 +177,9 @@ void messageHandler(char* topic, byte* payload, unsigned int length) {
   Serial.println(message);
 }
 
+// Global Variable to get ESP32 MAC
+String espId;
+
 /* Entry point for the example */
 void setup(void) {
     /* Initialize the communication interfaces */
@@ -190,6 +193,14 @@ void setup(void) {
 
     /* Valid for boards with USB-COM. Wait until the port is open */
     while(!Serial) delay(10);
+
+    uint64_t chipId = ESP.getEfuseMac();
+    uint16_t chip = (uint16_t)(chipId >> 32);
+    char ssid[23];
+    snprintf(ssid, 23, "%04X%08X", chip, (uint32_t)chip);
+    
+    espId = (String)ssid; // MAC as a string
+    
     
     for (uint8_t i = 0; i < NUM_OF_SENS; i++) {        
         /* Sets the Communication interface for the sensors */
@@ -273,8 +284,7 @@ void newDataCallback(const bme68xData data, const bsecOutputs outputs, Bsec2 bse
     for (uint8_t i = 0; i < outputs.nOutputs; i++)
     {
         const bsecData output  = outputs.output[i];
-        switch (output.sensor_id)
-        {
+        switch (output.sensor_id) {
             case BSEC_OUTPUT_IAQ:
                 // Serial.println("\tiaq = " + String(output.signal));
                 // Serial.println("\tiaq accuracy = " + String((int) output.accuracy));
@@ -358,7 +368,7 @@ void publishSensorData(SensorData arr[]) {
 
     JsonArray jsonArr = doc["jsonArr"].to<JsonArray>();
 
-    for (int i=0; i<SENSOR_DATA_BUFFER_LENGTH; i++){
+    for (int i=0; i<SENSOR_DATA_BUFFER_LENGTH; i++) {
         JsonObject obj1 = jsonArr.add<JsonObject>();
         obj1["deviceId"] = arr[i].device;
         obj1["sensor"] = arr[i].sensor;
