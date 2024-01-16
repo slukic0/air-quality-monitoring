@@ -32,7 +32,7 @@ export const registerDevice: APIGatewayProxyHandlerV2 = ApiHandler(
             createJsonMessage(400, 'deviceId is required')
         }
 
-        // Register device ro user if the device is not registered
+        // Register device to user if the device is not registered
         const PutDeviceAdmin = {
             TableName: Table.DeviceAdmins.tableName,
             Item: {
@@ -59,8 +59,7 @@ export const registerDevice: APIGatewayProxyHandlerV2 = ApiHandler(
 
         // Return result
         try {
-            const results = await dynamoDb.transactWrite(params).promise()
-            console.log(results)
+            await dynamoDb.transactWrite(params).promise()
             return createJsonMessage(201, `${data.deviceId} registered`)
         } catch (err: any) {
             if (err.CancellationReasons[0].Code === 'ConditionalCheckFailed') {
