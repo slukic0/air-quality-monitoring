@@ -3,20 +3,33 @@ import { StorageStack } from "./StorageStack";
 
 
 export function ApiStack({ stack, app }: StackContext) {
-  const { sensorDataTable, usersTable } = use(StorageStack);
+  const { sensorDataTable, usersTable, deviceAdminsTable } = use(StorageStack);
 
   // Create the API
   const api = new Api(stack, "App", {
     defaults: {
       function: {
-        bind: [sensorDataTable, usersTable],
+        bind: [sensorDataTable, usersTable, deviceAdminsTable],
       },
     },
     routes: {
+      // test endpoint
       "GET /": "packages/functions/src/lambda.handler",
+      // get session information (user info)
       "GET /session": "packages/functions/src/session.handler",
+      // get sensorData for a given device
       "GET /api/sensorData/{deviceId}": "packages/functions/src/sensorData.getData",
+      // create sensor data for a given device (test endpoint)
       "POST /api/sensorData": "packages/functions/src/sensorData.createData",
+      // register a device to a device admin
+      "POST /api/devices/registerDevice": "packages/functions/src/devices.registerDevice",
+      // add an authorized user to a device
+      "POST /api/devices/addUser": "packages/functions/src/devices.addUser",
+      // remove an authorized user from a device
+      "POST /api/devices/removeUser": "packages/functions/src/devices.removeUser",
+      // TODO change device owner, unregister device
+      // "POST /api/devices/changeAdmin": "packages/functions/src/devices.changeAdmin",
+      // "POST /api/devices/unregisterDevice": "packages/functions/src/devices.unregisterDevice",
     },
   });
 
