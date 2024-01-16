@@ -4,7 +4,6 @@ import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import { ApiHandler, usePathParams, useQueryParams } from "sst/node/api";
 import { createJsonMessage, createJsonBody } from "@air-quality-sst/core/util";
 import { useSession } from "sst/node/auth";
-import { log } from "console";
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
