@@ -200,6 +200,8 @@ void setup(void) {
     snprintf(ssid, 23, "%04X%08X", chip, (uint32_t)chip);
     
     espId = (String)ssid; // MAC as a string
+    Serial.print("Device MAC: ");
+    Serial.println(espId);
     
     
     for (uint8_t i = 0; i < NUM_OF_SENS; i++) {        
