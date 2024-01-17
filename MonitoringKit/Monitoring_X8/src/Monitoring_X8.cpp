@@ -93,7 +93,7 @@ typedef struct {
   float trunInStatus;
 } SensorData;
 
-void publishSensorData(SensorData arr[]);
+void publishSensorData(SensorData arr);
 
 const int SENSOR_DATA_LENGTH = 11;
 
@@ -111,8 +111,9 @@ void printSensorData(SensorData val) {
     Serial.print("trunInStatus=" + String(val.timestamp) + "\n");
 }
 
-# define SAMPLING_RATE BSEC_SAMPLE_RATE_LP
-
+# define SAMPLING_RATE BSEC_SAMPLE_RATE_LP // Sample every 3 sec
+constexpr uint8_t SAMPLING_COUNTER_RESET = 9; // Record the nth reading (start at 0)
+// This should send a record every 30 sec 
 
 void setupWifi() {
   // Connect to Wifi
@@ -212,14 +213,12 @@ void setup(void) {
          envSensor[i].allocateMemory(bsecMemBlock[i]);
 
         /* Initialize the library and interfaces */
-        if (!envSensor[i].begin(BME68X_SPI_INTF, commMuxRead, commMuxWrite, commMuxDelay, &communicationSetup[i]))
-        {
+        if (!envSensor[i].begin(BME68X_SPI_INTF, commMuxRead, commMuxWrite, commMuxDelay, &communicationSetup[i])) {
             checkBsecStatus (envSensor[i]);
         }
 
         /* Subscribe to the desired BSEC2 outputs */
-        if (!envSensor[i].updateSubscription(sensorList, ARRAY_LEN(sensorList), SAMPLING_RATE))
-        {
+        if (!envSensor[i].updateSubscription(sensorList, ARRAY_LEN(sensorList), SAMPLING_RATE)) {
             checkBsecStatus (envSensor[i]);
         }
 
@@ -267,15 +266,11 @@ void errLeds(void) {
     }
 }
 
-/* Buffer to avoid publishing too many messages */
-const int SENSOR_DATA_BUFFER_LENGTH = NUM_OF_SENS * 5; // BSEC_SAMPLE_RATE_LP = 1/3 Hz = every 3s
-
 void newDataCallback(const bme68xData data, const bsecOutputs outputs, Bsec2 bsec) {
-    if (!outputs.nOutputs)
-    {
+    if (!outputs.nOutputs) {
         return;
     }
-    static std::vector<SensorData> v;
+    static uint8_t samplingCounter = 0;
 
     int timestamp = (int) (outputs.output[0].time_stamp / INT64_C(1000000));
 
@@ -283,8 +278,7 @@ void newDataCallback(const bme68xData data, const bsecOutputs outputs, Bsec2 bse
     sensorValue.sensor = sensor;
     sensorValue.timestamp = timestamp;
 
-    for (uint8_t i = 0; i < outputs.nOutputs; i++)
-    {
+    for (uint8_t i = 0; i < outputs.nOutputs; i++) {
         const bsecData output  = outputs.output[i];
         switch (output.sensor_id) {
             case BSEC_OUTPUT_IAQ:
@@ -322,36 +316,28 @@ void newDataCallback(const bme68xData data, const bsecOutputs outputs, Bsec2 bse
         }
     }
 
-    v.push_back(sensorValue);
-    
-    if (v.size() == SENSOR_DATA_BUFFER_LENGTH) {
-        SensorData arr[SENSOR_DATA_BUFFER_LENGTH];
-        for (int i=0; i<SENSOR_DATA_BUFFER_LENGTH; i++){
-          arr[i] = v[i];
-        }
-        v.clear();
-        publishSensorData(arr);
+    if (samplingCounter == SAMPLING_COUNTER_RESET) {
+        publishSensorData(sensorValue);
+        samplingCounter = 0; // reset counter
+    } else {
+        samplingCounter++;
     }
 }
 
 void checkBsecStatus(Bsec2 bsec) {
-    if (bsec.status < BSEC_OK)
-    {
+    if (bsec.status < BSEC_OK) {
         Serial.println("BSEC error code : " + String(bsec.status));
         errLeds(); /* Halt in case of failure */ 
     }
-    else if (bsec.status > BSEC_OK)
-    {
+    else if (bsec.status > BSEC_OK) {
         Serial.println("BSEC warning code : " + String(bsec.status));
     }
 
-    if (bsec.sensor.status < BME68X_OK)
-    {
+    if (bsec.sensor.status < BME68X_OK) {
         Serial.println("BME68X error code : " + String(bsec.sensor.status));
         errLeds(); /* Halt in case of failure */
     }
-    else if (bsec.sensor.status > BME68X_OK)
-    {
+    else if (bsec.sensor.status > BME68X_OK) {
         Serial.println("BME68X warning code : " + String(bsec.sensor.status));
     }
 }
@@ -359,31 +345,24 @@ void checkBsecStatus(Bsec2 bsec) {
 /**
  * Encodes an array of SensorData into a JSON and sends it to AWS
 */
-void publishSensorData(SensorData arr[]) {
-    // for (int i=0; i<SENSOR_DATA_BUFFER_LENGTH; i++){
-    //     printSensorData(arr[i]);
-    // }
-    Serial.println("Items: " + String(SENSOR_DATA_BUFFER_LENGTH) + " Size: " + String(SENSOR_DATA_BUFFER_LENGTH * sizeof arr[0]));
-    
-
+void publishSensorData(SensorData arr) {
     JsonDocument doc;
 
     JsonArray jsonArr = doc["jsonArr"].to<JsonArray>();
 
-    for (int i=0; i<SENSOR_DATA_BUFFER_LENGTH; i++) {
-        JsonObject obj1 = jsonArr.add<JsonObject>();
-        obj1["deviceId"] = espId;
-        obj1["sensor"] = arr[i].sensor;
-        obj1["recordedTimestamp"] = arr[i].timestamp;
-        obj1["tiaq"] = arr[i].tiaq;
-        obj1["tiaqAccuracy"] = arr[i].tiaqAccuracy;
-        obj1["ttemperature"] = arr[i].ttemperature;
-        obj1["tpressure"] = arr[i].tpressure;
-        obj1["thumidity"] = arr[i].thumidity;
-        obj1["tgasResistance"] = arr[i].tgasResistance;
-        obj1["tstabilizationStatus"] = arr[i].tstabilizationStatus;
-        obj1["trunInStatus"] = arr[i].trunInStatus;
-    }
+    JsonObject obj1 = jsonArr.add<JsonObject>();
+    obj1["deviceId"] = espId;
+    obj1["sensor"] = arr.sensor;
+    obj1["recordedTimestamp"] = arr.timestamp;
+    obj1["tiaq"] = arr.tiaq;
+    obj1["tiaqAccuracy"] = arr.tiaqAccuracy;
+    obj1["ttemperature"] = arr.ttemperature;
+    obj1["tpressure"] = arr.tpressure;
+    obj1["thumidity"] = arr.thumidity;
+    obj1["tgasResistance"] = arr.tgasResistance;
+    obj1["tstabilizationStatus"] = arr.tstabilizationStatus;
+    obj1["trunInStatus"] = arr.trunInStatus;
+
     int jsonLength = measureJson(doc);
     Serial.println("JsonLength: " + String(jsonLength));
 
@@ -399,7 +378,7 @@ void publishSensorData(SensorData arr[]) {
 
     bufferedClient.flush();
 
-    if (client.endPublish()){
+    if (client.endPublish()) {
         Serial.println("Published!\n");
     } else {
         Serial.println("ERROR PUBLISHING!\n");
