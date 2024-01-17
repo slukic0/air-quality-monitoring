@@ -93,7 +93,7 @@ typedef struct {
   float trunInStatus;
 } SensorData;
 
-void publishSensorData(SensorData arr);
+void publishSensorData(SensorData data);
 
 const int SENSOR_DATA_LENGTH = 11;
 
@@ -112,7 +112,7 @@ void printSensorData(SensorData val) {
 }
 
 # define SAMPLING_RATE BSEC_SAMPLE_RATE_LP // Sample every 3 sec
-constexpr uint8_t SAMPLING_COUNTER_RESET = 9; // Record the nth reading (start at 0)
+constexpr uint8_t SAMPLING_COUNTER_RESET = 10; // Record the nth reading (start at 1)
 // This should send a record every 30 sec 
 
 void setupWifi() {
@@ -270,7 +270,7 @@ void newDataCallback(const bme68xData data, const bsecOutputs outputs, Bsec2 bse
     if (!outputs.nOutputs) {
         return;
     }
-    static uint8_t samplingCounter = 0;
+    static uint8_t samplingCounter = 1;
 
     int timestamp = (int) (outputs.output[0].time_stamp / INT64_C(1000000));
 
@@ -318,10 +318,9 @@ void newDataCallback(const bme68xData data, const bsecOutputs outputs, Bsec2 bse
 
     if (samplingCounter == SAMPLING_COUNTER_RESET) {
         publishSensorData(sensorValue);
-        samplingCounter = 0; // reset counter
-    } else {
-        samplingCounter++;
+        samplingCounter = 0; // reset to 0 since next line increments
     }
+    samplingCounter++;
 }
 
 void checkBsecStatus(Bsec2 bsec) {
@@ -345,23 +344,23 @@ void checkBsecStatus(Bsec2 bsec) {
 /**
  * Encodes an array of SensorData into a JSON and sends it to AWS
 */
-void publishSensorData(SensorData arr) {
+void publishSensorData(SensorData data) {
     JsonDocument doc;
 
     JsonArray jsonArr = doc["jsonArr"].to<JsonArray>();
 
     JsonObject obj1 = jsonArr.add<JsonObject>();
     obj1["deviceId"] = espId;
-    obj1["sensor"] = arr.sensor;
-    obj1["recordedTimestamp"] = arr.timestamp;
-    obj1["tiaq"] = arr.tiaq;
-    obj1["tiaqAccuracy"] = arr.tiaqAccuracy;
-    obj1["ttemperature"] = arr.ttemperature;
-    obj1["tpressure"] = arr.tpressure;
-    obj1["thumidity"] = arr.thumidity;
-    obj1["tgasResistance"] = arr.tgasResistance;
-    obj1["tstabilizationStatus"] = arr.tstabilizationStatus;
-    obj1["trunInStatus"] = arr.trunInStatus;
+    obj1["sensor"] = data.sensor;
+    obj1["recordedTimestamp"] = data.timestamp;
+    obj1["tiaq"] = data.tiaq;
+    obj1["tiaqAccuracy"] = data.tiaqAccuracy;
+    obj1["ttemperature"] = data.ttemperature;
+    obj1["tpressure"] = data.tpressure;
+    obj1["thumidity"] = data.thumidity;
+    obj1["tgasResistance"] = data.tgasResistance;
+    obj1["tstabilizationStatus"] = data.tstabilizationStatus;
+    obj1["trunInStatus"] = data.trunInStatus;
 
     int jsonLength = measureJson(doc);
     Serial.println("JsonLength: " + String(jsonLength));
