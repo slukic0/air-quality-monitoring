@@ -65,7 +65,7 @@ export const getData: APIGatewayProxyHandlerV2 = ApiHandler(async (event) => {
   }
   const { Item: device } = await dynamoDb.get(getParams).promise();
 
-  const authorizedUsers = device?.authorizedUsers.values;
+  const authorizedUsers = device?.authorizedUsers?.values;
   const deviceAdmin = device?.adminId;
   const userId = session.properties.userID;
   
