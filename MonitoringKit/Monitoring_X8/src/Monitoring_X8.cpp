@@ -144,6 +144,9 @@ void setupMqtt() {
   client.setServer(AWS_IOT_ENDPOINT, 8883);
   client.setCallback(messageHandler);
 
+  // Needed if publish intervals exceed 15 seconds
+  client.setKeepAlive(33); // + 3 secs for buffer room
+
   while (!client.connect(THINGNAME)) {
     Serial.print(".");
     delay(100);
@@ -268,11 +271,10 @@ void errLeds(void) {
 }
 
 /* Buffer to avoid publishing too many messages */
-const int NUMBER_OF_SKIPPED_SAMPLES = NUM_OF_SENS * 2; // Number of samples to skip
+const int NUMBER_OF_SKIPPED_SAMPLES = NUM_OF_SENS * 9; // Number of samples to skip
 
 void newDataCallback(const bme68xData data, const bsecOutputs outputs, Bsec2 bsec) {
-    if (!outputs.nOutputs)
-    {
+    if (!outputs.nOutputs) {
         return;
     }
     static std::vector<SensorData> v;
@@ -335,7 +337,7 @@ void newDataCallback(const bme68xData data, const bsecOutputs outputs, Bsec2 bse
             }
             v.clear();
             publishSensorData(arr);
-            counter=0;
+            counter = 0;
         }
     }
 }
