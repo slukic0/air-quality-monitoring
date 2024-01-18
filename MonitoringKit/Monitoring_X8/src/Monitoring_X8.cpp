@@ -254,8 +254,7 @@ void loop(void) {
      * and process it.
      */
     for (sensor = 0; sensor < NUM_OF_SENS; sensor++) {
-        if (!envSensor[sensor].run())
-        {
+        if (!envSensor[sensor].run()) {
          checkBsecStatus(envSensor[sensor]);
         }
     }
@@ -288,8 +287,7 @@ void newDataCallback(const bme68xData data, const bsecOutputs outputs, Bsec2 bse
     sensorValue.sensor = sensor;
     sensorValue.timestamp = timestamp;
 
-    for (uint8_t i = 0; i < outputs.nOutputs; i++)
-    {
+    for (uint8_t i = 0; i < outputs.nOutputs; i++) {
         const bsecData output  = outputs.output[i];
         switch (output.sensor_id) {
             case BSEC_OUTPUT_IAQ:
@@ -343,23 +341,19 @@ void newDataCallback(const bme68xData data, const bsecOutputs outputs, Bsec2 bse
 }
 
 void checkBsecStatus(Bsec2 bsec) {
-    if (bsec.status < BSEC_OK)
-    {
+    if (bsec.status < BSEC_OK) {
         Serial.println("BSEC error code : " + String(bsec.status));
         errLeds(); /* Halt in case of failure */ 
     }
-    else if (bsec.status > BSEC_OK)
-    {
+    else if (bsec.status > BSEC_OK) {
         Serial.println("BSEC warning code : " + String(bsec.status));
     }
 
-    if (bsec.sensor.status < BME68X_OK)
-    {
+    if (bsec.sensor.status < BME68X_OK) {
         Serial.println("BME68X error code : " + String(bsec.sensor.status));
         errLeds(); /* Halt in case of failure */
     }
-    else if (bsec.sensor.status > BME68X_OK)
-    {
+    else if (bsec.sensor.status > BME68X_OK) {
         Serial.println("BME68X warning code : " + String(bsec.sensor.status));
     }
 }
@@ -402,5 +396,4 @@ void publishSensorData(SensorData arr[]) {
     }
 
     client.flush();
-
 }
