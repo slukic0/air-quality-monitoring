@@ -56,7 +56,7 @@ void newDataCallback(const bme68xData data, const bsecOutputs outputs, Bsec2 bse
 // Wifi & MQTT
 WiFiClientSecure wifiClient;
 PubSubClient client(wifiClient);
-const bool useEnterprise = 0;
+const bool useEnterprise = 1;
 
 void setupWifi();
 void setupMqtt();
@@ -235,7 +235,7 @@ void setup(void) {
 
     Serial.println("Sampling rate " + String(SAMPLING_RATE));
 
-    if(client.setBufferSize(10240)){ // 10 KB
+    if(client.setBufferSize(5120)){ // 10 KB
         Serial.println("Set pubsub buffer size!");
     } else{
         Serial.println("ERROR pubsub setting buffer size!");
@@ -268,7 +268,7 @@ void errLeds(void) {
 }
 
 /* Buffer to avoid publishing too many messages */
-const int SENSOR_DATA_BUFFER_LENGTH = NUM_OF_SENS * 5; // BSEC_SAMPLE_RATE_LP = 1/3 Hz = every 3s
+const int NUMBER_OF_SKIPPED_SAMPLES = NUM_OF_SENS * 2; // Number of samples to skip
 
 void newDataCallback(const bme68xData data, const bsecOutputs outputs, Bsec2 bsec) {
     if (!outputs.nOutputs)
@@ -276,6 +276,9 @@ void newDataCallback(const bme68xData data, const bsecOutputs outputs, Bsec2 bse
         return;
     }
     static std::vector<SensorData> v;
+    static int counter = 0;
+    counter++;
+    Serial.println(counter);
 
     int timestamp = (int) (outputs.output[0].time_stamp / INT64_C(1000000));
 
@@ -322,15 +325,18 @@ void newDataCallback(const bme68xData data, const bsecOutputs outputs, Bsec2 bse
         }
     }
 
-    v.push_back(sensorValue);
-    
-    if (v.size() == SENSOR_DATA_BUFFER_LENGTH) {
-        SensorData arr[SENSOR_DATA_BUFFER_LENGTH];
-        for (int i=0; i<SENSOR_DATA_BUFFER_LENGTH; i++){
-          arr[i] = v[i];
+    if (counter > NUMBER_OF_SKIPPED_SAMPLES && counter <= NUMBER_OF_SKIPPED_SAMPLES + NUM_OF_SENS) {
+        v.push_back(sensorValue);
+        if (v.size() == NUM_OF_SENS) {
+            SensorData arr[NUM_OF_SENS];
+
+            for (int i=0; i<NUM_OF_SENS; i++){
+                arr[i] = v[i];
+            }
+            v.clear();
+            publishSensorData(arr);
+            counter=0;
         }
-        v.clear();
-        publishSensorData(arr);
     }
 }
 
@@ -359,22 +365,15 @@ void checkBsecStatus(Bsec2 bsec) {
 /**
  * Encodes an array of SensorData into a JSON and sends it to AWS
 */
-void publishSensorData(SensorData arr[]) {
-    // for (int i=0; i<SENSOR_DATA_BUFFER_LENGTH; i++){
-    //     printSensorData(arr[i]);
-    // }
-    Serial.println("Items: " + String(SENSOR_DATA_BUFFER_LENGTH) + " Size: " + String(SENSOR_DATA_BUFFER_LENGTH * sizeof arr[0]));
-    
-
+void publishSensorData(SensorData arr[]) {    
     JsonDocument doc;
+    JsonArray jsonArr = doc["data"].to<JsonArray>();
+    doc["deviceId"] = espId;
+    doc["recordedTimestamp"] = arr[0].timestamp;
 
-    JsonArray jsonArr = doc["jsonArr"].to<JsonArray>();
-
-    for (int i=0; i<SENSOR_DATA_BUFFER_LENGTH; i++) {
+    for (int i=0; i<NUM_OF_SENS; i++) {
         JsonObject obj1 = jsonArr.add<JsonObject>();
-        obj1["deviceId"] = espId;
         obj1["sensor"] = arr[i].sensor;
-        obj1["recordedTimestamp"] = arr[i].timestamp;
         obj1["tiaq"] = arr[i].tiaq;
         obj1["tiaqAccuracy"] = arr[i].tiaqAccuracy;
         obj1["ttemperature"] = arr[i].ttemperature;
@@ -387,15 +386,10 @@ void publishSensorData(SensorData arr[]) {
     int jsonLength = measureJson(doc);
     Serial.println("JsonLength: " + String(jsonLength));
 
-    Serial.println("Begining publish...");
-
     client.beginPublish(AWS_IOT_PUBLISH_TOPIC, jsonLength, false);
 
     BufferingPrint bufferedClient(client, 512);
-    Serial.println("Created buffered client");
-
     serializeJson(doc, bufferedClient);
-    Serial.println("Serialized");
 
     bufferedClient.flush();
 
