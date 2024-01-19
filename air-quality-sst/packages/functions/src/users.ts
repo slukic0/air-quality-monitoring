@@ -2,7 +2,7 @@ import AWS from 'aws-sdk'
 import { Table } from 'sst/node/table'
 import { APIGatewayProxyHandlerV2 } from 'aws-lambda'
 import { ApiHandler, usePathParams, useQueryParams } from 'sst/node/api'
-import { createJsonMessage, createJsonBody } from '@air-quality-sst/core/util'
+import { createJsonMessage, createJsonBody } from '@air-quality-sst/core/jsonUtil'
 import { useSession } from 'sst/node/auth'
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient()

@@ -5,7 +5,7 @@ import { ApiHandler } from 'sst/node/api'
 import { Table } from 'sst/node/table'
 import { useSession } from 'sst/node/auth'
 
-import { createJsonBody, createJsonMessage } from '@air-quality-sst/core/util'
+import { createJsonBody, createJsonMessage } from '@air-quality-sst/core/jsonUtil'
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient()
 
@@ -42,13 +42,13 @@ export const registerDevice: APIGatewayProxyHandlerV2 = ApiHandler(
             ConditionExpression: 'attribute_not_exists(deviceId)',
         }
 
-        // Add device to list of user's devices
+        // Add device to list of user's admin devices
         const UpdateUsers = {
             TableName: Table.Users.tableName,
             Key: { userId: session.properties.userID },
-            UpdateExpression: 'ADD authorizedDevices :authorizedDevices',
+            UpdateExpression: 'ADD adminDevices :adminDevices',
             ExpressionAttributeValues: {
-                ':authorizedDevices': dynamoDb.createSet([data.deviceId]),
+                ':adminDevices': dynamoDb.createSet([data.deviceId]),
             },
         }
 
@@ -218,4 +218,96 @@ export const removeUser: APIGatewayProxyHandlerV2 = ApiHandler(async (event) => 
             return createJsonMessage(500, 'Internal Server Error')
         }
     }
+})
+
+export const unregisterDevice: APIGatewayProxyHandlerV2 = ApiHandler(async (event) => {
+    const session = useSession()
+
+    // Check user is authenticated
+    if (session.type !== 'user') {
+        return createJsonMessage(401, 'Unauthorized')
+    }
+
+    const data = JSON.parse(event?.body || '')
+    if (!data?.deviceId) {
+        createJsonMessage(400, 'deviceId is required')
+    }
+
+    
+    // Get the list of authorized users for this device.
+    const QueryDeviceAdmins = {
+        TableName: Table.DeviceAdmins.tableName,
+        KeyConditionExpression: 'deviceId = :hkey',
+        ExpressionAttributeValues: {
+            ':hkey': data.deviceId
+        }
+    }
+    const { Items } = await dynamoDb.query(QueryDeviceAdmins).promise()
+
+    if (!Items || Items.length === 0){
+        return createJsonMessage(404, 'Device not found')
+    } 
+    
+    const device = Items[0];
+    const deviceAdminId = device.adminId
+    const deviceAuthorizedUsers = device?.authorizedUsers?.values
+
+    if (session.properties.userID !==  deviceAdminId) {
+        return createJsonMessage(403, 'Forbidden')
+    }
+
+
+    // Unregister device
+    const DeleteDeviceAdminsOperation = {
+        Delete: {
+            TableName: Table.DeviceAdmins.tableName,
+            Key: { deviceId: data.deviceId },
+        }
+    }
+
+    // Remove device from all affected users
+    // Note: if there is only the device admin and no users, deviceAuthorizedUsers will be null
+    const UsersTableUpdateOperations: Array<Object> = []
+    if (!!deviceAuthorizedUsers) {
+        for (const user of deviceAuthorizedUsers) {
+            UsersTableUpdateOperations.push({
+                Update: {
+                    TableName: Table.Users.tableName,
+                    Key: { userId: user },
+                    UpdateExpression: 'DELETE authorizedDevices :authorizedDevices',
+                    ExpressionAttributeValues: {
+                        ':authorizedDevices': dynamoDb.createSet([data.deviceId]),
+                    },
+                }
+            })
+        }
+    }
+    // Remove device from admin's user profile
+    UsersTableUpdateOperations.push({
+        Update: {
+            TableName: Table.Users.tableName,
+            Key: { userId: session.properties.userID },
+            UpdateExpression: 'DELETE adminDevices :adminDevices',
+            ExpressionAttributeValues: {
+                ':adminDevices': dynamoDb.createSet([data.deviceId]),
+            },
+        }
+    })
+    
+    const transaction = {
+        TransactItems: [
+            DeleteDeviceAdminsOperation,
+            ...UsersTableUpdateOperations
+        ]
+    }
+
+    try {
+        await dynamoDb.transactWrite(transaction).promise()
+        return createJsonMessage(204, 'Deleted')
+    } catch (err: any) {
+        console.log(err)
+        console.log(err.CancellationReasons)
+        return createJsonMessage(500, 'Internal Server Error')
+    }
+
 })
