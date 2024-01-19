@@ -56,6 +56,7 @@ void newDataCallback(const bme68xData data, const bsecOutputs outputs, Bsec2 bse
 // Wifi & MQTT
 WiFiClientSecure wifiClient;
 PubSubClient client(wifiClient);
+const bool useEnterprise = 0;
 
 void setupWifi();
 void setupMqtt();
@@ -121,7 +122,7 @@ void setupWifi() {
   
   WiFi.mode(WIFI_STA);
 
-  if (USE_ENTERPISE) {
+  if (useEnterprise) {
     WiFi.begin(AP_SSID_E, WPA2_AUTH_PEAP, ID_E, USERNAME_E, PASSWORD_E);
   } else {
     WiFi.begin(AP_SSID, PASSWORD);
@@ -142,9 +143,6 @@ void setupMqtt() {
   // Connect to MQTT broker
   client.setServer(AWS_IOT_ENDPOINT, 8883);
   client.setCallback(messageHandler);
-
-  // Needed if publish intervals exceed 15 seconds
-  client.setKeepAlive(33); // + 3 secs for buffer room
 
   while (!client.connect(THINGNAME)) {
     Serial.print(".");
@@ -237,7 +235,7 @@ void setup(void) {
 
     Serial.println("Sampling rate " + String(SAMPLING_RATE));
 
-    if(client.setBufferSize(5120)){ // 5 KB
+    if(client.setBufferSize(10240)){ // 10 KB
         Serial.println("Set pubsub buffer size!");
     } else{
         Serial.println("ERROR pubsub setting buffer size!");
@@ -253,7 +251,8 @@ void loop(void) {
      * and process it.
      */
     for (sensor = 0; sensor < NUM_OF_SENS; sensor++) {
-        if (!envSensor[sensor].run()) {
+        if (!envSensor[sensor].run())
+        {
          checkBsecStatus(envSensor[sensor]);
         }
     }
@@ -269,15 +268,14 @@ void errLeds(void) {
 }
 
 /* Buffer to avoid publishing too many messages */
-const int NUMBER_OF_SKIPPED_SAMPLES = NUM_OF_SENS * 9; // Number of samples to skip
+const int SENSOR_DATA_BUFFER_LENGTH = NUM_OF_SENS * 5; // BSEC_SAMPLE_RATE_LP = 1/3 Hz = every 3s
 
 void newDataCallback(const bme68xData data, const bsecOutputs outputs, Bsec2 bsec) {
-    if (!outputs.nOutputs) {
+    if (!outputs.nOutputs)
+    {
         return;
     }
     static std::vector<SensorData> v;
-    static int counter = 0;
-    counter++;
 
     int timestamp = (int) (outputs.output[0].time_stamp / INT64_C(1000000));
 
@@ -285,7 +283,8 @@ void newDataCallback(const bme68xData data, const bsecOutputs outputs, Bsec2 bse
     sensorValue.sensor = sensor;
     sensorValue.timestamp = timestamp;
 
-    for (uint8_t i = 0; i < outputs.nOutputs; i++) {
+    for (uint8_t i = 0; i < outputs.nOutputs; i++)
+    {
         const bsecData output  = outputs.output[i];
         switch (output.sensor_id) {
             case BSEC_OUTPUT_IAQ:
@@ -323,35 +322,36 @@ void newDataCallback(const bme68xData data, const bsecOutputs outputs, Bsec2 bse
         }
     }
 
-    if (counter > NUMBER_OF_SKIPPED_SAMPLES && counter <= NUMBER_OF_SKIPPED_SAMPLES + NUM_OF_SENS) {
-        v.push_back(sensorValue);
-        if (v.size() == NUM_OF_SENS) {
-            SensorData arr[NUM_OF_SENS];
-
-            for (int i=0; i<NUM_OF_SENS; i++){
-                arr[i] = v[i];
-            }
-            v.clear();
-            publishSensorData(arr);
-            counter = 0;
+    v.push_back(sensorValue);
+    
+    if (v.size() == SENSOR_DATA_BUFFER_LENGTH) {
+        SensorData arr[SENSOR_DATA_BUFFER_LENGTH];
+        for (int i=0; i<SENSOR_DATA_BUFFER_LENGTH; i++){
+          arr[i] = v[i];
         }
+        v.clear();
+        publishSensorData(arr);
     }
 }
 
 void checkBsecStatus(Bsec2 bsec) {
-    if (bsec.status < BSEC_OK) {
+    if (bsec.status < BSEC_OK)
+    {
         Serial.println("BSEC error code : " + String(bsec.status));
         errLeds(); /* Halt in case of failure */ 
     }
-    else if (bsec.status > BSEC_OK) {
+    else if (bsec.status > BSEC_OK)
+    {
         Serial.println("BSEC warning code : " + String(bsec.status));
     }
 
-    if (bsec.sensor.status < BME68X_OK) {
+    if (bsec.sensor.status < BME68X_OK)
+    {
         Serial.println("BME68X error code : " + String(bsec.sensor.status));
         errLeds(); /* Halt in case of failure */
     }
-    else if (bsec.sensor.status > BME68X_OK) {
+    else if (bsec.sensor.status > BME68X_OK)
+    {
         Serial.println("BME68X warning code : " + String(bsec.sensor.status));
     }
 }
@@ -359,15 +359,22 @@ void checkBsecStatus(Bsec2 bsec) {
 /**
  * Encodes an array of SensorData into a JSON and sends it to AWS
 */
-void publishSensorData(SensorData arr[]) {    
-    JsonDocument doc;
-    JsonArray jsonArr = doc["data"].to<JsonArray>();
-    doc["deviceId"] = espId;
-    doc["recordedTimestamp"] = arr[0].timestamp;
+void publishSensorData(SensorData arr[]) {
+    // for (int i=0; i<SENSOR_DATA_BUFFER_LENGTH; i++){
+    //     printSensorData(arr[i]);
+    // }
+    Serial.println("Items: " + String(SENSOR_DATA_BUFFER_LENGTH) + " Size: " + String(SENSOR_DATA_BUFFER_LENGTH * sizeof arr[0]));
+    
 
-    for (int i=0; i<NUM_OF_SENS; i++) {
+    JsonDocument doc;
+
+    JsonArray jsonArr = doc["jsonArr"].to<JsonArray>();
+
+    for (int i=0; i<SENSOR_DATA_BUFFER_LENGTH; i++) {
         JsonObject obj1 = jsonArr.add<JsonObject>();
+        obj1["deviceId"] = espId;
         obj1["sensor"] = arr[i].sensor;
+        obj1["recordedTimestamp"] = arr[i].timestamp;
         obj1["tiaq"] = arr[i].tiaq;
         obj1["tiaqAccuracy"] = arr[i].tiaqAccuracy;
         obj1["ttemperature"] = arr[i].ttemperature;
@@ -380,10 +387,15 @@ void publishSensorData(SensorData arr[]) {
     int jsonLength = measureJson(doc);
     Serial.println("JsonLength: " + String(jsonLength));
 
+    Serial.println("Begining publish...");
+
     client.beginPublish(AWS_IOT_PUBLISH_TOPIC, jsonLength, false);
 
     BufferingPrint bufferedClient(client, 512);
+    Serial.println("Created buffered client");
+
     serializeJson(doc, bufferedClient);
+    Serial.println("Serialized");
 
     bufferedClient.flush();
 
@@ -394,4 +406,5 @@ void publishSensorData(SensorData arr[]) {
     }
 
     client.flush();
+
 }

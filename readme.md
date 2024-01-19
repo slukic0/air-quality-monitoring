@@ -12,6 +12,7 @@ Pranav Hari
 - `MonitoringKit`: Code for Monitoring Stations  
   - `Monitoring_Breakout`: Code for single breakout BME 688 sensor  
   - `Monitoring_X8`: Code for development board with 8x BME688
+  - `Monitoring_X8_3S`: Code for development board with 8x BME688 taking a sample every 3 seconds
 - `air-quality-sst`: AWS Infrastructure. Contains backend code and frontend web app.  
 - `docs`: Relevant datasheets and documentation
 - `images`: Image files
