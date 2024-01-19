@@ -56,7 +56,6 @@ void newDataCallback(const bme68xData data, const bsecOutputs outputs, Bsec2 bse
 // Wifi & MQTT
 WiFiClientSecure wifiClient;
 PubSubClient client(wifiClient);
-const bool useEnterprise = 1;
 
 void setupWifi();
 void setupMqtt();
@@ -122,7 +121,7 @@ void setupWifi() {
   
   WiFi.mode(WIFI_STA);
 
-  if (useEnterprise) {
+  if (USE_ENTERPISE) {
     WiFi.begin(AP_SSID_E, WPA2_AUTH_PEAP, ID_E, USERNAME_E, PASSWORD_E);
   } else {
     WiFi.begin(AP_SSID, PASSWORD);
@@ -238,7 +237,7 @@ void setup(void) {
 
     Serial.println("Sampling rate " + String(SAMPLING_RATE));
 
-    if(client.setBufferSize(5120)){ // 10 KB
+    if(client.setBufferSize(5120)){ // 5 KB
         Serial.println("Set pubsub buffer size!");
     } else{
         Serial.println("ERROR pubsub setting buffer size!");
@@ -279,7 +278,6 @@ void newDataCallback(const bme68xData data, const bsecOutputs outputs, Bsec2 bse
     static std::vector<SensorData> v;
     static int counter = 0;
     counter++;
-    Serial.println(counter);
 
     int timestamp = (int) (outputs.output[0].time_stamp / INT64_C(1000000));
 
