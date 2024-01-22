@@ -52,7 +52,17 @@ export const getData: APIGatewayProxyHandlerV2 = ApiHandler(async (event) => {
   // Convert recordedTimestampNumber to a number
   let recordedTimestampNumber = null;
   if (recordedTimestamp){
-     recordedTimestampNumber = Number(recordedTimestamp);
+
+    let recordedTimestampMilliseconds;
+    if (recordedTimestamp.length == 10){
+      recordedTimestampMilliseconds = recordedTimestamp + "000";
+    } else if (recordedTimestamp.length == 13){
+      recordedTimestampMilliseconds = recordedTimestamp;
+    } else {
+      return createJsonMessage(400, 'Invalid timestamp');
+    }
+
+    recordedTimestampNumber = Number(recordedTimestampMilliseconds);
     if (isNaN(recordedTimestampNumber)){
       return createJsonMessage(400, 'recordedTimestamp must be a number');
     }
