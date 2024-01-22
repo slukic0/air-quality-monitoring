@@ -23,8 +23,8 @@
 #include "secrets.h"
 
 
-#define AWS_IOT_PUBLISH_TOPIC   "esp32/pub"
-#define AWS_IOT_SUBSCRIBE_TOPIC "esp32/sub"
+String AWS_IOT_DATA_PUBLISH_TOPIC = "";
+#define AWS_IOT_DATA_SUBSCRIBE_TOPIC "esp32/sub"
 
 /* Macros used */
 /* Number of sensors to operate*/
@@ -158,7 +158,7 @@ void setupMqtt() {
   }
  
   // Subscribe to a topic
-  client.subscribe(AWS_IOT_SUBSCRIBE_TOPIC);
+  client.subscribe(AWS_IOT_DATA_SUBSCRIBE_TOPIC);
   Serial.println("AWS IoT Connected!");
 
   // Send hello message
@@ -166,7 +166,7 @@ void setupMqtt() {
   doc["status"] = "OK";
   char jsonBuffer[512];
   serializeJson(doc, jsonBuffer);
-  client.publish(AWS_IOT_PUBLISH_TOPIC, jsonBuffer);
+  client.publish(AWS_IOT_DATA_PUBLISH_TOPIC.c_str(), jsonBuffer);
 }
 
 void messageHandler(char* topic, byte* payload, unsigned int length) {
@@ -186,6 +186,18 @@ String espId;
 void setup(void) {
     /* Initialize the communication interfaces */
     Serial.begin(115200);
+
+    uint64_t chipId = ESP.getEfuseMac();
+    uint16_t chip = (uint16_t)(chipId >> 32);
+    char ssid[23];
+    snprintf(ssid, 23, "%04X%08X", chip, (uint32_t)chip);
+    espId = (String)ssid; // MAC as a string
+    Serial.print("Device MAC: ");
+    Serial.println(espId);
+
+    AWS_IOT_DATA_PUBLISH_TOPIC = "device/" + espId + "/data";
+    Serial.println(AWS_IOT_DATA_PUBLISH_TOPIC);
+
     commMuxBegin(Wire, SPI);
     pinMode(PANIC_LED, OUTPUT);
     delay(100);
@@ -195,15 +207,6 @@ void setup(void) {
 
     /* Valid for boards with USB-COM. Wait until the port is open */
     while(!Serial) delay(10);
-
-    uint64_t chipId = ESP.getEfuseMac();
-    uint16_t chip = (uint16_t)(chipId >> 32);
-    char ssid[23];
-    snprintf(ssid, 23, "%04X%08X", chip, (uint32_t)chip);
-    
-    espId = (String)ssid; // MAC as a string
-    Serial.print("Device MAC: ");
-    Serial.println(espId);
     
     
     for (uint8_t i = 0; i < NUM_OF_SENS; i++) {        
@@ -380,7 +383,7 @@ void publishSensorData(SensorData arr[]) {
     int jsonLength = measureJson(doc);
     Serial.println("JsonLength: " + String(jsonLength));
 
-    client.beginPublish(AWS_IOT_PUBLISH_TOPIC, jsonLength, false);
+    client.beginPublish(AWS_IOT_DATA_PUBLISH_TOPIC.c_str(), jsonLength, false);
 
     BufferingPrint bufferedClient(client, 512);
     serializeJson(doc, bufferedClient);
