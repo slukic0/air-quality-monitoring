@@ -196,7 +196,6 @@ void setup(void) {
     Serial.println(espId);
 
     AWS_IOT_DATA_PUBLISH_TOPIC = "device/" + espId + "/data";
-    Serial.println(AWS_IOT_DATA_PUBLISH_TOPIC);
 
     commMuxBegin(Wire, SPI);
     pinMode(PANIC_LED, OUTPUT);
