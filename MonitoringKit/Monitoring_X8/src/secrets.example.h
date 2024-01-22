@@ -11,6 +11,8 @@
 #define USERNAME_E  "*****"
 #define PASSWORD_E  "*****"
 
+const bool USE_ENTERPISE = 0;
+
 #define THINGNAME "*****"
 
 const char AWS_IOT_ENDPOINT[] = "*****";
