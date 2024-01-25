@@ -7,5 +7,6 @@
     "paths": {
       "@air-quality-sst/core/*": ["../core/src/*"]
     }
-  }
+  },
+  "include": ["./.eslintrc.cjs", "./src", "./sst-env.d.ts"],
 }
