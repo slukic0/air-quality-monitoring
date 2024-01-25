@@ -3,9 +3,13 @@ import { type APIGatewayProxyHandlerV2 } from 'aws-lambda';
 
 import { ApiHandler } from 'sst/node/api';
 import { Table } from 'sst/node/table';
-import { useSession } from 'sst/node/auth';
 
 import { createJsonBody, createJsonMessage } from '@air-quality-sst/core/jsonUtil';
+
+import jsonBodyParser from '@middy/http-json-body-parser';
+import { useSession } from 'sst/node/auth';
+import { jwtErrorHandlingMiddleware, useMiddewares } from '@air-quality-sst/core/middlewareUtil';
+import httpErrorHandler from '@middy/http-error-handler';
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
@@ -18,8 +22,8 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
  *  409 if already registered
  *  201 for success
  */
-export const registerDevice: APIGatewayProxyHandlerV2 = ApiHandler(
-  async (event) => {
+const registerDeviceHandler: APIGatewayProxyHandlerV2 = ApiHandler(
+  async (event: any) => {
     const session = useSession();
 
     // Check user is authenticated
@@ -27,7 +31,7 @@ export const registerDevice: APIGatewayProxyHandlerV2 = ApiHandler(
       return createJsonMessage(401, 'Unauthorized');
     }
 
-    const data = JSON.parse(event?.body ?? '');
+    const data = event.body;
     if (!data?.deviceId) {
       createJsonMessage(400, 'deviceId is required');
     }
@@ -83,7 +87,7 @@ export const registerDevice: APIGatewayProxyHandlerV2 = ApiHandler(
  *  403 if the calling user is not the device admin
  *  200 for success
  */
-export const addUser: APIGatewayProxyHandlerV2 = ApiHandler(async (event) => {
+const addUserHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any) => {
   const session = useSession();
 
   // Check user is authenticated
@@ -91,7 +95,7 @@ export const addUser: APIGatewayProxyHandlerV2 = ApiHandler(async (event) => {
     return createJsonMessage(401, 'Unauthorized');
   }
 
-  const data = JSON.parse(event?.body ?? '');
+  const data = event.body;
   if (!data?.deviceId) {
     createJsonMessage(400, 'deviceId is required');
   } else if (!data?.userId) {
@@ -155,7 +159,7 @@ export const addUser: APIGatewayProxyHandlerV2 = ApiHandler(async (event) => {
  *  403 if the calling user is not the device admin
  *  200 for success
  */
-export const removeUser: APIGatewayProxyHandlerV2 = ApiHandler(async (event) => {
+const removeUserHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any) => {
   const session = useSession();
 
   // Check user is authenticated
@@ -163,7 +167,7 @@ export const removeUser: APIGatewayProxyHandlerV2 = ApiHandler(async (event) => 
     return createJsonMessage(401, 'Unauthorized');
   }
 
-  const data = JSON.parse(event?.body ?? '');
+  const data = event.body;
   if (!data?.deviceId) {
     createJsonMessage(400, 'deviceId is required');
   } else if (!data?.userId) {
@@ -217,7 +221,7 @@ export const removeUser: APIGatewayProxyHandlerV2 = ApiHandler(async (event) => 
   }
 });
 
-export const unregisterDevice: APIGatewayProxyHandlerV2 = ApiHandler(async (event) => {
+const unregisterDeviceHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any) => {
   const session = useSession();
 
   // Check user is authenticated
@@ -225,7 +229,7 @@ export const unregisterDevice: APIGatewayProxyHandlerV2 = ApiHandler(async (even
     return createJsonMessage(401, 'Unauthorized');
   }
 
-  const data = JSON.parse(event?.body ?? '');
+  const data = event.body;
   if (!data?.deviceId) {
     createJsonMessage(400, 'deviceId is required');
   }
@@ -306,3 +310,10 @@ export const unregisterDevice: APIGatewayProxyHandlerV2 = ApiHandler(async (even
     return createJsonMessage(500, 'Internal Server Error');
   }
 });
+
+const middleware = [httpErrorHandler, jwtErrorHandlingMiddleware, jsonBodyParser];
+
+export const registerDevice = useMiddewares(registerDeviceHandler, middleware);
+export const addUser = useMiddewares(addUserHandler, middleware);
+export const removeUser = useMiddewares(removeUserHandler, middleware);
+export const unregisterDevice = useMiddewares(unregisterDeviceHandler, middleware);

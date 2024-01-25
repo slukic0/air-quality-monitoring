@@ -3,14 +3,16 @@ import { Table } from 'sst/node/table';
 import { type APIGatewayProxyHandlerV2 } from 'aws-lambda';
 import { ApiHandler, usePathParams } from 'sst/node/api';
 import { createJsonMessage, createJsonBody } from '@air-quality-sst/core/jsonUtil';
+import { jwtErrorHandlingMiddleware, useMiddewares } from '@air-quality-sst/core/middlewareUtil';
 import { useSession } from 'sst/node/auth';
+import httpErrorHandler from '@middy/http-error-handler';
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 /**
  *  List users by specifiying the start of their email address
  */
-export const getUsers: APIGatewayProxyHandlerV2 = ApiHandler(async (event) => {
+const getUsersHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any) => {
   const session = useSession();
   const { emailString } = usePathParams();
 
@@ -41,3 +43,5 @@ export const getUsers: APIGatewayProxyHandlerV2 = ApiHandler(async (event) => {
 
   return createJsonBody(201, Items);
 });
+
+export const getUsers = useMiddewares(getUsersHandler, [httpErrorHandler, jwtErrorHandlingMiddleware]);
