@@ -1,25 +1,27 @@
 import AWS from 'aws-sdk';
 import { Table } from 'sst/node/table';
-import { type APIGatewayProxyHandlerV2 } from 'aws-lambda';
+import { type APIGatewayProxyHandlerV2, type APIGatewayProxyResultV2 } from 'aws-lambda';
 import { ApiHandler, usePathParams, useQueryParams } from 'sst/node/api';
 import { createJsonMessage, createJsonBody } from '@air-quality-sst/core/jsonUtil';
+import jsonBodyParser from '@middy/http-json-body-parser';
+import { jwtErrorHandlingMiddleware, useMiddewares } from '@air-quality-sst/core/middlewareUtil';
 import { useSession } from 'sst/node/auth';
+import httpErrorHandler from '@middy/http-error-handler';
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 /**
  * Put a sensorData item into the database
  */
-export const createData: APIGatewayProxyHandlerV2 = async (event) => {
-  const data = JSON.parse(event?.body ?? '');
-
-  if (!data || typeof (data.deviceId) !== 'string' || typeof (data.recordedTimestamp) !== 'number') {
+const createDataHandler: APIGatewayProxyHandlerV2 = async (event: any): Promise<APIGatewayProxyResultV2> => {
+  const { deviceId, recordedTimestamp } = event.body;
+  if (typeof (deviceId) !== 'string' || typeof (recordedTimestamp) !== 'number') {
     return createJsonMessage(400, 'Invalid Parameter');
   }
 
   const params = {
     TableName: Table.SensorData.tableName,
-    Item: data,
+    Item: event.body,
   };
 
   await dynamoDb.put(params).promise();
@@ -35,7 +37,7 @@ export const createData: APIGatewayProxyHandlerV2 = async (event) => {
  * @returns 403 if user is not authorized
  * @returns 200 for success
  */
-export const getData: APIGatewayProxyHandlerV2 = ApiHandler(async (event) => {
+const getDataHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any) => {
   const session = useSession();
   const { deviceId } = usePathParams();
   const { recordedTimestamp } = useQueryParams();
@@ -103,3 +105,6 @@ export const getData: APIGatewayProxyHandlerV2 = ApiHandler(async (event) => {
 
   return createJsonBody(200, results.Items);
 });
+
+export const createData = useMiddewares(createDataHandler, [httpErrorHandler, jsonBodyParser]);
+export const getData = useMiddewares(getDataHandler, [httpErrorHandler, jwtErrorHandlingMiddleware]);
