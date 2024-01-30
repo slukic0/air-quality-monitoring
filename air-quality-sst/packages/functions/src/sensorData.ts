@@ -3,9 +3,10 @@ import { Table } from 'sst/node/table';
 import { type APIGatewayProxyHandlerV2, type APIGatewayProxyResultV2 } from 'aws-lambda';
 import { ApiHandler, usePathParams, useQueryParams } from 'sst/node/api';
 import { createJsonMessage, createJsonBody } from '@air-quality-sst/core/jsonUtil';
-import jsonBodyParser from '@middy/http-json-body-parser';
 import { jwtErrorHandlingMiddleware, useMiddewares } from '@air-quality-sst/core/middlewareUtil';
+import { stringToTimestampMilliseconds } from '@air-quality-sst/core/stringUtil';
 import { useSession } from 'sst/node/auth';
+import jsonBodyParser from '@middy/http-json-body-parser';
 import httpErrorHandler from '@middy/http-error-handler';
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
@@ -40,7 +41,7 @@ const createDataHandler: APIGatewayProxyHandlerV2 = async (event: any): Promise<
 const getDataHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any) => {
   const session = useSession();
   const { deviceId } = usePathParams();
-  const { recordedTimestamp } = useQueryParams();
+  const { recordedTimestampStart, recordedTimestampEnd } = useQueryParams();
 
   if (session.type !== 'user') {
     return createJsonMessage(401, 'Unauthorized');
@@ -50,21 +51,20 @@ const getDataHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any) =
     return createJsonMessage(400, 'deviceId is required');
   }
 
-  // Convert recordedTimestampNumber to a number
-  let recordedTimestampNumber = null;
-  if (recordedTimestamp) {
-    let recordedTimestampMilliseconds;
-    if (recordedTimestamp.length === 10) {
-      recordedTimestampMilliseconds = recordedTimestamp + '000';
-    } else if (recordedTimestamp.length === 13) {
-      recordedTimestampMilliseconds = recordedTimestamp;
-    } else {
-      return createJsonMessage(400, 'Invalid timestamp');
+  // Convert recordedTimestamps to numbers
+  let recordedTimestampStartNumber = null; let recordedTimestampEndNumber = null;
+  if (recordedTimestampStart) {
+    try {
+      recordedTimestampStartNumber = stringToTimestampMilliseconds(recordedTimestampStart);
+    } catch {
+      return createJsonMessage(400, 'recordedTimestampStart must be a valid timestamp!');
     }
-
-    recordedTimestampNumber = Number(recordedTimestampMilliseconds);
-    if (isNaN(recordedTimestampNumber)) {
-      return createJsonMessage(400, 'recordedTimestamp must be a number');
+  }
+  if (recordedTimestampEnd) {
+    try {
+      recordedTimestampEndNumber = stringToTimestampMilliseconds(recordedTimestampEnd);
+    } catch {
+      return createJsonMessage(400, 'recordedTimestampEnd must be a valid timestamp!');
     }
   }
 
@@ -88,10 +88,19 @@ const getDataHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any) =
   }
 
   // Get sensor data for this device
-  const KeyConditionExpression = recordedTimestamp ? 'deviceId = :hkey and recordedTimestamp >= :skey' : 'deviceId = :hkey';
+  let KeyConditionExpression = 'deviceId = :hkey';
+  if (recordedTimestampStartNumber && recordedTimestampEndNumber) {
+    KeyConditionExpression += ' AND recordedTimestamp BETWEEN :recordedTimestampStart AND :recordedTimestampEnd';
+  } else if (recordedTimestampStartNumber) {
+    KeyConditionExpression += ' AND recordedTimestamp >= :recordedTimestampStart';
+  } else if (recordedTimestampEndNumber) {
+    KeyConditionExpression += ' AND recordedTimestamp <= :recordedTimestampEnd';
+  }
+
   const ExpressionAttributeValues = {
     ':hkey': deviceId,
-    ...(recordedTimestampNumber && { ':skey': recordedTimestampNumber }),
+    ...(recordedTimestampStartNumber && { ':recordedTimestampStart': recordedTimestampStartNumber }),
+    ...(recordedTimestampEndNumber && { ':recordedTimestampEnd': recordedTimestampEndNumber }),
   };
 
   // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#query-property
