@@ -11,7 +11,7 @@
 #define USERNAME_E  "*****"
 #define PASSWORD_E  "*****"
 
-const bool USE_ENTERPRISE = 0;
+const bool USE_ENTERPRISE = 0; // 0 for home network, 1 for enterprise
 
 #define THINGNAME "*****"
 
