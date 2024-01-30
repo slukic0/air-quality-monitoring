@@ -121,7 +121,7 @@ void setupWifi() {
   
   WiFi.mode(WIFI_STA);
 
-  if (USE_ENTERPISE) {
+  if (USE_ENTERPRISE) {
     WiFi.begin(AP_SSID_E, WPA2_AUTH_PEAP, ID_E, USERNAME_E, PASSWORD_E);
   } else {
     WiFi.begin(AP_SSID, PASSWORD);

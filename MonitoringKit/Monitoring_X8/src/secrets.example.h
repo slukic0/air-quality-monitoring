@@ -11,7 +11,7 @@
 #define USERNAME_E  "*****"
 #define PASSWORD_E  "*****"
 
-const bool USE_ENTERPISE = 0;
+const bool USE_ENTERPRISE = 0;
 
 #define THINGNAME "*****"
 
