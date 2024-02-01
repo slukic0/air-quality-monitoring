@@ -26,6 +26,11 @@
 String AWS_IOT_DATA_PUBLISH_TOPIC = "";
 #define AWS_IOT_DATA_SUBSCRIBE_TOPIC "esp32/sub"
 
+// Use "/data" as default
+#ifndef AWS_TOPIC_SUFFIX
+#define AWS_TOPIC_SUFFIX "/data"
+#endif
+
 /* Macros used */
 /* Number of sensors to operate*/
 #define NUM_OF_SENS    8
@@ -195,7 +200,7 @@ void setup(void) {
     Serial.print("Device MAC: ");
     Serial.println(espId);
 
-    AWS_IOT_DATA_PUBLISH_TOPIC = "device/" + espId + "/data";
+    AWS_IOT_DATA_PUBLISH_TOPIC = "device/" + espId + AWS_TOPIC_SUFFIX;
 
     commMuxBegin(Wire, SPI);
     pinMode(PANIC_LED, OUTPUT);

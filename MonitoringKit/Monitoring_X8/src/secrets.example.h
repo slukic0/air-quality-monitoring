@@ -14,6 +14,7 @@
 const bool USE_ENTERPISE = 0;
 
 #define THINGNAME "*****"
+#define AWS_TOPIC_SUFFIX "/****" // Optional, default is "/data" Change if needed
 
 const char AWS_IOT_ENDPOINT[] = "*****";
 
