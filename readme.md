@@ -34,7 +34,7 @@ Follow the [AWS documentation here](https://docs.aws.amazon.com/singlesignon/lat
 ### SST Setup
 
 SST is a framework that allows the creation of serverless infrastructure using code. To get started, read the documentation [here](https://docs.sst.dev/start/standalone).  See the readme file in `air-quality-sst` for more information.
-Note that SST using the AWS CLI for authetication. See the AWS documentation [here](https://docs.aws.amazon.com/cli/latest/userguide/sso-configure-profile-token.html) for instructions on configuring the AWS CLI.  
+Note that SST using the AWS CLI for authentication. See the AWS documentation [here](https://docs.aws.amazon.com/cli/latest/userguide/sso-configure-profile-token.html) for instructions on configuring the AWS CLI.  
 
 ### Setup AWS IOT Core
 
