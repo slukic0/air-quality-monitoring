@@ -41,7 +41,10 @@ export function ApiStack({ stack, app }: StackContext) {
       "POST /api/devices/unregisterDevice": "packages/functions/src/devices.unregisterDevice",
       
       // list users by specifiying the start of their email address
-      "GET /api/users/{emailString}": "packages/functions/src/users.getUsers"
+      "GET /api/users/{emailString}": "packages/functions/src/users.getUsers",
+
+      // get user by userId
+      "GET /api/user/{userId}": "packages/functions/src/users.getUser",
     },
   });
 

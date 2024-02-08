@@ -44,4 +44,32 @@ const getUsersHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any) 
   return createJsonBody(201, Items);
 });
 
+const getUserHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any) => {
+  const session = useSession();
+  const { userId } = usePathParams();
+
+  // Check user is authenticated
+  if (session.type !== 'user') {
+    return createJsonMessage(401, 'Unauthorized');
+  }
+
+  if (typeof userId !== 'string') {
+    return createJsonMessage(400, 'emailString is required');
+  }
+
+  const getItemParams = {
+    TableName: Table.Users.tableName,
+    Key: { userId },
+    ProjectionExpression: 'userId, email, #givenName, adminDevices, authorizedDevices',
+    ExpressionAttributeNames: {
+      '#givenName': 'name',
+    },
+  };
+
+  const { Item } = await dynamoDb.get(getItemParams).promise();
+
+  return createJsonBody(201, Item);
+});
+
 export const getUsers = useMiddewares(getUsersHandler, [httpErrorHandler, jwtErrorHandlingMiddleware]);
+export const getUser = useMiddewares(getUserHandler, [httpErrorHandler, jwtErrorHandlingMiddleware]);
