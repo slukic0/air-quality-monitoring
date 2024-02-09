@@ -1,17 +1,17 @@
-import { use, StackContext, StaticSite } from "sst/constructs";
+import { use, StackContext, NextjsSite } from "sst/constructs";
 import { ApiStack } from "./ApiStack";
 
 
 export function WebStack({ stack, app }: StackContext) {
   const { api } = use(ApiStack);
 
-  const site = new StaticSite(stack, "ReactSite", {
+  // Create the Next.js site
+  const site = new NextjsSite(stack, "Site", {
     path: "packages/web",
-    buildOutput: "dist",
-    buildCommand: "npm run build",
     environment: {
-      VITE_APP_API_URL: api.url,
+      API_URL: api.url,
     },
+    edge: false, //  we don't need cloudfront tbh
   });
 
   stack.addOutputs({
