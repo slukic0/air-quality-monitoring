@@ -1,36 +1,109 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+## [Material Kit - React](https://material-kit-react.devias.io/) [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social&logo=twitter)](https://twitter.com/intent/tweet?text=%F0%9F%9A%A8Devias%20Freebie%20Alert%20-%20An%20awesome%20ready-to-use%20register%20page%20made%20with%20%23material%20%23react%0D%0Ahttps%3A%2F%2Fdevias.io%20%23createreactapp%20%23devias%20%23material%20%23freebie%20%40devias-io)
 
-## Getting Started
+![license](https://img.shields.io/badge/license-MIT-blue.svg)
 
-First, run the development server:
+[![Material Kit - React](https://github.com/devias-io/material-kit-react/blob/main/public/assets/thumbnail.png)](https://material-kit-react.devias.io/)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+> Free React Admin Dashboard made with [MUI's](https://mui.com/?ref=devias-io)
+> components, [React](https://reactjs.org/?ref=devias-io) and of
+> course [Next.js](https://github.com/vercel/next.js/?ref=devias-io) to boost your app development
+> process!
+
+## Demo
+
+- [Dashboard Page](https://material-kit-react.devias.io)
+- [Companies Page](https://material-kit-react.devias.io/companies)
+- [Customers Page](https://material-kit-react.devias.io/customers)
+- [Account Page](https://material-kit-react.devias.io/account)
+- [Settings Page](https://material-kit-react.devias.io/settings)
+- [Login Page](https://material-kit-react.devias.io/auth/login)
+- [Register Page](https://material-kit-react.devias.io/auth/register)
+
+## Free Figma Community File
+
+- [Duplicate File](https://www.figma.com/file/b3L1Np4RYiicZAOMopHNkm/Devias-Dashboard-Design-Library-Kit)
+
+## Upgrade to PRO Version
+
+We also have a pro version of this product which bundles even more pages and components if you want
+to save more time and design efforts :)
+
+| Free Version (this one) | [Material Kit Pro - React](https://mui.com/store/items/devias-kit-pro/)  |
+|-------------------------|:-------------------------------------------------------------------------|
+| **9** Demo Pages        | **40+** demo pages                                                       
+| ✔ Mocked Authentication | ✔ Authentication with **Amplify**, **Auth0**, **JWT** and **Firebase**   
+| -                       | ✔ Dark & light mode                                                      
+| -                       | ✔ CRA version                                                            
+| -                       | ✔ TypeScript version - for Standard Plus and Extended license            
+| -                       | ✔ Design files (sketch & figma) - for Standard Plus and Extended license 
+| -                       | ✔ Complete users flows                                                   
+
+## Quick start
+
+- [Download from Github](https://github.com/devias-io/material-kit-react/archive/master.zip)
+  or [Download from Devias](https://devias.io/products/material-kit-react) or clone the
+  repo: `git clone https://github.com/devias-io/material-kit-react.git`
+
+- Make sure your Node.js and npm versions are up to date for `React 18`
+
+- Install dependencies: `npm install` or `yarn`
+
+- Start the server: `npm run dev` or `yarn dev`
+
+- Views are on: `localhost:3000`
+
+## File Structure
+
+Within the download you'll find the following directories and files:
+
+```
+material-kit-react
+
+┌── .eslintrc.json
+├── .gitignore
+├── CHANGELOG.md
+├── LICENSE.md
+├── next.config.js
+├── package.json
+├── README.md
+├── public
+└── src
+	├── components
+	├── contexts
+	├── guards
+	├── hocs
+	├── hooks
+	├── layouts
+	├── sections
+	├── theme
+	├── utils
+	└── pages
+		├── 404.js
+		├── _app.js
+		├── _document.js
+		├── account.js
+		├── companies.js
+		├── customers.js
+		├── index.js
+		├── products.js
+		└── settings.js
+		└──  auth
+			├── login.js
+			└── register.js
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Resources
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- More freebies like this one: <https://devias.io>
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## Reporting Issues:
 
-## Learn More
+- [Github Issues Page](https://github.com/devias-io/react-material-dashboard/issues?ref=devias-io)
 
-To learn more about Next.js, take a look at the following resources:
+## License
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Licensed under MIT (https://github.com/devias-io/react-material-dashboard/blob/master/LICENSE.md)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+## Contact Us
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- Email Us: support@deviasio.zendesk.com
