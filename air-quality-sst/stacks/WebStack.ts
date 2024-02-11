@@ -9,13 +9,13 @@ export function WebStack({ stack, app }: StackContext) {
   const site = new NextjsSite(stack, "Site", {
     path: "packages/web",
     environment: {
-      API_URL: api.url,
+      NEXT_PUBLIC_API_URL: api.url,
     },
     edge: false, //  we don't need cloudfront tbh
   });
 
   stack.addOutputs({
-    WebAppUrl: site.url || "http://localhost:5173"
+    WebAppUrl: site.url || "http://localhost:3000"
   });
 
   return {

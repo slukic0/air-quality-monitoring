@@ -1,12 +1,12 @@
 import { AuthHandler, GoogleAdapter, Session } from 'sst/node/auth';
 import { Table } from 'sst/node/table';
-import { StaticSite } from 'sst/node/site';
+import { NextjsSite } from 'sst/node/site';
 import AWS from 'aws-sdk';
 
 const GOOGLE_CLIENT_ID =
   '921966491227-4qg7horhbq49gg7rbas1a9761l2q4p4c.apps.googleusercontent.com';
 
-const REDIRECT_URL = process.env.IS_LOCAL ? 'http://127.0.0.1:5173' : StaticSite.ReactSite.url;
+const REDIRECT_URL = process.env.IS_LOCAL ? 'http://127.0.0.1:3000' : NextjsSite.ReactSite.url;
 
 declare module 'sst/node/auth' {
   export interface SessionTypes {
