@@ -11,7 +11,7 @@ export function WebStack({ stack, app }: StackContext) {
     environment: {
       NEXT_PUBLIC_API_URL: api.url,
     },
-    edge: false, //  we don't need cloudfront tbh
+    edge: false,
   });
 
   stack.addOutputs({
