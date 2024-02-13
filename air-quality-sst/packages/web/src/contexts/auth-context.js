@@ -66,9 +66,6 @@ export const AuthProvider = (props) => {
    * If so, store it in local storage and then redirect the user to the root domain
    */
   const getTokenUrl = useCallback(() => {
-    console.log(window.location);
-    console.log(window.location.search);
-
     const search = window.location.search;
     const params = new URLSearchParams(search);
     const token = params.get('token');

@@ -17,8 +17,12 @@ const user = {
   name: 'Anika Visser',
   timezone: 'GTM-7'
 };
+import { useAuth } from 'src/hooks/use-auth';
 
-export const AccountProfile = () => (
+export const AccountProfile = () => {
+  const {user} = useAuth()
+  console.log(user);
+  return (
   <Card>
     <CardContent>
       <Box
@@ -29,7 +33,7 @@ export const AccountProfile = () => (
         }}
       >
         <Avatar
-          src={user.avatar}
+          src={user.picture}
           sx={{
             height: 80,
             mb: 2,
@@ -46,24 +50,10 @@ export const AccountProfile = () => (
           color="text.secondary"
           variant="body2"
         >
-          {user.city} {user.country}
-        </Typography>
-        <Typography
-          color="text.secondary"
-          variant="body2"
-        >
-          {user.timezone}
+          {user.email}
         </Typography>
       </Box>
     </CardContent>
     <Divider />
-    <CardActions>
-      <Button
-        fullWidth
-        variant="text"
-      >
-        Upload picture
-      </Button>
-    </CardActions>
   </Card>
-);
+)};

@@ -26,7 +26,8 @@ const Page = () => (
             </Typography>
           </div>
           <div>
-            <Grid
+            <AccountProfile/>
+            {/* <Grid
               container
               spacing={3}
             >
@@ -44,7 +45,7 @@ const Page = () => (
               >
                 <AccountProfileDetails />
               </Grid>
-            </Grid>
+            </Grid> */}
           </div>
         </Stack>
       </Container>
