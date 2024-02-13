@@ -71,7 +71,7 @@ const Page = () => (
   <>
     <Head>
       <title>
-        Companies | Devias Kit
+        Companies | Air Quality Monitoring
       </title>
     </Head>
     <Box

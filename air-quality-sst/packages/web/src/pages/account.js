@@ -8,7 +8,7 @@ const Page = () => (
   <>
     <Head>
       <title>
-        Account | Devias Kit
+        Account | Air Quality Monitoring
       </title>
     </Head>
     <Box

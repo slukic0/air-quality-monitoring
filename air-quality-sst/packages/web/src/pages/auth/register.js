@@ -48,7 +48,7 @@ const Page = () => {
     <>
       <Head>
         <title>
-          Register | Devias Kit
+          Register | Air Quality Monitoring
         </title>
       </Head>
       <Box

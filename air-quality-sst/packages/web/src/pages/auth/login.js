@@ -70,7 +70,7 @@ const Page = () => {
     <>
       <Head>
         <title>
-          Login | Devias Kit
+          Login | Air Quality Monitoring
         </title>
       </Head>
       <Box
@@ -144,6 +144,7 @@ const Page = () => {
                     onChange={formik.handleChange}
                     type="email"
                     value={formik.values.email}
+                    disabled={true}
                   />
                   <TextField
                     error={!!(formik.touched.password && formik.errors.password)}
@@ -155,6 +156,7 @@ const Page = () => {
                     onChange={formik.handleChange}
                     type="password"
                     value={formik.values.password}
+                    disabled={true}
                   />
                 </Stack>
                 <FormHelperText sx={{ mt: 1 }}>
@@ -183,6 +185,7 @@ const Page = () => {
                   size="large"
                   sx={{ mt: 3 }}
                   onClick={handleSkip}
+                  disabled={true}
                 >
                   Skip authentication
                 </Button>
