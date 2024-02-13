@@ -60,7 +60,7 @@ export const useSession = () => {
         }
 
         getSession()
-    }, [])
+    }, [session])
 
     return { loading, session }
 }

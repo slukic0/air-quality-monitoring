@@ -9,7 +9,7 @@ export const AuthGuard = (props) => {
   const { isAuthenticated } = useAuthContext();
   const ignore = useRef(false);
   const [checked, setChecked] = useState(false);
-
+  
   // Only do authentication check on component mount.
   // This flow allows you to manually redirect the user after sign-out, otherwise this will be
   // triggered and will automatically redirect to sign-in page.
@@ -39,6 +39,7 @@ export const AuthGuard = (props) => {
         setChecked(true);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [router.isReady]
   );
 

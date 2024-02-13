@@ -6,7 +6,7 @@ import AWS from 'aws-sdk';
 const GOOGLE_CLIENT_ID =
   '921966491227-4qg7horhbq49gg7rbas1a9761l2q4p4c.apps.googleusercontent.com';
 
-const REDIRECT_URL = process.env.IS_LOCAL ? 'http://127.0.0.1:3000' : NextjsSite.ReactSite.url;
+const REDIRECT_URL = process.env.IS_LOCAL ? 'http://localhost:3000' : NextjsSite.Site.url;
 
 declare module 'sst/node/auth' {
   export interface SessionTypes {

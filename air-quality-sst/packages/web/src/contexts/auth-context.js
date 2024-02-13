@@ -1,16 +1,15 @@
-import { createContext, useContext, useEffect, useReducer, useRef } from 'react';
+import { useCallback, createContext, useContext, useEffect, useReducer, useRef } from 'react';
 import PropTypes from 'prop-types';
 
 const HANDLERS = {
   INITIALIZE: 'INITIALIZE',
-  SIGN_IN: 'SIGN_IN',
-  SIGN_OUT: 'SIGN_OUT'
+  SIGN_OUT: 'SIGN_OUT',
 };
 
 const initialState = {
   isAuthenticated: false,
   isLoading: true,
-  user: null
+  user: null,
 };
 
 const handlers = {
@@ -19,41 +18,29 @@ const handlers = {
 
     return {
       ...state,
-      ...(
-        // if payload (user) is provided, then is authenticated
-        user
-          ? ({
+      ...// if payload (user) is provided, then is authenticated
+      (user
+        ? {
             isAuthenticated: true,
             isLoading: false,
-            user
-          })
-          : ({
-            isLoading: false
-          })
-      )
-    };
-  },
-  [HANDLERS.SIGN_IN]: (state, action) => {
-    const user = action.payload;
-
-    return {
-      ...state,
-      isAuthenticated: true,
-      user
+            user,
+          }
+        : {
+            isLoading: false,
+          }),
     };
   },
   [HANDLERS.SIGN_OUT]: (state) => {
     return {
       ...state,
       isAuthenticated: false,
-      user: null
+      user: null,
     };
-  }
+  },
 };
 
-const reducer = (state, action) => (
-  handlers[action.type] ? handlers[action.type](state, action) : state
-);
+const reducer = (state, action) =>
+  handlers[action.type] ? handlers[action.type](state, action) : state;
 
 // The role of this context is to propagate authentication state through the App tree.
 
@@ -64,7 +51,54 @@ export const AuthProvider = (props) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const initialized = useRef(false);
 
-  const initialize = async () => {
+  /**
+   * Get token from local storage
+   */
+  const getTokenLocalStorage = useCallback(() => localStorage.getItem('session'), []);
+
+  /**
+   * Clear token from local storage
+   */
+  const clearTokenLocalStorage = useCallback(() => localStorage.removeItem('session'), []);
+
+  /**
+   * Check if the URL contains the token query string when the page loads
+   * If so, store it in local storage and then redirect the user to the root domain
+   */
+  const getTokenUrl = useCallback(() => {
+    console.log(window.location);
+    console.log(window.location.search);
+
+    const search = window.location.search;
+    const params = new URLSearchParams(search);
+    const token = params.get('token');
+    if (token) {
+      console.log('Found token in URL');
+      localStorage.setItem('session', token);
+      window.location.replace(window.location.origin);
+    }
+    return token;
+  }, []);
+
+  /**
+   * Get user info from DB
+   * @param {String} token
+   */
+  const getUserInfo = useCallback(async (token) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/session`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.json();
+    } catch (error) {
+      console.log('Error getting session', error);
+    }
+  }, []);
+
+  const initialize = useCallback(async () => {
     // Prevent from calling twice in development mode with React.StrictMode enabled
     if (initialized.current) {
       return;
@@ -72,92 +106,36 @@ export const AuthProvider = (props) => {
 
     initialized.current = true;
 
-    let isAuthenticated = false;
+    let token = null;
 
     try {
-      isAuthenticated = window.sessionStorage.getItem('authenticated') === 'true';
+      token = getTokenLocalStorage() ?? getTokenUrl();
     } catch (err) {
       console.error(err);
     }
 
-    if (isAuthenticated) {
-      const user = {
-        id: '5e86809283e28b96d2d38537',
-        avatar: '/assets/avatars/avatar-anika-visser.png',
-        name: 'Anika Visser',
-        email: 'anika.visser@devias.io'
-      };
+    if (token) {
+      const user = await getUserInfo(token);
 
       dispatch({
         type: HANDLERS.INITIALIZE,
-        payload: user
+        payload: user,
       });
     } else {
       dispatch({
-        type: HANDLERS.INITIALIZE
+        type: HANDLERS.INITIALIZE,
       });
     }
-  };
+  }, [getTokenLocalStorage, getTokenUrl, getUserInfo]);
 
-  useEffect(
-    () => {
-      initialize();
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
-
-  const skip = () => {
-    try {
-      window.sessionStorage.setItem('authenticated', 'true');
-    } catch (err) {
-      console.error(err);
-    }
-
-    const user = {
-      id: '5e86809283e28b96d2d38537',
-      avatar: '/assets/avatars/avatar-anika-visser.png',
-      name: 'Anika Visser',
-      email: 'anika.visser@devias.io'
-    };
-
-    dispatch({
-      type: HANDLERS.SIGN_IN,
-      payload: user
-    });
-  };
-
-  const signIn = async (email, password) => {
-    if (email !== 'demo@devias.io' || password !== 'Password123!') {
-      throw new Error('Please check your email and password');
-    }
-
-    try {
-      window.sessionStorage.setItem('authenticated', 'true');
-    } catch (err) {
-      console.error(err);
-    }
-
-    const user = {
-      id: '5e86809283e28b96d2d38537',
-      avatar: '/assets/avatars/avatar-anika-visser.png',
-      name: 'Anika Visser',
-      email: 'anika.visser@devias.io'
-    };
-
-    dispatch({
-      type: HANDLERS.SIGN_IN,
-      payload: user
-    });
-  };
-
-  const signUp = async (email, name, password) => {
-    throw new Error('Sign up is not implemented');
-  };
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
 
   const signOut = () => {
+    clearTokenLocalStorage();
     dispatch({
-      type: HANDLERS.SIGN_OUT
+      type: HANDLERS.SIGN_OUT,
     });
   };
 
@@ -165,10 +143,7 @@ export const AuthProvider = (props) => {
     <AuthContext.Provider
       value={{
         ...state,
-        skip,
-        signIn,
-        signUp,
-        signOut
+        signOut,
       }}
     >
       {children}
@@ -177,7 +152,7 @@ export const AuthProvider = (props) => {
 };
 
 AuthProvider.propTypes = {
-  children: PropTypes.node
+  children: PropTypes.node,
 };
 
 export const AuthConsumer = AuthContext.Consumer;
