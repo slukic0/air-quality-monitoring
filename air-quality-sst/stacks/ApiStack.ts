@@ -37,6 +37,9 @@ export function ApiStack({ stack, app }: StackContext) {
       // TODO Change device owner
       // "POST /api/devices/changeAdmin": "packages/functions/src/devices.changeAdmin",
 
+      // get device by ID
+      "GET /api/device/{deviceId}": "packages/functions/src/devices.getDevice",
+
       // unregister a device. NOTE: Will also remove all authorized users.
       "POST /api/devices/unregisterDevice": "packages/functions/src/devices.unregisterDevice",
       
