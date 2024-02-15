@@ -1,7 +1,7 @@
 import AWS from 'aws-sdk';
 import { type APIGatewayProxyHandlerV2 } from 'aws-lambda';
 
-import { ApiHandler } from 'sst/node/api';
+import { ApiHandler, usePathParams } from 'sst/node/api';
 import { Table } from 'sst/node/table';
 
 import { createJsonBody, createJsonMessage } from '@air-quality-sst/core/jsonUtil';
@@ -311,9 +311,37 @@ const unregisterDeviceHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (even
   }
 });
 
+const getDeviceHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any) => {
+  const session = useSession();
+  const { deviceId } = usePathParams();
+
+  // Check user is authenticated
+  if (session.type !== 'user') {
+    return createJsonMessage(401, 'Unauthorized');
+  }
+
+  if (typeof deviceId !== 'string') {
+    return createJsonMessage(400, 'deviceId is required');
+  }
+
+  const getItemParams = {
+    TableName: Table.DeviceAdmins.tableName,
+    Key: { deviceId },
+  };
+
+  const { Item } = await dynamoDb.get(getItemParams).promise();
+
+  if (!Item) {
+    return createJsonBody(204, null);
+  } else {
+    return createJsonBody(200, Item);
+  }
+});
+
 const middleware = [httpErrorHandler, jwtErrorHandlingMiddleware, jsonBodyParser];
 
 export const registerDevice = useMiddewares(registerDeviceHandler, middleware);
 export const addUser = useMiddewares(addUserHandler, middleware);
 export const removeUser = useMiddewares(removeUserHandler, middleware);
 export const unregisterDevice = useMiddewares(unregisterDeviceHandler, middleware);
+export const getDevice = useMiddewares(getDeviceHandler, [httpErrorHandler, jwtErrorHandlingMiddleware]);
