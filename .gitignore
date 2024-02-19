@@ -1,6 +1,5 @@
 config.h
 secrets.h
 c_cpp_properties.json
-settings.json
 extensions.json
 air-quality-sst/packages/web/.sst.config.*
