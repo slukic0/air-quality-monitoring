@@ -49,8 +49,9 @@ export function ApiStack({ stack, app }: StackContext) {
       // get user by userId
       "GET /api/user/{userId}": "packages/functions/src/users.getUser",
 
+      /* Cron job testing */
       // test cron job
-      "PUT /api/data/aggregate": "packages/functions/src/deviceDataAggregator.main",
+      // "PUT /api/data/aggregate": "packages/functions/src/deviceDataAggregator.main",
     },
   });
 
