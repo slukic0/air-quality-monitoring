@@ -86,6 +86,13 @@ export const main: APIGatewayProxyHandlerV2 = async (event: any) => {
   });
   console.log(dataLastHour);
 
+  // if a device has not written in the last hour, include the device but with no values
+  for (const deviceId of deviceIds) {
+    if (!Object.keys(dataLastHour).includes(deviceId)) {
+      dataLastHour[deviceId] = null;
+    }
+  }
+
   if (Object.keys(dataLastHour).length > 0) {
     // write the aggregated results
     const putRequests = [];
@@ -98,7 +105,6 @@ export const main: APIGatewayProxyHandlerV2 = async (event: any) => {
           hourTimestamp: nowTruncatedToHour,
           ...value,
         },
-        ConditionExpression: 'attribute_not_exists(deviceId)',
       };
 
       putRequests.push({ PutRequest: putParams });
