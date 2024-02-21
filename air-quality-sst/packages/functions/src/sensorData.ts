@@ -8,8 +8,67 @@ import { stringToTimestampMilliseconds } from '@air-quality-sst/core/stringUtil'
 import { useSession } from 'sst/node/auth';
 import jsonBodyParser from '@middy/http-json-body-parser';
 import httpErrorHandler from '@middy/http-error-handler';
+import { type AttributeValue } from '@aws-sdk/client-dynamodb';
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
+
+/**
+ * Check if user is allowed to read data for this device
+ */
+const checkIfAuthorized = async (userId: string, deviceId: string): Promise<boolean> => {
+  // Check if user is allowed to read data for this device
+  const getParams = {
+    TableName: Table.DeviceAdmins.tableName,
+    Key: { deviceId },
+  };
+  const { Item: device } = await dynamoDb.get(getParams).promise();
+
+  const authorizedUsers = device?.authorizedUsers?.values;
+  const deviceAdmin = device?.adminId;
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+  const isAuthorizedUser = !!authorizedUsers && Object.values(authorizedUsers).includes(userId);
+  const isDeviceAdmin = userId === deviceAdmin;
+
+  return isAuthorizedUser || isDeviceAdmin;
+};
+
+const convertTimestamps = (recordedTimestampStart: string | undefined, recordedTimestampEnd: string | undefined): Record<string, number | null> => {
+  let recordedTimestampStartNumber = null; let recordedTimestampEndNumber = null;
+  if (recordedTimestampStart) {
+    recordedTimestampStartNumber = stringToTimestampMilliseconds(recordedTimestampStart);
+  }
+  if (recordedTimestampEnd) {
+    recordedTimestampEndNumber = stringToTimestampMilliseconds(recordedTimestampEnd);
+  }
+  return { recordedTimestampStartNumber, recordedTimestampEndNumber };
+};
+
+const createQueryUsingTimestamps = (tableName: string, pkName: string, pkVal: string, skName: string, recordedTimestampStartNumber: number | null, recordedTimestampEndNumber: number | null): AWS.DynamoDB.DocumentClient.QueryInput => {
+  // Get sensor data for this device
+  let KeyConditionExpression: string = `${pkName} = :hkey`;
+  if (recordedTimestampStartNumber && recordedTimestampEndNumber) {
+    KeyConditionExpression += ` AND ${skName} BETWEEN :recordedTimestampStart AND :recordedTimestampEnd`;
+  } else if (recordedTimestampStartNumber) {
+    KeyConditionExpression += `AND ${skName} >= :recordedTimestampStart`;
+  } else if (recordedTimestampEndNumber) {
+    KeyConditionExpression += ` AND ${skName} <= :recordedTimestampEnd`;
+  }
+
+  const ExpressionAttributeValues: Record<string, AttributeValue> = {
+    // @ts-expect-error stupid dynamodb type stuff
+    ':hkey': pkVal,
+    ...(recordedTimestampStartNumber && { ':recordedTimestampStart': recordedTimestampStartNumber }),
+    ...(recordedTimestampEndNumber && { ':recordedTimestampEnd': recordedTimestampEndNumber }),
+  };
+
+  // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#query-property
+  return {
+    TableName: tableName,
+    KeyConditionExpression,
+    ExpressionAttributeValues,
+  };
+};
 
 /**
  * Put a sensorData item into the database
@@ -53,63 +112,60 @@ const getDataHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any) =
 
   // Convert recordedTimestamps to numbers
   let recordedTimestampStartNumber = null; let recordedTimestampEndNumber = null;
-  if (recordedTimestampStart) {
-    try {
-      recordedTimestampStartNumber = stringToTimestampMilliseconds(recordedTimestampStart);
-    } catch {
-      return createJsonMessage(400, 'recordedTimestampStart must be a valid timestamp!');
-    }
-  }
-  if (recordedTimestampEnd) {
-    try {
-      recordedTimestampEndNumber = stringToTimestampMilliseconds(recordedTimestampEnd);
-    } catch {
-      return createJsonMessage(400, 'recordedTimestampEnd must be a valid timestamp!');
-    }
+  try {
+    const result = convertTimestamps(recordedTimestampStart, recordedTimestampEnd);
+    recordedTimestampStartNumber = result.recordedTimestampStartNumber;
+    recordedTimestampEndNumber = result.recordedTimestampEndNumber;
+  } catch {
+    return createJsonMessage(400, 'recordedTimestampStart must be a valid timestamp!');
   }
 
   // Check if user is allowed to read data for this device
-  const getParams = {
-    TableName: Table.DeviceAdmins.tableName,
-    Key: { deviceId },
-  };
-  const { Item: device } = await dynamoDb.get(getParams).promise();
-
-  const authorizedUsers = device?.authorizedUsers?.values;
-  const deviceAdmin = device?.adminId;
   const userId = session.properties.userID;
+  const isAuthorized = await checkIfAuthorized(userId, deviceId);
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-  const isAuthorizedUser = !!authorizedUsers && Object.values(authorizedUsers).includes(userId);
-  const isDeviceAdmin = userId === deviceAdmin;
-
-  if (!isAuthorizedUser && !isDeviceAdmin) {
+  if (!isAuthorized) {
     return createJsonMessage(403, 'Forbidden');
   }
 
   // Get sensor data for this device
-  let KeyConditionExpression = 'deviceId = :hkey';
-  if (recordedTimestampStartNumber && recordedTimestampEndNumber) {
-    KeyConditionExpression += ' AND recordedTimestamp BETWEEN :recordedTimestampStart AND :recordedTimestampEnd';
-  } else if (recordedTimestampStartNumber) {
-    KeyConditionExpression += ' AND recordedTimestamp >= :recordedTimestampStart';
-  } else if (recordedTimestampEndNumber) {
-    KeyConditionExpression += ' AND recordedTimestamp <= :recordedTimestampEnd';
+  const params = createQueryUsingTimestamps(Table.SensorData.tableName, 'deviceId', deviceId, 'recordedTimestamp', recordedTimestampStartNumber, recordedTimestampEndNumber);
+  const results = await dynamoDb.query(params).promise();
+
+  return createJsonBody(200, results.Items);
+});
+
+const getAverageHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any) => {
+  const session = useSession();
+  const { deviceId } = usePathParams();
+  const { recordedTimestampStart, recordedTimestampEnd } = useQueryParams();
+
+  if (session.type !== 'user') {
+    return createJsonMessage(401, 'Unauthorized');
   }
 
-  const ExpressionAttributeValues = {
-    ':hkey': deviceId,
-    ...(recordedTimestampStartNumber && { ':recordedTimestampStart': recordedTimestampStartNumber }),
-    ...(recordedTimestampEndNumber && { ':recordedTimestampEnd': recordedTimestampEndNumber }),
-  };
+  if (!deviceId) {
+    return createJsonMessage(400, 'deviceId is required');
+  }
 
-  // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#query-property
-  const params = {
-    TableName: Table.SensorData.tableName,
-    KeyConditionExpression,
-    ExpressionAttributeValues,
-  };
+  let recordedTimestampStartNumber = null; let recordedTimestampEndNumber = null;
+  try {
+    const result = convertTimestamps(recordedTimestampStart, recordedTimestampEnd);
+    recordedTimestampStartNumber = result.recordedTimestampStartNumber;
+    recordedTimestampEndNumber = result.recordedTimestampEndNumber;
+  } catch {
+    return createJsonMessage(400, 'recordedTimestampStart must be a valid timestamp!');
+  }
 
+  // Check if user is allowed to read data for this device
+  const userId = session.properties.userID;
+  const isAuthorized = await checkIfAuthorized(userId, deviceId);
+
+  if (!isAuthorized) {
+    return createJsonMessage(403, 'Forbidden');
+  }
+
+  const params = createQueryUsingTimestamps(Table.SensorDataAggregate.tableName, 'deviceId', deviceId, 'hourTimestamp', recordedTimestampStartNumber, recordedTimestampEndNumber);
   const results = await dynamoDb.query(params).promise();
 
   return createJsonBody(200, results.Items);
@@ -117,3 +173,4 @@ const getDataHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any) =
 
 export const createData = useMiddewares(createDataHandler, [httpErrorHandler, jsonBodyParser]);
 export const getData = useMiddewares(getDataHandler, [httpErrorHandler, jwtErrorHandlingMiddleware]);
+export const getDataAverages = useMiddewares(getAverageHandler, [httpErrorHandler, jwtErrorHandlingMiddleware]);

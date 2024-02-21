@@ -22,6 +22,9 @@ export function ApiStack({ stack, app }: StackContext) {
       // get sensorData for a given device
       "GET /api/sensorData/{deviceId}": "packages/functions/src/sensorData.getData",
 
+      // get sensorData for a given device
+      "GET /api/sensorData/{deviceId}/average": "packages/functions/src/sensorData.getDataAverages",
+
       // create sensor data for a given device (test endpoint)
       "POST /api/sensorData": "packages/functions/src/sensorData.createData",
 
