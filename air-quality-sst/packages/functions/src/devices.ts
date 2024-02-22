@@ -1,7 +1,7 @@
-import AWS from 'aws-sdk';
+import { DynamoDB } from 'aws-sdk';
 import { type APIGatewayProxyHandlerV2 } from 'aws-lambda';
 
-import { ApiHandler, usePathParams } from 'sst/node/api';
+import { ApiHandler, usePathParams, useQueryParams } from 'sst/node/api';
 import { Table } from 'sst/node/table';
 
 import { createJsonBody, createJsonMessage } from '@air-quality-sst/core/jsonUtil';
@@ -11,7 +11,7 @@ import { useSession } from 'sst/node/auth';
 import { jwtErrorHandlingMiddleware, useMiddewares } from '@air-quality-sst/core/middlewareUtil';
 import httpErrorHandler from '@middy/http-error-handler';
 
-const dynamoDb = new AWS.DynamoDB.DocumentClient();
+const dynamoDb = new DynamoDB.DocumentClient();
 
 /**
  * Takes a deviceId and registers it to a user
@@ -314,6 +314,7 @@ const unregisterDeviceHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (even
 const getDeviceHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any) => {
   const session = useSession();
   const { deviceId } = usePathParams();
+  const { hydrate } = useQueryParams();
 
   // Check user is authenticated
   if (session.type !== 'user') {
@@ -334,7 +335,11 @@ const getDeviceHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any)
   if (!Item) {
     return createJsonBody(204, null);
   } else {
-    return createJsonBody(200, Item);
+    if (!hydrate) {
+      return createJsonBody(200, Item);
+    } else {
+      const { adminId, authorizedUsers } = Item;
+    }
   }
 });
 

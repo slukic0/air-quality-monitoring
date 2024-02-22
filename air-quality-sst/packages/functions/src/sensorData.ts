@@ -1,4 +1,4 @@
-import AWS from 'aws-sdk';
+import { DynamoDB } from 'aws-sdk';
 import { Table } from 'sst/node/table';
 import { type APIGatewayProxyHandlerV2, type APIGatewayProxyResultV2 } from 'aws-lambda';
 import { ApiHandler, usePathParams, useQueryParams } from 'sst/node/api';
@@ -9,7 +9,7 @@ import { useSession } from 'sst/node/auth';
 import jsonBodyParser from '@middy/http-json-body-parser';
 import httpErrorHandler from '@middy/http-error-handler';
 
-const dynamoDb = new AWS.DynamoDB.DocumentClient();
+const dynamoDb = new DynamoDB.DocumentClient();
 
 /**
  * Put a sensorData item into the database

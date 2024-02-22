@@ -1,7 +1,7 @@
 import { AuthHandler, GoogleAdapter, Session } from 'sst/node/auth';
 import { Table } from 'sst/node/table';
 import { NextjsSite } from 'sst/node/site';
-import AWS from 'aws-sdk';
+import { DynamoDB } from 'aws-sdk';
 
 const GOOGLE_CLIENT_ID =
   '921966491227-4qg7horhbq49gg7rbas1a9761l2q4p4c.apps.googleusercontent.com';
@@ -23,7 +23,7 @@ export const handler = AuthHandler({
       clientID: GOOGLE_CLIENT_ID,
       onSuccess: async (tokenset) => {
         const claims = tokenset.claims();
-        const dynamoDb = new AWS.DynamoDB.DocumentClient();
+        const dynamoDb = new DynamoDB.DocumentClient();
 
         const params = {
           TableName: Table.Users.tableName,
