@@ -2,9 +2,9 @@ import { Table } from 'sst/node/table';
 import { ApiHandler } from 'sst/node/api';
 import { useSession } from 'sst/node/auth';
 import { createJsonBody } from '@air-quality-sst/core/jsonUtil';
-import AWS from 'aws-sdk';
+import { DynamoDB } from 'aws-sdk';
 
-const dynamoDb = new AWS.DynamoDB.DocumentClient();
+const dynamoDb = new DynamoDB.DocumentClient();
 
 export const handler = ApiHandler(async () => {
   const session = useSession();

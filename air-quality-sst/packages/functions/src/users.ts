@@ -1,4 +1,4 @@
-import AWS from 'aws-sdk';
+import { DynamoDB } from 'aws-sdk';
 import { Table } from 'sst/node/table';
 import { type APIGatewayProxyHandlerV2 } from 'aws-lambda';
 import { ApiHandler, usePathParams } from 'sst/node/api';
@@ -6,13 +6,14 @@ import { createJsonMessage, createJsonBody } from '@air-quality-sst/core/jsonUti
 import { jwtErrorHandlingMiddleware, useMiddewares } from '@air-quality-sst/core/middlewareUtil';
 import { useSession } from 'sst/node/auth';
 import httpErrorHandler from '@middy/http-error-handler';
+import createGetUserGetItemParams from '@air-quality-sst/core/src/dynamo/createGetUserGetItemParams';
 
-const dynamoDb = new AWS.DynamoDB.DocumentClient();
+const dynamoDb = new DynamoDB.DocumentClient();
 
 /**
  *  List users by specifiying the start of their email address
  */
-const getUsersHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any) => {
+const getUsersByEmailHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any) => {
   const session = useSession();
   const { emailString } = usePathParams();
 
@@ -57,19 +58,10 @@ const getUserHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any) =
     return createJsonMessage(400, 'emailString is required');
   }
 
-  const getItemParams = {
-    TableName: Table.Users.tableName,
-    Key: { userId },
-    ProjectionExpression: 'userId, email, #givenName, adminDevices, authorizedDevices',
-    ExpressionAttributeNames: {
-      '#givenName': 'name',
-    },
-  };
-
-  const { Item } = await dynamoDb.get(getItemParams).promise();
+  const { Item } = await dynamoDb.get(createGetUserGetItemParams(userId)).promise();
 
   return createJsonBody(201, Item);
 });
 
-export const getUsers = useMiddewares(getUsersHandler, [httpErrorHandler, jwtErrorHandlingMiddleware]);
+export const getUsersByEmail = useMiddewares(getUsersByEmailHandler, [httpErrorHandler, jwtErrorHandlingMiddleware]);
 export const getUser = useMiddewares(getUserHandler, [httpErrorHandler, jwtErrorHandlingMiddleware]);
