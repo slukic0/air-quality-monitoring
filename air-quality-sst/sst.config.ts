@@ -14,10 +14,10 @@ export default {
   },
   stacks(app) {
     app.stack(StorageStack);
-    app.stack(CronStack);
     app.stack(ApiStack);
     app.stack(WebStack);
     app.stack(AuthStack);
+    app.stack(CronStack);
     // Remove all resources when non-prod stages are removed
     if (app.stage !== "prod") {
       app.setDefaultRemovalPolicy("destroy");

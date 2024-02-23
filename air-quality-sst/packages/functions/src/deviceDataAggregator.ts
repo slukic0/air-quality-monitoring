@@ -1,9 +1,9 @@
 import { createJsonBody } from '@air-quality-sst/core/jsonUtil';
 import { type APIGatewayProxyHandlerV2 } from 'aws-lambda';
-import AWS from 'aws-sdk';
+import { DynamoDB } from 'aws-sdk';
 import { Table } from 'sst/node/table';
 
-const dynamoDb = new AWS.DynamoDB.DocumentClient();
+const dynamoDb = new DynamoDB.DocumentClient();
 
 export const main: APIGatewayProxyHandlerV2 = async (event: any) => {
   const now = Date.now();
@@ -49,10 +49,10 @@ export const main: APIGatewayProxyHandlerV2 = async (event: any) => {
   const dataLastHour: Record<string, any> = {};
   resolvedQueryPromises.forEach((result) => {
     const count = result.Count ?? 0;
-    if (count > 0) {
+    if (count > 0 && result.Items) {
       // get all data from each device
-      const deviceId = result.Items[0].deviceId;
       const items = result.Items;
+      const deviceId = items[0].deviceId;
       const numSensors = items[0].payload.data.length;
       const deviceData = [];
 
@@ -84,14 +84,16 @@ export const main: APIGatewayProxyHandlerV2 = async (event: any) => {
       dataLastHour[deviceId] = deviceDataAverage;
     }
   });
-  console.log(dataLastHour);
 
   // if a device has not written in the last hour, include the device but with no values
   for (const deviceId of deviceIds) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     if (!Object.keys(dataLastHour).includes(deviceId)) {
       dataLastHour[deviceId] = null;
     }
   }
+
+  console.log(dataLastHour);
 
   // write the aggregated results
   const putRequests = [];
@@ -117,5 +119,5 @@ export const main: APIGatewayProxyHandlerV2 = async (event: any) => {
 
   const res = await dynamoDb.batchWrite(batchWriteParams).promise();
 
-  return createJsonBody(200, res);
+  return createJsonBody(200, { dataLastHour, res });
 };
