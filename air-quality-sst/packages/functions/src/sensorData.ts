@@ -1,4 +1,4 @@
-import AWS from 'aws-sdk';
+import { DynamoDB } from 'aws-sdk';
 import { Table } from 'sst/node/table';
 import { type APIGatewayProxyHandlerV2, type APIGatewayProxyResultV2 } from 'aws-lambda';
 import { ApiHandler, usePathParams, useQueryParams } from 'sst/node/api';
@@ -10,7 +10,7 @@ import jsonBodyParser from '@middy/http-json-body-parser';
 import httpErrorHandler from '@middy/http-error-handler';
 import { type AttributeValue } from '@aws-sdk/client-dynamodb';
 
-const dynamoDb = new AWS.DynamoDB.DocumentClient();
+const dynamoDb = new DynamoDB.DocumentClient();
 
 /**
  * Check if user is allowed to read data for this device
