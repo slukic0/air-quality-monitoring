@@ -60,25 +60,25 @@ const Page = () => {
       getDevices();
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
-
     
-  // const [page, setPage] = useState(0);
-  // const [rowsPerPage, setRowsPerPage] = useState(5);
+  // TODO: Pagination
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const devciesSelection = useSelection(devices);
 
-  // const handlePageChange = useCallback(
-  //   (event, value) => {
-  //     setPage(value);
-  //   },
-  //   []
-  // );
+  const handlePageChange = useCallback(
+    (event, value) => {
+      setPage(value);
+    },
+    []
+  );
 
-  // const handleRowsPerPageChange = useCallback(
-  //   (event) => {
-  //     setRowsPerPage(event.target.value);
-  //   },
-  //   []
-  // );
+  const handleRowsPerPageChange = useCallback(
+    (event) => {
+      setRowsPerPage(event.target.value);
+    },
+    []
+  );
 
   return (
     <>
@@ -149,6 +149,15 @@ const Page = () => {
             <DevicesTable
               count={devices.length}
               items={devices}
+              page={page}
+              rowsPerPage={rowsPerPage}
+              onPageChange={handlePageChange}
+              onRowsPerPageChange={handleRowsPerPageChange}
+              onDeselectAll={devciesSelection.handleDeselectAll}
+              onDeselectOne={devciesSelection.handleDeselectOne}
+              onSelectAll={devciesSelection.handleSelectAll}
+              onSelectOne={devciesSelection.handleSelectOne}
+              selected={devciesSelection.selected}
             />
           </Stack>
         </Container>
