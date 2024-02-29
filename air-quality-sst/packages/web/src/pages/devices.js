@@ -10,7 +10,7 @@ import { DevicesTable } from 'src/sections/device/devices-table';
 import { DevicesSearch } from 'src/sections/device/devices-search';
 import { applyPagination } from 'src/utils/apply-pagination';
 import { useAuth } from 'src/hooks/use-auth';
-import axios from 'axios';
+import { getDevicesData } from 'src/utils/get-devices-data';
 
 // const useDevices = (page, rowsPerPage) => {
 //   return useMemo(
@@ -32,34 +32,12 @@ import axios from 'axios';
 
 const Page = () => {
     const { user } = useAuth();
-
-    const [devices, setDevices] = useState([])
+    const [devices, setDevices] = useState([]);
 
     useEffect(() => {
-      const getDevices = async() => {
-        const devices = [];
-
-        if (user.adminDevices) devices.push(...user.adminDevices)
-        if (user.authorizedDevices) devices.push(...user.authorizedDevices)
-        console.log('EFFFFF', user, devices);
-
-
-        const devicePromises = [];
-        devices.forEach(deviceId => {
-          const url = `${process.env.NEXT_PUBLIC_API_URL}/api/device/${deviceId}?hydrate=true`;
-          devicePromises.push(axios.get(url, {headers: {"Authorization": `Bearer ${user.token}`}}));
-        });
-        const resolvedDevicePromises = await Promise.all(devicePromises)
-        const deviceData = [];
-        resolvedDevicePromises.forEach(result => {
-          console.log("result", result.data);
-          deviceData.push(result.data);
-        });
-        setDevices(deviceData);
-      };
-      getDevices();
+      async () => setDevices(await getDevicesData(user)); // Kinda of ugly
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [ user.adminDevices, user.authorizedDevices ]);
     
   // TODO: Pagination
   const [page, setPage] = useState(0);
@@ -84,7 +62,7 @@ const Page = () => {
     <>
       <Head>
         <title>
-          Devices | Devias Kit
+          Devices | Air Quality Monitoring
         </title>
       </Head>
       <Box
@@ -146,6 +124,7 @@ const Page = () => {
               </div>
             </Stack>
             <DevicesSearch />
+            
             <DevicesTable
               count={devices.length}
               items={devices}

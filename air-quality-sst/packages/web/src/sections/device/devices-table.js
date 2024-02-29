@@ -65,6 +65,7 @@ export const DevicesTable = (props) => {
               </TableRow>
             </TableHead>
             <TableBody>
+              {console.log(items)}
               {items.map((device) => {
                 const isSelected = selected.includes(device.deviceId);
 
