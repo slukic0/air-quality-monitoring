@@ -60,6 +60,15 @@ const getUserHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any) =
 
   const { Item } = await dynamoDb.get(createGetUserGetItemParams(userId)).promise();
 
+  if (Item) {
+    if (!Item.authorizedUsers) {
+      Item.authorizedUsers = [];
+    }
+    if (!Item.adminDevices) {
+      Item.adminDevices = [];
+    }
+  }
+
   return createJsonBody(201, Item);
 });
 

@@ -328,19 +328,22 @@ const getDeviceHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any)
   };
 
   const { Item: device } = await dynamoDb.get(getItemParams).promise();
-  // convert string sets to arrays
-  if (device?.authorizedUsers) {
-    device.authorizedUsers = device.authorizedUsers.values;
-  }
 
   if (!device) {
     return createJsonBody(404, null);
   } else {
+    if (device.authorizedUsers) {
+      // convert string set to array
+      device.authorizedUsers = device.authorizedUsers.values;
+    } else {
+      // add empty array if no authorizedUsers exist
+      device.authorizedUsers = [];
+    }
     if (hydrate) {
       // get the users names and emails, not just the Ids
       const { adminId, authorizedUsers } = device as { adminId: string, authorizedUsers: string[] };
 
-      const deviceUserIds = authorizedUsers ? [...authorizedUsers, adminId] : [adminId];
+      const deviceUserIds = [...authorizedUsers, adminId];
       const deviceUserIdKeys = deviceUserIds.map((userId: string) => ({ userId }));
 
       const batchGetParams = {

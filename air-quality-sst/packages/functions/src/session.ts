@@ -21,5 +21,14 @@ export const handler = ApiHandler(async () => {
 
   const { Item } = await dynamoDb.get(params).promise();
 
+  if (Item) {
+    if (!Item.authorizedUsers) {
+      Item.authorizedUsers = [];
+    }
+    if (!Item.adminDevices) {
+      Item.adminDevices = [];
+    }
+  }
+
   return createJsonBody(200, Item);
 });
