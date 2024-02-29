@@ -168,7 +168,18 @@ const getAverageHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any
   const params = createQueryUsingTimestamps(Table.SensorDataAggregate.tableName, 'deviceId', deviceId, 'hourTimestamp', recordedTimestampStartNumber, recordedTimestampEndNumber);
   const results = await dynamoDb.query(params).promise();
 
-  return createJsonBody(200, results.Items);
+  if (results.Items) {
+    // map results to timestamp entires
+    // results are already sorted since the SK is a number (https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_Query.html)
+    const mappedResults = results.Items.map((item) => {
+      const { hourTimestamp } = item;
+      delete item.hourTimestamp;
+      return { [hourTimestamp]: item };
+    });
+    return createJsonBody(200, mappedResults);
+  } else {
+    return createJsonBody(200, null);
+  }
 });
 
 export const createData = useMiddewares(createDataHandler, [httpErrorHandler, jsonBodyParser]);
