@@ -1,17 +1,14 @@
-import AWS from 'aws-sdk';
+import { DynamoDB } from 'aws-sdk';
 import { type APIGatewayProxyHandlerV2 } from 'aws-lambda';
-
-import { ApiHandler, usePathParams } from 'sst/node/api';
+import { ApiHandler, usePathParams, useQueryParams } from 'sst/node/api';
 import { Table } from 'sst/node/table';
-
 import { createJsonBody, createJsonMessage } from '@air-quality-sst/core/jsonUtil';
-
 import jsonBodyParser from '@middy/http-json-body-parser';
 import { useSession } from 'sst/node/auth';
 import { jwtErrorHandlingMiddleware, useMiddewares } from '@air-quality-sst/core/middlewareUtil';
 import httpErrorHandler from '@middy/http-error-handler';
 
-const dynamoDb = new AWS.DynamoDB.DocumentClient();
+const dynamoDb = new DynamoDB.DocumentClient();
 
 /**
  * Takes a deviceId and registers it to a user
@@ -314,6 +311,7 @@ const unregisterDeviceHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (even
 const getDeviceHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any) => {
   const session = useSession();
   const { deviceId } = usePathParams();
+  const { hydrate } = useQueryParams();
 
   // Check user is authenticated
   if (session.type !== 'user') {
@@ -329,12 +327,54 @@ const getDeviceHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any)
     Key: { deviceId },
   };
 
-  const { Item } = await dynamoDb.get(getItemParams).promise();
+  const { Item: device } = await dynamoDb.get(getItemParams).promise();
 
-  if (!Item) {
-    return createJsonBody(204, null);
+  if (!device) {
+    return createJsonBody(404, null);
   } else {
-    return createJsonBody(200, Item);
+    if (device.authorizedUsers) {
+      // convert string set to array
+      device.authorizedUsers = device.authorizedUsers.values;
+    } else {
+      // add empty array if no authorizedUsers exist
+      device.authorizedUsers = [];
+    }
+    if (hydrate) {
+      // get the users names and emails, not just the Ids
+      const { adminId, authorizedUsers } = device as { adminId: string, authorizedUsers: string[] };
+
+      const deviceUserIds = [...authorizedUsers, adminId];
+      const deviceUserIdKeys = deviceUserIds.map((userId: string) => ({ userId }));
+
+      const batchGetParams = {
+        RequestItems: {
+          [Table.Users.tableName]: {
+            Keys: deviceUserIdKeys,
+            ProjectionExpression: 'userId, email, #givenName',
+            ExpressionAttributeNames: {
+              '#givenName': 'name',
+            },
+          },
+        },
+      };
+
+      const result = await dynamoDb.batchGet(batchGetParams).promise();
+      if (!result.Responses || (!!result.UnprocessedKeys && Object.keys(result.UnprocessedKeys).length > 0)) {
+        return createJsonMessage(500, 'Cannot hydrate');
+      }
+
+      // hydrate the device information
+      const users = result.Responses[Table.Users.tableName];
+      const userMap = Object.fromEntries(
+        users.map(user => [user.userId, user]),
+      );
+
+      device.adminId = userMap[adminId];
+      if (device.authorizedUsers && device.authorizedUsers.length > 0) {
+        device.authorizedUsers = device.authorizedUsers.map((userId: string) => userMap[userId]);
+      }
+    }
+    return createJsonBody(200, device);
   }
 });
 

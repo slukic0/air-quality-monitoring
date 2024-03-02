@@ -1,8 +1,10 @@
 import { Table } from 'sst/node/table';
 import { ApiHandler } from 'sst/node/api';
 import { useSession } from 'sst/node/auth';
-import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb';
-import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
+import { createJsonBody } from '@air-quality-sst/core/jsonUtil';
+import { DynamoDB } from 'aws-sdk';
+
+const dynamoDb = new DynamoDB.DocumentClient();
 
 export const handler = ApiHandler(async () => {
   const session = useSession();
@@ -12,18 +14,21 @@ export const handler = ApiHandler(async () => {
     throw new Error('Not authenticated');
   }
 
-  const ddb = new DynamoDBClient({});
-  const data = await ddb.send(
-    new GetItemCommand({
-      TableName: Table.Users.tableName,
-      Key: marshall({
-        userId: session.properties.userID,
-      }),
-    }),
-  );
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify(unmarshall(data.Item!)),
+  const params = {
+    TableName: Table.Users.tableName,
+    Key: { userId: session.properties.userID },
   };
+
+  const { Item } = await dynamoDb.get(params).promise();
+
+  if (Item) {
+    if (!Item.authorizedUsers) {
+      Item.authorizedUsers = [];
+    }
+    if (!Item.adminDevices) {
+      Item.adminDevices = [];
+    }
+  }
+
+  return createJsonBody(200, Item);
 });

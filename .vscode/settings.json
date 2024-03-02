@@ -1,0 +1,7 @@
+{
+    // specify different eslint directories
+    "eslint.workingDirectories": [
+        { "pattern": "air-quality-sst/packages/functions/*" },
+        { "pattern": "air-quality-sst/packages/web/*" },
+      ]
+}
