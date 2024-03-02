@@ -12,24 +12,6 @@ import { applyPagination } from 'src/utils/apply-pagination';
 import { useAuth } from 'src/hooks/use-auth';
 import { getDevicesData } from 'src/utils/get-devices-data';
 
-// const useDevices = (page, rowsPerPage) => {
-//   return useMemo(
-//     () => {
-//       return applyPagination(data, page, rowsPerPage);
-//     },
-//     [page, rowsPerPage]
-//   );
-// };
-
-// const useDeviceIds = (devices) => {
-//   return useMemo(
-//     () => {
-//       return devices.map((device) => device.id);
-//     },
-//     [devices]
-//   );
-// };
-
 const Page = () => {
     const { user } = useAuth();
     const [devices, setDevices] = useState([]);
@@ -42,22 +24,6 @@ const Page = () => {
     }, [ user ]);
     
   // TODO: Pagination
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-
-  const handlePageChange = useCallback(
-    (event, value) => {
-      setPage(value);
-    },
-    []
-  );
-
-  const handleRowsPerPageChange = useCallback(
-    (event) => {
-      setRowsPerPage(event.target.value);
-    },
-    []
-  );
 
   return (
     <>
@@ -90,26 +56,6 @@ const Page = () => {
                   direction="row"
                   spacing={1}
                 >
-                  {/*<Button
-                    color="inherit"
-                    startIcon={(
-                      <SvgIcon fontSize="small">
-                        <ArrowUpOnSquareIcon />
-                      </SvgIcon>
-                    )}
-                  >
-                    Import
-                  </Button>
-                  <Button
-                    color="inherit"
-                    startIcon={(
-                      <SvgIcon fontSize="small">
-                        <ArrowDownOnSquareIcon />
-                      </SvgIcon>
-                    )}
-                  >
-                    Export
-                    </Button>*/}
                 </Stack>
               </Stack>
               <div>

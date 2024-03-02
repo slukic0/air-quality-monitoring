@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import { format } from 'date-fns';
 import {
   Box,
+  Button,
   Card,
   Collapse,
   IconButton,
@@ -11,6 +12,7 @@ import {
   TableBody,
   TableCell,
   TableContainer,
+  TableFooter,
   TableHead,
   TablePagination,
   TableRow,
@@ -29,15 +31,16 @@ export const DevicesTable = (props) => {
   const[open, setOpen] = useState(false);
 
   return (
-    <TableContainer component={Paper}
-      sx={{ minWidth: 800 }}
-    >
+    <TableContainer component={Paper}>
       <Table>
         <TableHead>
           <TableRow>
             <TableCell />
             <TableCell>
               Device ID
+            </TableCell>
+            <TableCell align='right'>
+              Device Name
             </TableCell>
             <TableCell align='right'>
               Owner Name
@@ -64,19 +67,14 @@ export const DevicesTable = (props) => {
                       {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
                     </IconButton>
                   </TableCell>
-                  <TableCell align='right' 
+                  <TableCell
                     component="th"
                     scope="row"
                   >
-                    <Stack
-                      alignItems="center"
-                      direction="row"
-                      spacing={2}
-                    >
-                      <Typography variant="subtitle2">
-                        {device.deviceId}
-                      </Typography>
-                    </Stack>
+                      {device.deviceId}
+                  </TableCell>
+                  <TableCell align='right'>
+                    {device.name? device.name : "NA"}
                   </TableCell>
                   <TableCell align='right'>
                     {device.adminId.name}
@@ -91,7 +89,7 @@ export const DevicesTable = (props) => {
                       timeout='auto'
                       unmountOnExit
                     >
-                      <Box>
+                      <Box sx={{ margin: 1 }}>
                         <Typography variant='p'
                           gutterBottom
                           component='div'
@@ -103,25 +101,28 @@ export const DevicesTable = (props) => {
                         >
                           <TableHead>
                             <TableRow>
-                              <TableCell>User name</TableCell>
-                              <TableCell>User ID</TableCell>
-                              <TableCell align='right'>Device Name</TableCell>
-                              <TableCell align='right'>Device Location</TableCell>
-                              <TableCell align='right'>Is Admin?</TableCell>
+                              <TableCell>User Name</TableCell>
+                              <TableCell>User Email</TableCell>
                             </TableRow>
                           </TableHead>
                           <TableBody>
-                            {device.authorizedUsers.map((authedUser) => {
-                              return (
+                            {device.authorizedUsers.map((authedUser) => (
                                 <TableRow key={authedUser.userId}>
-                                  <TableCell></TableCell>
-                                  <TableCell>{authedUser.userId}</TableCell>
-                                  <TableCell align='right'></TableCell>
-                                  <TableCell align='right'></TableCell>
-                                  <TableCell align='right'></TableCell>
+                                  <TableCell>{authedUser.name? authedUser.name : "NA"}</TableCell>
+                                  <TableCell>{authedUser.email? authedUser.email : "NA"}</TableCell>
                                 </TableRow>
-                              )})}
+                              ))}
                             </TableBody>
+                            <TableFooter>
+                              <TableRow>
+                                <TableCell />
+                                <TableCell align='right'>
+                                  <Button size='small'>
+                                    Edit
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            </TableFooter>
                         </Table>
                       </Box>
                     </Collapse>
