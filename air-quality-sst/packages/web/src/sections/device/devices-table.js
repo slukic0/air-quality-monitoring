@@ -8,6 +8,7 @@ import {
   IconButton,
   Paper,
   Stack,
+  SvgIcon,
   Table,
   TableBody,
   TableCell,
@@ -16,11 +17,12 @@ import {
   TableHead,
   TablePagination,
   TableRow,
-  Typography
+  Typography,
 } from '@mui/material';
 import { Fragment, useState } from 'react';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import { PlusIcon, TrashIcon } from '@heroicons/react/24/solid';
 
 export const DevicesTable = (props) => {
   const {
@@ -90,12 +92,36 @@ export const DevicesTable = (props) => {
                       unmountOnExit
                     >
                       <Box sx={{ margin: 1 }}>
-                        <Typography variant='p'
-                          gutterBottom
-                          component='div'
-                        >
-                          Users
-                        </Typography>
+                        <Stack
+                            direction="row"
+                            justifyContent="space-between"
+                            spacing={4}
+                            
+                          >
+                              <Stack spacing={1}>
+                                <Typography variant="p">
+                                  Users
+                                </Typography>
+                                <Stack
+                                  alignItems="center"
+                                  direction="row"
+                                  spacing={1}
+                                >
+                                </Stack>
+                              </Stack>
+                              <div>
+                                <Button
+                                  startIcon={(
+                                    <SvgIcon fontSize="small">
+                                      <PlusIcon />
+                                    </SvgIcon>
+                                  )}
+                                  variant="contained"
+                                >
+                                  Add User
+                                </Button>
+                              </div>
+                            </Stack>
                         <Table size='small' 
                           aria-label='Users'
                         >
@@ -103,6 +129,7 @@ export const DevicesTable = (props) => {
                             <TableRow>
                               <TableCell>User Name</TableCell>
                               <TableCell>User Email</TableCell>
+                              <TableCell />
                             </TableRow>
                           </TableHead>
                           <TableBody>
@@ -110,19 +137,21 @@ export const DevicesTable = (props) => {
                                 <TableRow key={authedUser.userId}>
                                   <TableCell>{authedUser.name? authedUser.name : "NA"}</TableCell>
                                   <TableCell>{authedUser.email? authedUser.email : "NA"}</TableCell>
+                                  <TableCell>
+                                    <Button
+                                      startIcon={(
+                                        <SvgIcon fontSize="small">
+                                          <TrashIcon />
+                                        </SvgIcon>
+                                      )}
+                                      variant="contained"
+                                    >
+                                      Remove User
+                                  </Button>
+                                </TableCell>
                                 </TableRow>
                               ))}
                             </TableBody>
-                            <TableFooter>
-                              <TableRow>
-                                <TableCell />
-                                <TableCell align='right'>
-                                  <Button size='small'>
-                                    Edit
-                                  </Button>
-                                </TableCell>
-                              </TableRow>
-                            </TableFooter>
                         </Table>
                       </Box>
                     </Collapse>
