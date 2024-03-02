@@ -22,9 +22,11 @@ const Page = () => {
     const [ device, setDevice ] = useState("");
 
     useEffect(() => {
-        async () => setDevices(await getDevicesData(user));
-        console.log("devices: ", devices);
-    }, [ user.adminDevices, user.authorizedDevices ]);
+        const getDevices = async () => {
+          setDevices(await getDevicesData(user));
+        };
+        getDevices();
+    }, [ user ]);
 
     const handleChange = (event) => {
         setDevice(event.target.change);
@@ -63,7 +65,11 @@ const Page = () => {
                                 {devices.map((deviceId) => {
                                     console.log("deviceId: ", deviceId);
                                     return (
-                                        <MenuItem value={deviceId.deviceId}>{deviceId.deviceId}</MenuItem>
+                                        <MenuItem key={deviceId.deviceId}
+                                            value={deviceId.deviceId}
+                                        >
+                                            {deviceId.deviceId}
+                                        </MenuItem>
                                     );
                                 })}
                                 </Select>

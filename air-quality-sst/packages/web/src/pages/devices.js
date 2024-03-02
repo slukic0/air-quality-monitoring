@@ -35,9 +35,11 @@ const Page = () => {
     const [devices, setDevices] = useState([]);
 
     useEffect(() => {
-      async () => setDevices(await getDevicesData(user)); // Kinda of ugly
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [ user.adminDevices, user.authorizedDevices ]);
+      const getDevices = async () => {
+        setDevices(await getDevicesData(user));
+      };
+      getDevices();
+    }, [ user ]);
     
   // TODO: Pagination
   const [page, setPage] = useState(0);
