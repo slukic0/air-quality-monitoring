@@ -3,6 +3,9 @@ import { Box, Container, Stack, Typography, Unstable_Grid2 as Grid } from '@mui/
 import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import { Chart } from 'src/components/chart';
 import { alpha, useTheme } from '@mui/material/styles';
+import { useAuth } from 'src/hooks/use-auth';
+import { useMemo, useState } from 'react'
+import { DeviceSelector } from 'src/sections/data/device-selector'
 
 const useChartOptions = () => {
   const theme = useTheme();
@@ -79,8 +82,18 @@ const useChartOptions = () => {
 };
 
 
+
 const Page = () => {
   const chartOptions = useChartOptions();
+  const { user } = useAuth();
+  const devices = useMemo(() => !!user ? [...user.adminDevices, ...user.authorizedDevices] : [], [user])
+  const hasDevices = devices.length > 0;
+
+  const [item, setItem] = useState('')
+
+  const onSelectorChange = (value) => {
+    setItem(value);
+  }
 
   const chartSeries = [
     {
@@ -111,12 +124,21 @@ const Page = () => {
               <Typography variant="h4">Data</Typography>
             </div>
             <div>
+              <Typography variant="body1">Select a device to view more information</Typography>
+            </div>
+            <div>
               <Chart
                 height={350}
                 options={chartOptions}
                 series={chartSeries}
                 type="line"
                 width="100%"
+              />
+            </div>
+            <div sx={{p: 4}}>
+              <DeviceSelector 
+                items={devices}
+                onChange={onSelectorChange}
               />
             </div>
           </Stack>
