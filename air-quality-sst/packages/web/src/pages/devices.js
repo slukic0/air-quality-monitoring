@@ -44,7 +44,6 @@ const Page = () => {
   // TODO: Pagination
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const devciesSelection = useSelection(devices);
 
   const handlePageChange = useCallback(
     (event, value) => {
@@ -64,7 +63,7 @@ const Page = () => {
     <>
       <Head>
         <title>
-          Devices | Air Quality Monitoring
+          Device Management | Air Quality Monitoring
         </title>
       </Head>
       <Box
@@ -80,17 +79,18 @@ const Page = () => {
               direction="row"
               justifyContent="space-between"
               spacing={4}
+              
             >
               <Stack spacing={1}>
                 <Typography variant="h4">
-                  Devices
+                  Device Management
                 </Typography>
                 <Stack
                   alignItems="center"
                   direction="row"
                   spacing={1}
                 >
-                  <Button
+                  {/*<Button
                     color="inherit"
                     startIcon={(
                       <SvgIcon fontSize="small">
@@ -109,7 +109,7 @@ const Page = () => {
                     )}
                   >
                     Export
-                  </Button>
+                    </Button>*/}
                 </Stack>
               </Stack>
               <div>
@@ -125,20 +125,11 @@ const Page = () => {
                 </Button>
               </div>
             </Stack>
-            <DevicesSearch />
+            {/*<DevicesSearch /> TODO search for devices*/}
             
             <DevicesTable
               count={devices.length}
               items={devices}
-              page={page}
-              rowsPerPage={rowsPerPage}
-              onPageChange={handlePageChange}
-              onRowsPerPageChange={handleRowsPerPageChange}
-              onDeselectAll={devciesSelection.handleDeselectAll}
-              onDeselectOne={devciesSelection.handleDeselectOne}
-              onSelectAll={devciesSelection.handleSelectAll}
-              onSelectOne={devciesSelection.handleSelectOne}
-              selected={devciesSelection.selected}
             />
           </Stack>
         </Container>

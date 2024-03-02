@@ -28,7 +28,7 @@ export const items = [
     )
   },
   {
-    title: 'Devices',
+    title: 'Device Managment',
     path: '/devices',
     icon: (
       <SvgIcon fontSize="small">

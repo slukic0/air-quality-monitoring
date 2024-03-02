@@ -52,7 +52,9 @@ const Page = () => {
                             <Typography variant="h4">
                                 Admin stuff
                             </Typography>
-                            <FormControl variant='standard' sx={{ maxWidth: 500, minWidth: 250, m: 1 }}>
+                            <FormControl variant='standard'
+                                sx={{ maxWidth: 500, minWidth: 250, m: 1 }
+                            }>
                                 <InputLabel id="demo-simple-select-standard-label">Device ID</InputLabel>
                                 <Select
                                     labelId="demo-simple-select-standard-label"
