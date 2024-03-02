@@ -75,29 +75,29 @@ export const Layout = (props) => {
               sx={{
                 fontSize: '24px',
                 lineHeight: '32px',
-                mb: 1
+                mb: 4
               }}
               variant="h1"
             >
               Welcome to{' '}
               <Box
                 component="a"
-                sx={{ color: '#15B79E' }}
+                sx={{ color: '#bae7e0' }}
                 target="_blank"
               >
                 Air Quality Monitoring
               </Box>
             </Typography>
-            <Typography
+            {/* <Typography
               align="center"
               sx={{ mb: 3 }}
               variant="subtitle1"
             >
-              A professional kit that comes with ready-to-use MUI components.
-            </Typography>
+              Subtitle text here.
+            </Typography> */}
             <img
               alt=""
-              src="/assets/auth-illustration.svg"
+              src="/assets/auth-background.png"
             />
           </Box>
         </Grid>

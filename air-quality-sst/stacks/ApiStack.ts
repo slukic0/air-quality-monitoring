@@ -3,13 +3,13 @@ import { StorageStack } from "./StorageStack";
 
 
 export function ApiStack({ stack, app }: StackContext) {
-  const { sensorDataTable, usersTable, deviceAdminsTable } = use(StorageStack);
+  const { sensorDataTable, usersTable, deviceAdminsTable, sensorDataAggregateTable } = use(StorageStack);
 
   // Create the API
   const api = new Api(stack, "App", {
     defaults: {
       function: {
-        bind: [sensorDataTable, usersTable, deviceAdminsTable],
+        bind: [sensorDataTable, usersTable, deviceAdminsTable, sensorDataAggregateTable],
       },
     },
     routes: {
@@ -21,6 +21,9 @@ export function ApiStack({ stack, app }: StackContext) {
 
       // get sensorData for a given device
       "GET /api/sensorData/{deviceId}": "packages/functions/src/sensorData.getData",
+
+      // get sensorData for a given device
+      "GET /api/sensorData/{deviceId}/average": "packages/functions/src/sensorData.getDataAverages",
 
       // create sensor data for a given device (test endpoint)
       "POST /api/sensorData": "packages/functions/src/sensorData.createData",
@@ -48,6 +51,11 @@ export function ApiStack({ stack, app }: StackContext) {
 
       // get user by userId
       "GET /api/user/{userId}": "packages/functions/src/users.getUser",
+
+
+
+      /* Cron job testing */
+      // "PUT /api/data/aggregate": "packages/functions/src/deviceDataAggregator.main",
     },
   });
 

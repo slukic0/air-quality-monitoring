@@ -36,10 +36,19 @@ export function StorageStack({ stack, app }: StackContext) {
     primaryIndex: { partitionKey: "deviceId" },
   })
 
+  const sensorDataAggregateTable = new Table(stack, "SensorDataAggregate", {
+    fields: {
+      deviceId: "string",
+      hourTimestamp: "number"
+    },
+    primaryIndex: { partitionKey: "deviceId", sortKey: "hourTimestamp" },
+  })
+
 
   return {
     sensorDataTable,
     usersTable,
     deviceAdminsTable,
+    sensorDataAggregateTable,
   };
 }
