@@ -2,8 +2,8 @@ import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import PropTypes from 'prop-types';
 import { useState } from 'react';
 
-export const DeviceSelector = (props) => {
-  const {items, onChange} = props;
+export const Selector = (props) => {
+  const {items, onChange, defaultText} = props;
   const [item, setItem] = useState('')
 
   const handleChange = (event) => {
@@ -21,7 +21,7 @@ export const DeviceSelector = (props) => {
         <MenuItem 
           value=""
           disabled={item !== ''}>
-            <em>Select Device</em>
+            <em>{defaultText}</em>
         </MenuItem>
         {...items.map((item) => (
             <MenuItem
@@ -35,7 +35,8 @@ export const DeviceSelector = (props) => {
   );
 };
 
-DeviceSelector.protoTypes = {
+Selector.protoTypes = {
+  defaultText: PropTypes.string.isRequired,
   items: PropTypes.array.isRequired,
   onChange: PropTypes.array.isRequired
 };
