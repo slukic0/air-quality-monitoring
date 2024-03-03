@@ -57,7 +57,7 @@ const useChartOptions = (categories) => {
     xaxis: {
       categories,
       title: {
-        text: 'Time (UTC)'
+        text: 'Time (UTC)',
       },
       axisBorder: {
         color: theme.palette.divider,
@@ -83,6 +83,27 @@ const useChartOptions = (categories) => {
         },
       },
     },
+    markers: {
+      size: 0,
+      colors: undefined,
+      strokeColors: '#fff',
+      strokeWidth: 2,
+      strokeOpacity: 0.9,
+      strokeDashArray: 0,
+      fillOpacity: 1,
+      discrete: [],
+      shape: 'circle',
+      radius: 2,
+      offsetX: 0,
+      offsetY: 0,
+      onClick: undefined,
+      onDblClick: undefined,
+      showNullDataPoints: true,
+      hover: {
+        size: undefined,
+        sizeOffset: 3,
+      },
+    },
   };
 };
 
@@ -97,7 +118,7 @@ const Page = () => {
 
   const [device, setDevice] = useState('');
   const [period, setPeriod] = useState('');
-  const [deviceChartData, setDeviceChartData] = useState({x: [], y:[]});
+  const [deviceChartData, setDeviceChartData] = useState({ x: [], y: [] });
 
   const onDeviceSelectorChange = (value) => {
     setDevice(value);
@@ -109,17 +130,21 @@ const Page = () => {
   const chartOptions = useChartOptions(deviceChartData.x);
 
   useEffect(() => {
-    const getDeviceData = async()=> {
-      if (device === '' || period === ''){
-        return
+    const getDeviceData = async () => {
+      if (device === '' || period === '') {
+        return;
       }
-      const data = await getDeviceAggregateDataChartData(user.token, device, period)
-      // TODO data.y needs to be an array of values, so we need to pick a key (eg: tgasResistance) since we are recording multiple things
-      console.log(data);
-      setDeviceChartData(data)
-    }
-    getDeviceData()
-  }, [device, period, user.token])
+      const data = await getDeviceAggregateDataChartData(user.token, device, period);
+      // the chart data needs to be an array of values, so we need to pick a key to plot
+      // TODO choose what to plot
+      data.y[0].data = data.y[0].data.map((item) => {
+        return !!item ? item.tgasResistance : null;
+      });
+      data.y[0].name = 'tgasResistance';
+      setDeviceChartData(data);
+    };
+    getDeviceData();
+  }, [device, period, user.token]);
 
   return (
     <>
@@ -139,7 +164,9 @@ const Page = () => {
               <Typography variant="h4">Data</Typography>
             </div>
             <div>
-              <Typography variant="body1">Select a device and time period to view more information</Typography>
+              <Typography variant="body1">
+                Select a device and time period to view more information
+              </Typography>
             </div>
             <div>
               <Chart

@@ -4,7 +4,7 @@ import { getDateFromTimestamp, getTimestampHour, getTimestampHoursAgo } from 'sr
 export const deviceAggregateDataPeriods = ['24 Hours'];
 
 export const getDeviceAggregateDataChartData = async (token, deviceId, period) => {
-  const url = `${process.env.NEXT_PUBLIC_API_URL}/api/sensorData/${deviceId}`;
+  const url = `${process.env.NEXT_PUBLIC_API_URL}/api/sensorData/${deviceId}/average`;
   const now = Date.now();
 
   if (period === deviceAggregateDataPeriods[0]) {
@@ -31,24 +31,26 @@ export const getDeviceAggregateDataChartData = async (token, deviceId, period) =
         return nullData;
       }
       
-      // convert timestamps to utc hours
-      const timeStampConvertedData = data.map((reading) => {
-        const timestamp = reading.keys()[0];
+      /** 
+       * The api will return an array of objects, each of which contain
+       * a key (timestamp) associated with another object containing the
+       * recorded data.
+       * 
+       * We need to convert the timestamps to hours and also fill ensure 
+       * that the final array has a length of 24 elements.
+      **/ 
+      const resultArray = Array.from({ length: 24 }, () => null)
+
+      data.forEach((reading) => {
+        const timestamp = Number(Object.keys(reading)[0]);
         const date = getDateFromTimestamp(timestamp);
         const hour = date.getUTCHours();
-        return { [hour]: reading[timestamp] };
+        resultArray[hour] = Object.keys(reading[timestamp]).length === 0 ? null : reading[timestamp];
       });
-
-      // pad in missing hours
-      for (const hour of last24Hours) {
-        if (!timeStampConvertedData[hour]) {
-          timeStampConvertedData.hour = null;
-        }
-      }
 
       return {
         x: last24Hours,
-        y: [{ name: deviceId, data: timeStampConvertedData }],
+        y: [{ name: deviceId, data: resultArray }],
       };
     } catch (error) {
       console.log(error);
