@@ -85,13 +85,13 @@ export const main: APIGatewayProxyHandlerV2 = async (event: any) => {
     }
   });
 
-  // if a device has not written in the last hour, include the device but with no values
-  for (const deviceId of deviceIds) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    if (!Object.keys(dataLastHour).includes(deviceId)) {
-      dataLastHour[deviceId] = null;
-    }
-  }
+  // // if a device has not written in the last hour, include the device but with no values
+  // for (const deviceId of deviceIds) {
+  //   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+  //   if (!Object.keys(dataLastHour).includes(deviceId)) {
+  //     dataLastHour[deviceId] = null;
+  //   }
+  // }
 
   console.log(dataLastHour);
 
