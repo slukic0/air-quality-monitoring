@@ -76,7 +76,7 @@ const useChartOptions = (categories) => {
     },
     yaxis: {
       labels: {
-        formatter: (value) => (value > 0 ? `${value}K` : `${value}`),
+        formatter: (value) => (value > 1000 ? `${value/1000}K` : `${value}`),
         offsetX: -10,
         style: {
           colors: theme.palette.text.secondary,
