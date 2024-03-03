@@ -4,10 +4,11 @@ import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import { Chart } from 'src/components/chart';
 import { alpha, useTheme } from '@mui/material/styles';
 import { useAuth } from 'src/hooks/use-auth';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Selector } from 'src/sections/core/Selector';
+import { deviceAggregateDataPeriods, getDeviceAggregateDataChartData } from 'src/api/devices';
 
-const useChartOptions = () => {
+const useChartOptions = (categories) => {
   const theme = useTheme();
 
   return {
@@ -54,6 +55,10 @@ const useChartOptions = () => {
       mode: theme.palette.mode,
     },
     xaxis: {
+      categories,
+      title: {
+        text: 'Time (UTC)'
+      },
       axisBorder: {
         color: theme.palette.divider,
         show: true,
@@ -82,35 +87,39 @@ const useChartOptions = () => {
 };
 
 const Page = () => {
-  const chartOptions = useChartOptions();
   const { user } = useAuth();
   const devices = useMemo(
     () => (!!user ? [...user.adminDevices, ...user.authorizedDevices] : []),
     [user]
   );
   const hasDevices = devices.length > 0;
-  const timePeriods = ['24 Hours', '1 Week'];
+  const timePeriods = deviceAggregateDataPeriods;
 
-  const [item, setItem] = useState('');
+  const [device, setDevice] = useState('');
   const [period, setPeriod] = useState('');
+  const [deviceChartData, setDeviceChartData] = useState({x: [], y:[]});
 
   const onDeviceSelectorChange = (value) => {
-    setItem(value);
+    setDevice(value);
   };
   const onPeriodSelectorChange = (value) => {
     setPeriod(value);
   };
 
-  const chartSeries = [
-    {
-      name: 'This year',
-      data: [18, 16, 5, 8, 3, 14, 14, 16, 17, 19, 18, 20],
-    },
-    {
-      name: 'Last year',
-      data: [12, 11, 4, 6, 2, 9, 9, 10, 11, 12, 13, 13],
-    },
-  ];
+  const chartOptions = useChartOptions(deviceChartData.x);
+
+  useEffect(() => {
+    const getDeviceData = async()=> {
+      if (device === '' || period === ''){
+        return
+      }
+      const data = await getDeviceAggregateDataChartData(user.token, device, period)
+      // TODO data.y needs to be an array of values, so we need to pick a key (eg: tgasResistance) since we are recording multiple things
+      console.log(data);
+      setDeviceChartData(data)
+    }
+    getDeviceData()
+  }, [device, period, user.token])
 
   return (
     <>
@@ -130,13 +139,13 @@ const Page = () => {
               <Typography variant="h4">Data</Typography>
             </div>
             <div>
-              <Typography variant="body1">Select a device to view more information</Typography>
+              <Typography variant="body1">Select a device and time period to view more information</Typography>
             </div>
             <div>
               <Chart
                 height={350}
                 options={chartOptions}
-                series={chartSeries}
+                series={deviceChartData.y}
                 type="line"
                 width="100%"
               />
