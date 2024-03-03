@@ -27,7 +27,6 @@ import { PlusIcon, TrashIcon } from '@heroicons/react/24/solid';
 function Device(props) {
   const { device } = props;
   const[open, setOpen] = useState(false);
-  console.log("Device ", device);
 
   return (
     <Fragment>
