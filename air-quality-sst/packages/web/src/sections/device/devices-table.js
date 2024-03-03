@@ -23,10 +23,16 @@ import { Fragment, useState } from 'react';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/solid';
+import { RemoveUser } from 'src/utils/remove-user';
+import { useAuth } from 'src/hooks/use-auth';
 
 function Device(props) {
-  const { device } = props;
+  const { device, user } = props;
   const[open, setOpen] = useState(false);
+
+  const handleRemove = async(deviceId, userId, token) => {
+    await RemoveUser(deviceId, userId, token)
+  }
 
   return (
     <Fragment>
@@ -86,11 +92,12 @@ function Device(props) {
                     <div>
                       <Button
                         startIcon={(
-                          <SvgIcon fontSize="small">
+                          <SvgIcon fontSize='small'>
                             <PlusIcon />
                           </SvgIcon>
                         )}
-                        variant="contained"
+                        variant='contained'
+                        color='success'
                       >
                         Add User
                       </Button>
@@ -107,29 +114,34 @@ function Device(props) {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {device.authorizedUsers.map((authedUser) => (
+                  {device.authorizedUsers.map((authedUser) => {
+                    console.log("devId ", device.deviceId, " usrId ", authedUser.userId);
+                    return (
                       <TableRow key={authedUser.userId}>
                         <TableCell 
                         component='th' 
                         scope='device'
+                        align='left'
                         >
-                          {authedUser.name? authedUser.name : "NA"}
+                          {authedUser.name ?? authedUser.userId ?? "NA"}
                         </TableCell>
-                        <TableCell>{authedUser.email? authedUser.email : "NA"}</TableCell>
-                        <TableCell>
+                        <TableCell align='left'>{authedUser.email? authedUser.email : "NA"}</TableCell>
+                        <TableCell align='right'>
                           <Button
                             startIcon={(
-                              <SvgIcon fontSize="small">
+                              <SvgIcon fontSize='small'>
                                 <TrashIcon />
                               </SvgIcon>
                             )}
-                            variant="contained"
+                            variant='contained'
+                            color='error'
+                            onClick={() => handleRemove(device.deviceId, authedUser.userId, user.token)}
                           >
                             Remove User
                         </Button>
                       </TableCell>
                       </TableRow>
-                    ))}
+                    )})}
                   </TableBody>
               </Table>
             </Box>
@@ -146,12 +158,14 @@ Device.propTypes = {
     name: PropTypes.string,
     email: PropTypes.string,
   }),
+  user: PropTypes.string.isRequired
 };
 
 export const DevicesTable = (props) => {
   const {
     count = 0,
     items = [],
+    user,
   } = props;
 
   return (
@@ -179,6 +193,7 @@ export const DevicesTable = (props) => {
             <Device 
               key={device.deviceId} 
               device={device}
+              user={user}
             />
           ))}
         </TableBody>
@@ -190,4 +205,5 @@ export const DevicesTable = (props) => {
 DevicesTable.propTypes = {
   count: PropTypes.number,
   items: PropTypes.array,
+  user: PropTypes.string.isRequired
 };

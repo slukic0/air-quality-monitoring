@@ -76,6 +76,7 @@ const Page = () => {
             <DevicesTable
               count={devices.length}
               items={devices}
+              user={user}
             />
           </Stack>
         </Container>

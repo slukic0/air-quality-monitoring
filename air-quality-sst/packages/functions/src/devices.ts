@@ -160,6 +160,8 @@ const removeUserHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any
   const session = useSession();
 
   // Check user is authenticated
+  console.log(session);
+
   if (session.type !== 'user') {
     return createJsonMessage(401, 'Unauthorized');
   }
