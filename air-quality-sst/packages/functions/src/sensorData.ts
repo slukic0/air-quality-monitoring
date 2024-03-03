@@ -174,6 +174,7 @@ const getAverageHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any
     const mappedResults = results.Items.map((item) => {
       const { hourTimestamp } = item;
       delete item.hourTimestamp;
+      delete item.deviceId;
       return { [hourTimestamp]: item };
     });
     return createJsonBody(200, mappedResults);
