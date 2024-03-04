@@ -95,29 +95,32 @@ export const main: APIGatewayProxyHandlerV2 = async (event: any) => {
 
   console.log(dataLastHour);
 
-  // write the aggregated results
-  const putRequests = [];
+  if (Object.keys(dataLastHour).length > 0) {
+    // write the aggregated results
+    const putRequests = [];
 
-  for (const [key, value] of Object.entries(dataLastHour)) {
-    const putParams = {
-      TableName: Table.SensorDataAggregate.tableName,
-      Item: {
-        deviceId: key,
-        hourTimestamp: nowTruncatedToHour,
-        ...value,
+    for (const [key, value] of Object.entries(dataLastHour)) {
+      const putParams = {
+        TableName: Table.SensorDataAggregate.tableName,
+        Item: {
+          deviceId: key,
+          hourTimestamp: nowTruncatedToHour,
+          ...value,
+        },
+      };
+
+      putRequests.push({ PutRequest: putParams });
+    }
+
+    const batchWriteParams = {
+      RequestItems: {
+        [Table.SensorDataAggregate.tableName]: putRequests,
       },
     };
 
-    putRequests.push({ PutRequest: putParams });
+    const res = await dynamoDb.batchWrite(batchWriteParams).promise();
+    return createJsonBody(200, { dataLastHour, res });
+  } else {
+    return createJsonBody(200, dataLastHour);
   }
-
-  const batchWriteParams = {
-    RequestItems: {
-      [Table.SensorDataAggregate.tableName]: putRequests,
-    },
-  };
-
-  const res = await dynamoDb.batchWrite(batchWriteParams).promise();
-
-  return createJsonBody(200, { dataLastHour, res });
 };
