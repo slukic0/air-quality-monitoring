@@ -50,7 +50,7 @@ const createQueryUsingTimestamps = (tableName: string, pkName: string, pkVal: st
   if (recordedTimestampStartNumber && recordedTimestampEndNumber) {
     KeyConditionExpression += ` AND ${skName} BETWEEN :recordedTimestampStart AND :recordedTimestampEnd`;
   } else if (recordedTimestampStartNumber) {
-    KeyConditionExpression += `AND ${skName} >= :recordedTimestampStart`;
+    KeyConditionExpression += ` AND ${skName} >= :recordedTimestampStart`;
   } else if (recordedTimestampEndNumber) {
     KeyConditionExpression += ` AND ${skName} <= :recordedTimestampEnd`;
   }
@@ -69,6 +69,9 @@ const createQueryUsingTimestamps = (tableName: string, pkName: string, pkVal: st
     ExpressionAttributeValues,
   };
 };
+
+export const getTimestampHour = (time = Date.now()): number => Math.floor(time / (3600 * 1000)) * (3600 * 1000); // get just the hour
+export const incrementTimestamp = (timestamp: number, hours: number): number => (timestamp + hours * (1000 * 60 * 60));
 
 /**
  * Put a sensorData item into the database
@@ -154,7 +157,14 @@ const getAverageHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any
     recordedTimestampStartNumber = result.recordedTimestampStartNumber;
     recordedTimestampEndNumber = result.recordedTimestampEndNumber;
   } catch {
-    return createJsonMessage(400, 'recordedTimestampStart must be a valid timestamp!');
+    return createJsonMessage(400, 'recordedTimestamp must be a valid timestamp!');
+  }
+
+  if (recordedTimestampStartNumber === null) {
+    return createJsonMessage(400, 'recordedTimestampStart');
+  }
+  if (recordedTimestampEndNumber === null) {
+    recordedTimestampEndNumber = Date.now();
   }
 
   // Check if user is allowed to read data for this device
@@ -169,14 +179,33 @@ const getAverageHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any
   const results = await dynamoDb.query(params).promise();
 
   if (results.Items) {
-    // map results to timestamp entires
-    // results are already sorted since the SK is a number (https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_Query.html)
-    const mappedResults = results.Items.map((item) => {
-      const { hourTimestamp } = item;
-      delete item.hourTimestamp;
-      return { [hourTimestamp]: item };
-    });
-    return createJsonBody(200, mappedResults);
+    // Results are sorted since the SK is a number (https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_Query.html)
+    // Entries will not exist for devices that did not write in that hour
+    // We need to fill in these "missing" hours to make it easier to use the API
+
+    const hourStartTimestamp = getTimestampHour(recordedTimestampStartNumber);
+    const hourEndTimestamp = getTimestampHour(recordedTimestampEndNumber);
+
+    // Keep track of where each timestamp should go in our array
+    const timestampIndices: Record<number, number> = {};
+
+    const resultArray = [];
+
+    // Generate all the timestamps
+    for (let timestamp = hourStartTimestamp; timestamp <= hourEndTimestamp; timestamp += 3600000) {
+      resultArray.push(null);
+      timestampIndices[timestamp] = resultArray.length - 1;
+    }
+
+    // Fill in array with our results from dynamo
+    for (const item of results.Items) {
+      const timestamp = item.hourTimestamp;
+      const index = timestampIndices[timestamp];
+      delete item.deviceId; // don't need the deviceId
+      resultArray[index] = item;
+    }
+
+    return createJsonBody(200, resultArray);
   } else {
     return createJsonBody(200, null);
   }
