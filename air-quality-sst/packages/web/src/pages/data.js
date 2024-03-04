@@ -113,7 +113,6 @@ const Page = () => {
     () => (!!user ? [...user.adminDevices, ...user.authorizedDevices] : []),
     [user]
   );
-  const hasDevices = devices.length > 0;
   const timePeriods = deviceAggregateDataPeriods;
 
   const [device, setDevice] = useState('');

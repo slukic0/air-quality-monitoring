@@ -191,12 +191,9 @@ const getAverageHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any
 
     const resultArray = [];
 
-    console.log('ITEMS', results.Items);
-
     // Generate all the timestamps
     for (let timestamp = hourStartTimestamp; timestamp <= hourEndTimestamp; timestamp += 3600000) {
       resultArray.push(null);
-      console.log(timestamp, new Date(timestamp).getUTCHours());// TODO
       timestampIndices[timestamp] = resultArray.length - 1;
     }
 
