@@ -12,6 +12,7 @@
 /build
 out
 .next
+.open-next
 
 # misc
 .DS_Store
