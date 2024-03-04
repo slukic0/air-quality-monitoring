@@ -50,7 +50,7 @@ const createQueryUsingTimestamps = (tableName: string, pkName: string, pkVal: st
   if (recordedTimestampStartNumber && recordedTimestampEndNumber) {
     KeyConditionExpression += ` AND ${skName} BETWEEN :recordedTimestampStart AND :recordedTimestampEnd`;
   } else if (recordedTimestampStartNumber) {
-    KeyConditionExpression += `AND ${skName} >= :recordedTimestampStart`;
+    KeyConditionExpression += ` AND ${skName} >= :recordedTimestampStart`;
   } else if (recordedTimestampEndNumber) {
     KeyConditionExpression += ` AND ${skName} <= :recordedTimestampEnd`;
   }
