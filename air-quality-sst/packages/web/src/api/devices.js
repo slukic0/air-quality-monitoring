@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getDateFromTimestamp, getTimestampHour, getTimestampHoursAgo } from 'src/utils/timestamps';
+import { getTimestampHour, getTimestampHoursAgo } from 'src/utils/timestamps';
 
 export const deviceAggregateDataPeriods = ['24 Hours'];
 
@@ -23,34 +23,24 @@ export const getDeviceAggregateDataChartData = async (token, deviceId, period) =
         },
         params: {
           recordedTimestampEnd: now,
-          recordedTimestampStart: getTimestampHoursAgo(24, now),
+          recordedTimestampStart: getTimestampHoursAgo(23, now), // need 23 since the hour corresponds to the previous hour
         },
       });
 
       if (data.length === 0) {
         return nullData;
       }
-      
-      /** 
-       * The api will return an array of objects, each of which contain
-       * a key (timestamp) associated with another object containing the
-       * recorded data.
-       * 
-       * We need to convert the timestamps to hours and also fill ensure 
-       * that the final array has a length of 24 elements.
-      **/ 
-      const resultArray = Array.from({ length: 24 }, () => null)
 
-      data.forEach((reading) => {
-        const timestamp = Number(Object.keys(reading)[0]);
-        const date = getDateFromTimestamp(timestamp);
-        const hour = date.getUTCHours();
-        resultArray[hour] = Object.keys(reading[timestamp]).length === 0 ? null : reading[timestamp];
+      data.forEach((item) => {
+        if (item) {
+          const timestamp = item.hourTimestamp;
+          item.hour = new Date(timestamp).getUTCHours();
+        }
       });
 
       return {
         x: last24Hours,
-        y: [{ name: deviceId, data: resultArray }],
+        y: [{ name: deviceId, data }],
       };
     } catch (error) {
       console.log(error);

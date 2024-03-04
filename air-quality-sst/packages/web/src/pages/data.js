@@ -138,7 +138,7 @@ const Page = () => {
       // the chart data needs to be an array of values, so we need to pick a key to plot
       // TODO choose what to plot
       data.y[0].data = data.y[0].data.map((item) => {
-        return !!item ? item.tgasResistance : null;
+        return (item?.tgasResistance) ? Number(item.tgasResistance) : null;
       });
       data.y[0].name = 'tgasResistance';
       setDeviceChartData(data);

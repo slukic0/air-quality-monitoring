@@ -1,11 +1,4 @@
 /**
- * Get a date object from a timestamp in milliseconds
- * @param {number} unixTimestamp 
- * @returns 
- */
-export const getDateFromTimestamp = (unixTimestamp) => (new Date(unixTimestamp));
-
-/**
  * Get a timestamp in milliseconds from a given number of hours ago
  * @param {number} hours 
  * @param {number} time 
