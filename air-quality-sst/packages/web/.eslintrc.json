@@ -6,12 +6,6 @@
     "@next/next/no-img-element": "off",
     // "@next/next/no-html-link-for-pages": ["error", "air-quality-sst/packages/web/src/pages"],
     "jsx-a11y/alt-text": "off",
-    "react/display-name": "off",
-    "react/jsx-max-props-per-line": [
-      1,
-      {
-        "maximum": 3
-      }
-    ]
+    "react/display-name": "off"
   }
 }
