@@ -1,10 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Head from 'next/head';
-import ArrowDownOnSquareIcon from '@heroicons/react/24/solid/ArrowDownOnSquareIcon';
-import ArrowUpOnSquareIcon from '@heroicons/react/24/solid/ArrowUpOnSquareIcon';
-import PlusIcon from '@heroicons/react/24/solid/PlusIcon';
 import { Box, Button, Container, Stack, SvgIcon, Typography } from '@mui/material';
-import { useSelection } from 'src/hooks/use-selection';
 import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import { DevicesTable } from 'src/sections/device/devices-table';
 import { DevicesSearch } from 'src/sections/device/devices-search';
@@ -26,7 +22,6 @@ const Page = () => {
 
     
   // TODO: Pagination
-  console.log("token devices",user.token)
   return (
     <>
       <Head>
@@ -60,7 +55,7 @@ const Page = () => {
                 >
                 </Stack>
               </Stack>
-              <AddDeviceDialog token={user.toekn} />
+              <AddDeviceDialog/>
             </Stack>
             {/*<DevicesSearch /> TODO search for devices*/}
             

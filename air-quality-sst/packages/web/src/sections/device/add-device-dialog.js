@@ -13,11 +13,14 @@ import {
     useState
 } from 'react';
 import axios from 'axios';
+import { result } from 'lodash';
+import { useAuth } from 'src/hooks/use-auth';
 
-export default function AddDeviceDialog(props) {
-  const { token } = props;
+export default function AddDeviceDialog() {
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
-  const [deviceId, setDeviceId] = useState("");
+  const [deviceId, setDeviceId] = useState('');
+  const [deviceIdErrorText, setDeviceIdErrorText] = useState('');
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -29,13 +32,7 @@ export default function AddDeviceDialog(props) {
 
   const handleFieldChange = (event) => {
     setDeviceId(event.target.value);
-  };
-
-  const validateSubmit = async () => {
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/device/${deviceId}`;
-    const config = {headers: {"Authorization": `Bearer ${token}`}, data: {"deviceId": deviceId}}
-    const inUse = await axios.get(url, config);
-    return !!inUse;
+    setDeviceIdErrorText('');
   };
 
   return (
@@ -52,17 +49,18 @@ export default function AddDeviceDialog(props) {
         PaperProps={{
           component: 'form',
           onSubmit: async (event) => {
-            const inUse = await validateSubmit();
-            if (!!inUse) {
-                event.preventDefault();
-                const formData = new FormData(event.currentTarget);
-                const formJson = Object.fromEntries(formData.entries());
-                setDeviceId(formJson.text);
-                console.log(deviceId);
-                handleClose();
-            }
-            else {
-                
+            event.preventDefault();
+            const formData = new FormData(event.currentTarget);
+            const formJson = Object.fromEntries(formData.entries());
+            setDeviceId(formJson.text);
+
+            const url = `${process.env.NEXT_PUBLIC_API_URL}/api/devices/registerDevice`;
+            try {
+              await axios.post(url, {deviceId: deviceId}, {headers: {'Authorization': `Bearer ${user.token}`}});
+            } catch (err) {
+              if (err.response.status === 409) {
+                setDeviceIdErrorText('Device already registered');
+              }
             }
           },
         }}
@@ -82,7 +80,9 @@ export default function AddDeviceDialog(props) {
             type="text"
             fullWidth
             variant="standard"
+            error={!!deviceIdErrorText}
             onChange={handleFieldChange}
+            helperText={deviceIdErrorText}
           />
         </DialogContent>
         <DialogActions>
@@ -92,8 +92,4 @@ export default function AddDeviceDialog(props) {
       </Dialog>
     </Fragment>
   );
-}
-
-AddDeviceDialog.PropTypes = {
-    token: PropTypes.string.isReqiuired
 }

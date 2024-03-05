@@ -30,8 +30,7 @@ import DeviceDialog from 'src/sections/device/devcies-dialog';
 function Device(props) {
   const { device, user } = props;
   const[open, setOpen] = useState(false);
-  console.log("token table",user.token)
-
+  
   const handleRemove = async(deviceId, userId, token) => {
     await RemoveUser(deviceId, userId, token)
   }
@@ -144,7 +143,7 @@ function Device(props) {
   )
 };
 
-Device.PropTypes = {
+Device.propTypes = {
   device: PropTypes.shape({
     deviceId: PropTypes.string,
     name: PropTypes.string,
@@ -196,7 +195,7 @@ export const DevicesTable = (props) => {
   );
 };
 
-DevicesTable.PropTypes = {
+DevicesTable.propTypes = {
   count: PropTypes.number,
   items: PropTypes.array,
   user: PropTypes.object.isRequired
