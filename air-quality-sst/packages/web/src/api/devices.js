@@ -11,11 +11,11 @@ export const getDeviceAggregateDataChartData = async (token, deviceId, period) =
 
   if (period === deviceAggregateDataPeriods[0]) {
     const currentUtcHour = new Date(getTimestampHour(now)).getUTCHours();
-    const last24Hours = Array.from({ length: 24 }, (_, i) => (currentUtcHour + 1 + i) % 24);
+    const last24Hours = Array.from({ length: 25 }, (_, i) => (currentUtcHour + 1 + i) % 24);
 
     const nullData = {
       x: last24Hours,
-      y: [{ name: deviceId, data: Array.from({ length: 24 }, () => null) }],
+      y: [{ name: deviceId, data: Array.from({ length: 25 }, () => null) }],
     };
 
     try {
@@ -25,7 +25,7 @@ export const getDeviceAggregateDataChartData = async (token, deviceId, period) =
         },
         params: {
           recordedTimestampEnd: now,
-          recordedTimestampStart: getTimestampHoursAgo(23, now), // need 23 since the hour corresponds to the previous hour
+          recordedTimestampStart: getTimestampHoursAgo(24, now),
         },
       });
 
