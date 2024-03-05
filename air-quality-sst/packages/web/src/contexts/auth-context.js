@@ -116,7 +116,7 @@ export const AuthProvider = (props) => {
 
       dispatch({
         type: HANDLERS.INITIALIZE,
-        payload: {...user, token},
+        payload: { ...user, token },
       });
     } else {
       dispatch({

@@ -10,7 +10,7 @@ import {
   Stack,
   SvgIcon,
   Typography,
-  useTheme
+  useTheme,
 } from '@mui/material';
 import { Chart } from 'src/components/chart';
 
@@ -19,46 +19,42 @@ const useChartOptions = (labels) => {
 
   return {
     chart: {
-      background: 'transparent'
+      background: 'transparent',
     },
-    colors: [
-      theme.palette.primary.main,
-      theme.palette.success.main,
-      theme.palette.warning.main
-    ],
+    colors: [theme.palette.primary.main, theme.palette.success.main, theme.palette.warning.main],
     dataLabels: {
-      enabled: false
+      enabled: false,
     },
     labels,
     legend: {
-      show: false
+      show: false,
     },
     plotOptions: {
       pie: {
-        expandOnClick: false
-      }
+        expandOnClick: false,
+      },
     },
     states: {
       active: {
         filter: {
-          type: 'none'
-        }
+          type: 'none',
+        },
       },
       hover: {
         filter: {
-          type: 'none'
-        }
-      }
+          type: 'none',
+        },
+      },
     },
     stroke: {
-      width: 0
+      width: 0,
     },
     theme: {
-      mode: theme.palette.mode
+      mode: theme.palette.mode,
     },
     tooltip: {
-      fillSeriesColor: false
-    }
+      fillSeriesColor: false,
+    },
   };
 };
 
@@ -77,7 +73,7 @@ const iconMap = {
     <SvgIcon>
       <PhoneIcon />
     </SvgIcon>
-  )
+  ),
 };
 
 export const OverviewTraffic = (props) => {
@@ -88,13 +84,7 @@ export const OverviewTraffic = (props) => {
     <Card sx={sx}>
       <CardHeader title="Traffic Source" />
       <CardContent>
-        <Chart
-          height={300}
-          options={chartOptions}
-          series={chartSeries}
-          type="donut"
-          width="100%"
-        />
+        <Chart height={300} options={chartOptions} series={chartSeries} type="donut" width="100%" />
         <Stack
           alignItems="center"
           direction="row"
@@ -111,20 +101,14 @@ export const OverviewTraffic = (props) => {
                 sx={{
                   display: 'flex',
                   flexDirection: 'column',
-                  alignItems: 'center'
+                  alignItems: 'center',
                 }}
               >
                 {iconMap[label]}
-                <Typography
-                  sx={{ my: 1 }}
-                  variant="h6"
-                >
+                <Typography sx={{ my: 1 }} variant="h6">
                   {label}
                 </Typography>
-                <Typography
-                  color="text.secondary"
-                  variant="subtitle2"
-                >
+                <Typography color="text.secondary" variant="subtitle2">
                   {item}%
                 </Typography>
               </Box>
@@ -139,5 +123,5 @@ export const OverviewTraffic = (props) => {
 OverviewTraffic.propTypes = {
   chartSeries: PropTypes.array.isRequired,
   labels: PropTypes.array.isRequired,
-  sx: PropTypes.object
+  sx: PropTypes.object,
 };

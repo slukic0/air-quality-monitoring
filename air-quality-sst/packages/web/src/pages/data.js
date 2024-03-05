@@ -6,8 +6,12 @@ import { alpha, useTheme } from '@mui/material/styles';
 import { useAuth } from 'src/hooks/use-auth';
 import { useEffect, useMemo, useState } from 'react';
 import { Selector } from 'src/sections/core/Selector';
-import { deviceAggregateDataPeriods, getDeviceAggregateDataChartData, deviceMetrics } from 'src/api/devices';
-import { cloneDeep } from 'lodash'
+import {
+  deviceAggregateDataPeriods,
+  getDeviceAggregateDataChartData,
+  deviceMetrics,
+} from 'src/api/devices';
+import { cloneDeep } from 'lodash';
 
 const useChartOptions = (categories) => {
   const theme = useTheme();
@@ -77,7 +81,7 @@ const useChartOptions = (categories) => {
     },
     yaxis: {
       labels: {
-        formatter: (value) => (value > 1000 ? `${value/1000}K` : `${value}`),
+        formatter: (value) => (value > 1000 ? `${value / 1000}K` : `${value}`),
         offsetX: -10,
         style: {
           colors: theme.palette.text.secondary,
@@ -117,7 +121,7 @@ const Page = () => {
 
   const [device, setDevice] = useState('');
   const [period, setPeriod] = useState('');
-  const [metric, setMetric] = useState(deviceMetrics[0])
+  const [metric, setMetric] = useState(deviceMetrics[0]);
   const [deviceData, setDeviceData] = useState({ x: [], y: [] });
   const [deviceChartData, setDeviceChartData] = useState({ x: [], y: [] });
 
@@ -146,18 +150,18 @@ const Page = () => {
   }, [device, period, user.token]);
 
   // Filter device data to only plot the desired metric
-  useEffect(()=> {
-    if (deviceData.y.length > 0){
-      const data = cloneDeep(deviceData)
+  useEffect(() => {
+    if (deviceData.y.length > 0) {
+      const data = cloneDeep(deviceData);
 
       data.y[0].data = data.y[0].data.map((item) => {
-        return (!!item && item[metric]) ? Number(item[metric]) : null;
+        return !!item && item[metric] ? Number(item[metric]) : null;
       });
       data.y[0].name = metric;
 
-      setDeviceChartData(data)
+      setDeviceChartData(data);
     }
-  }, [deviceData, metric])
+  }, [deviceData, metric]);
 
   return (
     <>

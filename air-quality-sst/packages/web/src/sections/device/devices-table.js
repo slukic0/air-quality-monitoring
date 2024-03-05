@@ -12,7 +12,7 @@ import {
   TableHead,
   TablePagination,
   TableRow,
-  Typography
+  Typography,
 } from '@mui/material';
 import { Scrollbar } from 'src/components/scrollbar';
 
@@ -28,11 +28,11 @@ export const DevicesTable = (props) => {
     onSelectOne,
     page = 0,
     rowsPerPage = 0,
-    selected = []
+    selected = [],
   } = props;
 
-  const selectedSome = (selected.length > 0) && (selected.length < items.length);
-  const selectedAll = (items.length > 0) && (selected.length === items.length);
+  const selectedSome = selected.length > 0 && selected.length < items.length;
+  const selectedAll = items.length > 0 && selected.length === items.length;
   return (
     <Card>
       <Scrollbar>
@@ -53,15 +53,9 @@ export const DevicesTable = (props) => {
                     }}
                   />
                 </TableCell>
-                <TableCell>
-                  Device ID
-                </TableCell>
-                <TableCell>
-                  Owner Name
-                </TableCell>
-                <TableCell>
-                  Email
-                </TableCell>
+                <TableCell>Device ID</TableCell>
+                <TableCell>Owner Name</TableCell>
+                <TableCell>Email</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -69,11 +63,7 @@ export const DevicesTable = (props) => {
                 const isSelected = selected.includes(device.deviceId);
 
                 return (
-                  <TableRow
-                    hover
-                    key={device.deviceId}
-                    selected={isSelected}
-                  >
+                  <TableRow hover key={device.deviceId} selected={isSelected}>
                     <TableCell padding="checkbox">
                       <Checkbox
                         checked={isSelected}
@@ -87,22 +77,12 @@ export const DevicesTable = (props) => {
                       />
                     </TableCell>
                     <TableCell>
-                      <Stack
-                        alignItems="center"
-                        direction="row"
-                        spacing={2}
-                      >
-                        <Typography variant="subtitle2">
-                          {device.deviceId}
-                        </Typography>
+                      <Stack alignItems="center" direction="row" spacing={2}>
+                        <Typography variant="subtitle2">{device.deviceId}</Typography>
                       </Stack>
                     </TableCell>
-                    <TableCell>
-                      {device.adminId.name}
-                    </TableCell>
-                    <TableCell>
-                      {device.adminId.email}
-                    </TableCell>
+                    <TableCell>{device.adminId.name}</TableCell>
+                    <TableCell>{device.adminId.email}</TableCell>
                   </TableRow>
                 );
               })}
@@ -134,5 +114,5 @@ DevicesTable.propTypes = {
   onSelectOne: PropTypes.func,
   page: PropTypes.number,
   rowsPerPage: PropTypes.number,
-  selected: PropTypes.array
+  selected: PropTypes.array,
 };
