@@ -200,7 +200,7 @@ const getAverageHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any
     // Fill in array with our results from dynamo
     for (const item of results.Items) {
       const timestamp = item.hourTimestamp;
-      const index = timestampIndices[timestamp];
+      const index = timestampIndices[timestamp] ?? timestampIndices[getTimestampHour(Number(timestamp))];
       delete item.deviceId; // don't need the deviceId
       resultArray[index] = item;
     }

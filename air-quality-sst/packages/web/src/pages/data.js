@@ -6,7 +6,8 @@ import { alpha, useTheme } from '@mui/material/styles';
 import { useAuth } from 'src/hooks/use-auth';
 import { useEffect, useMemo, useState } from 'react';
 import { Selector } from 'src/sections/core/Selector';
-import { deviceAggregateDataPeriods, getDeviceAggregateDataChartData } from 'src/api/devices';
+import { deviceAggregateDataPeriods, getDeviceAggregateDataChartData, deviceMetrics } from 'src/api/devices';
+import { cloneDeep } from 'lodash'
 
 const useChartOptions = (categories) => {
   const theme = useTheme();
@@ -113,10 +114,11 @@ const Page = () => {
     () => (!!user ? [...user.adminDevices, ...user.authorizedDevices] : []),
     [user]
   );
-  const timePeriods = deviceAggregateDataPeriods;
 
   const [device, setDevice] = useState('');
   const [period, setPeriod] = useState('');
+  const [metric, setMetric] = useState(deviceMetrics[0])
+  const [deviceData, setDeviceData] = useState({ x: [], y: [] });
   const [deviceChartData, setDeviceChartData] = useState({ x: [], y: [] });
 
   const onDeviceSelectorChange = (value) => {
@@ -125,25 +127,37 @@ const Page = () => {
   const onPeriodSelectorChange = (value) => {
     setPeriod(value);
   };
+  const onMetricSelectorChange = (value) => {
+    setMetric(value);
+  };
 
   const chartOptions = useChartOptions(deviceChartData.x);
 
+  // Get device data
   useEffect(() => {
     const getDeviceData = async () => {
       if (device === '' || period === '') {
         return;
       }
       const data = await getDeviceAggregateDataChartData(user.token, device, period);
-      // the chart data needs to be an array of values, so we need to pick a key to plot
-      // TODO choose what to plot
-      data.y[0].data = data.y[0].data.map((item) => {
-        return (item?.tgasResistance) ? Number(item.tgasResistance) : null;
-      });
-      data.y[0].name = 'tgasResistance';
-      setDeviceChartData(data);
+      setDeviceData(data);
     };
     getDeviceData();
   }, [device, period, user.token]);
+
+  // Filter device data to only plot the desired metric
+  useEffect(()=> {
+    if (deviceData.y.length > 0){
+      const data = cloneDeep(deviceData)
+
+      data.y[0].data = data.y[0].data.map((item) => {
+        return (!!item && item[metric]) ? Number(item[metric]) : null;
+      });
+      data.y[0].name = metric;
+
+      setDeviceChartData(data)
+    }
+  }, [deviceData, metric])
 
   return (
     <>
@@ -185,11 +199,18 @@ const Page = () => {
                     onChange={onDeviceSelectorChange}
                   />
                 </Grid>
-                <Grid item sm={6} xs={12}>
+                <Grid item sm={3} xs={6}>
                   <Selector
                     defaultText={'Select Period'}
-                    items={timePeriods}
+                    items={deviceAggregateDataPeriods}
                     onChange={onPeriodSelectorChange}
+                  />
+                </Grid>
+                <Grid item sm={3} xs={6}>
+                  <Selector
+                    defaultItem={deviceMetrics[0]}
+                    items={deviceMetrics}
+                    onChange={onMetricSelectorChange}
                   />
                 </Grid>
               </Grid>

@@ -3,17 +3,19 @@ import { getTimestampHour, getTimestampHoursAgo } from 'src/utils/timestamps';
 
 export const deviceAggregateDataPeriods = ['24 Hours'];
 
+export const deviceMetrics = ['tgasResistance', 'thumidity', 'tiaq', 'tpressure', 'ttemperature']
+
 export const getDeviceAggregateDataChartData = async (token, deviceId, period) => {
   const url = `${process.env.NEXT_PUBLIC_API_URL}/api/sensorData/${deviceId}/average`;
   const now = Date.now();
 
   if (period === deviceAggregateDataPeriods[0]) {
     const currentUtcHour = new Date(getTimestampHour(now)).getUTCHours();
-    const last24Hours = Array.from({ length: 24 }, (_, i) => (currentUtcHour + 1 + i) % 24);
+    const last24Hours = Array.from({ length: 25 }, (_, i) => (currentUtcHour + 1 + i) % 24);
 
     const nullData = {
       x: last24Hours,
-      y: [{ name: deviceId, data: Array.from({ length: 24 }, () => null) }],
+      y: [{ name: deviceId, data: Array.from({ length: 25 }, () => null) }],
     };
 
     try {
@@ -23,7 +25,7 @@ export const getDeviceAggregateDataChartData = async (token, deviceId, period) =
         },
         params: {
           recordedTimestampEnd: now,
-          recordedTimestampStart: getTimestampHoursAgo(23, now), // need 23 since the hour corresponds to the previous hour
+          recordedTimestampStart: getTimestampHoursAgo(24, now),
         },
       });
 
