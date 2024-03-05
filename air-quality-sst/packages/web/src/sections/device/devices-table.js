@@ -25,10 +25,12 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/solid';
 import { RemoveUser } from 'src/utils/remove-user';
 import { useAuth } from 'src/hooks/use-auth';
+import DeviceDialog from 'src/sections/device/devcies-dialog';
 
 function Device(props) {
   const { device, user } = props;
   const[open, setOpen] = useState(false);
+  console.log("token table",user.token)
 
   const handleRemove = async(deviceId, userId, token) => {
     await RemoveUser(deviceId, userId, token)
@@ -61,6 +63,9 @@ function Device(props) {
         <TableCell align='right'>
           {device.adminId.email}
         </TableCell>
+        <TableCell align='right'>
+          <DeviceDialog />
+        </TableCell>
       </TableRow>
       <TableRow>
         <TableCell 
@@ -89,19 +94,6 @@ function Device(props) {
                       >
                       </Stack>
                     </Stack>
-                    <div>
-                      <Button
-                        startIcon={(
-                          <SvgIcon fontSize='small'>
-                            <PlusIcon />
-                          </SvgIcon>
-                        )}
-                        variant='contained'
-                        color='success'
-                      >
-                        Add User
-                      </Button>
-                    </div>
                   </Stack>
               <Table size='small' 
                 aria-label='Users'
@@ -126,7 +118,7 @@ function Device(props) {
                           {authedUser.name ?? authedUser.userId ?? "NA"}
                         </TableCell>
                         <TableCell align='left'>{authedUser.email? authedUser.email : "NA"}</TableCell>
-                        <TableCell align='right'>
+                        {/*<TableCell align='right'>
                           <Button
                             startIcon={(
                               <SvgIcon fontSize='small'>
@@ -138,8 +130,8 @@ function Device(props) {
                             onClick={() => handleRemove(device.deviceId, authedUser.userId, user.token)}
                           >
                             Remove User
-                        </Button>
-                      </TableCell>
+                          </Button>
+                        </TableCell>*/}
                       </TableRow>
                     )})}
                   </TableBody>
@@ -152,13 +144,13 @@ function Device(props) {
   )
 };
 
-Device.propTypes = {
+Device.PropTypes = {
   device: PropTypes.shape({
     deviceId: PropTypes.string,
     name: PropTypes.string,
     email: PropTypes.string,
   }),
-  user: PropTypes.string.isRequired
+  user: PropTypes.object.isRequired
 };
 
 export const DevicesTable = (props) => {
@@ -186,9 +178,11 @@ export const DevicesTable = (props) => {
             <TableCell align='right'>
               Email
             </TableCell>
+            <TableCell align='right' />
           </TableRow>
         </TableHead>
         <TableBody>
+          {console.log("items",items)}
           {items.map((device) => (
             <Device 
               key={device.deviceId} 
@@ -202,8 +196,8 @@ export const DevicesTable = (props) => {
   );
 };
 
-DevicesTable.propTypes = {
+DevicesTable.PropTypes = {
   count: PropTypes.number,
   items: PropTypes.array,
-  user: PropTypes.string.isRequired
+  user: PropTypes.object.isRequired
 };

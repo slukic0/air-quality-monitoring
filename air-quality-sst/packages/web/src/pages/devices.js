@@ -11,6 +11,7 @@ import { DevicesSearch } from 'src/sections/device/devices-search';
 import { applyPagination } from 'src/utils/apply-pagination';
 import { useAuth } from 'src/hooks/use-auth';
 import { getDevicesData } from 'src/utils/get-devices-data';
+import AddDeviceDialog from 'src/sections/device/add-device-dialog';
 
 const Page = () => {
     const { user } = useAuth();
@@ -22,9 +23,10 @@ const Page = () => {
       };
       getDevices();
     }, [ user ]);
+
     
   // TODO: Pagination
-
+  console.log("token devices",user.token)
   return (
     <>
       <Head>
@@ -58,18 +60,7 @@ const Page = () => {
                 >
                 </Stack>
               </Stack>
-              <div>
-                <Button
-                  startIcon={(
-                    <SvgIcon fontSize="small">
-                      <PlusIcon />
-                    </SvgIcon>
-                  )}
-                  variant="contained"
-                >
-                  Add
-                </Button>
-              </div>
+              <AddDeviceDialog token={user.toekn} />
             </Stack>
             {/*<DevicesSearch /> TODO search for devices*/}
             
