@@ -3,32 +3,26 @@ import PropTypes from 'prop-types';
 import { useState } from 'react';
 
 export const Selector = (props) => {
-  const {items, onChange, defaultText} = props;
-  const [item, setItem] = useState('')
+  const { items, onChange, defaultText, defaultItem } = props;
+  const [item, setItem] = useState(defaultItem ?? '');
 
   const handleChange = (event) => {
     setItem(event.target.value);
     onChange(event.target.value);
-  }
+  };
 
   return (
     <FormControl fullWidth>
-      <Select
-        value={item}
-        onChange={handleChange}
-        displayEmpty
-      >
-        <MenuItem 
-          value=""
-          disabled={item !== ''}>
-            <em>{defaultText}</em>
-        </MenuItem>
+      <Select value={item} onChange={handleChange} displayEmpty>
+        {!defaultItem && (
+          <MenuItem value="" disabled={item !== ''}>
+            <em>{defaultText ?? 'Select'}</em>
+          </MenuItem>
+        )}
         {...items.map((item) => (
-            <MenuItem
-              key={item}
-              value={item}>
-              {item}
-            </MenuItem>
+          <MenuItem key={item} value={item}>
+            {item}
+          </MenuItem>
         ))}
       </Select>
     </FormControl>
@@ -36,8 +30,8 @@ export const Selector = (props) => {
 };
 
 Selector.protoTypes = {
-  defaultText: PropTypes.string.isRequired,
+  defaultText: PropTypes.string,
   items: PropTypes.array.isRequired,
-  onChange: PropTypes.array.isRequired
+  onChange: PropTypes.array.isRequired,
+  defaultItem: PropTypes.any,
 };
-  
