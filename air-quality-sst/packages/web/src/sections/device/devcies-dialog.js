@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import {
   Button,
   TextField,
@@ -52,7 +51,7 @@ export default function DeviceDialog() {
             margin="dense"
             id="name"
             name="email"
-            label="Email Address"
+            label="Name or Email Address"
             type="email"
             fullWidth
             variant="standard"

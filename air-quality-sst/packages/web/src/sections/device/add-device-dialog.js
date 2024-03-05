@@ -21,10 +21,12 @@ export default function AddDeviceDialog() {
 
   const handleClickOpen = () => {
     setOpen(true);
+    setDeviceIdErrorText('');
   };
 
   const handleClose = () => {
     setOpen(false);
+    setDeviceIdErrorText('');
   };
 
   const handleFieldChange = (event) => {
