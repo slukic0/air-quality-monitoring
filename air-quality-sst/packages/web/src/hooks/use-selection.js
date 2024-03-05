@@ -30,6 +30,6 @@ export const useSelection = (items = []) => {
     handleDeselectOne,
     handleSelectAll,
     handleSelectOne,
-    selected
+    selected,
   };
 };

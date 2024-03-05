@@ -31,102 +31,83 @@ import axios from 'axios';
 // };
 
 const Page = () => {
-    const { user } = useAuth();
+  const { user } = useAuth();
 
-    const [devices, setDevices] = useState([])
+  const [devices, setDevices] = useState([]);
 
-    useEffect(() => {
-      const getDevices = async() => {
-        const devices = [];
+  useEffect(() => {
+    const getDevices = async () => {
+      const devices = [];
 
-        if (user.adminDevices) devices.push(...user.adminDevices)
-        if (user.authorizedDevices) devices.push(...user.authorizedDevices)
-        console.log('EFFFFF', user, devices);
+      if (user.adminDevices) devices.push(...user.adminDevices);
+      if (user.authorizedDevices) devices.push(...user.authorizedDevices);
+      console.log('EFFFFF', user, devices);
 
-
-        const devicePromises = [];
-        devices.forEach(deviceId => {
-          const url = `${process.env.NEXT_PUBLIC_API_URL}/api/device/${deviceId}?hydrate=true`;
-          devicePromises.push(axios.get(url, {headers: {"Authorization": `Bearer ${user.token}`}}));
-        });
-        const resolvedDevicePromises = await Promise.all(devicePromises)
-        const deviceData = [];
-        resolvedDevicePromises.forEach(result => {
-          console.log("result", result.data);
-          deviceData.push(result.data);
-        });
-        setDevices(deviceData);
-      };
-      getDevices();
+      const devicePromises = [];
+      devices.forEach((deviceId) => {
+        const url = `${process.env.NEXT_PUBLIC_API_URL}/api/device/${deviceId}?hydrate=true`;
+        devicePromises.push(axios.get(url, { headers: { Authorization: `Bearer ${user.token}` } }));
+      });
+      const resolvedDevicePromises = await Promise.all(devicePromises);
+      const deviceData = [];
+      resolvedDevicePromises.forEach((result) => {
+        console.log('result', result.data);
+        deviceData.push(result.data);
+      });
+      setDevices(deviceData);
+    };
+    getDevices();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-    
+  }, []);
+
   // TODO: Pagination
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const devciesSelection = useSelection(devices);
 
-  const handlePageChange = useCallback(
-    (event, value) => {
-      setPage(value);
-    },
-    []
-  );
+  const handlePageChange = useCallback((event, value) => {
+    setPage(value);
+  }, []);
 
-  const handleRowsPerPageChange = useCallback(
-    (event) => {
-      setRowsPerPage(event.target.value);
-    },
-    []
-  );
+  const handleRowsPerPageChange = useCallback((event) => {
+    setRowsPerPage(event.target.value);
+  }, []);
 
   return (
     <>
       <Head>
-        <title>
-          Devices | Devias Kit
-        </title>
+        <title>Devices | Devias Kit</title>
       </Head>
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          py: 8
+          py: 8,
         }}
       >
         <Container maxWidth="xl">
           <Stack spacing={3}>
-            <Stack
-              direction="row"
-              justifyContent="space-between"
-              spacing={4}
-            >
+            <Stack direction="row" justifyContent="space-between" spacing={4}>
               <Stack spacing={1}>
-                <Typography variant="h4">
-                  Devices
-                </Typography>
-                <Stack
-                  alignItems="center"
-                  direction="row"
-                  spacing={1}
-                >
+                <Typography variant="h4">Devices</Typography>
+                <Stack alignItems="center" direction="row" spacing={1}>
                   <Button
                     color="inherit"
-                    startIcon={(
+                    startIcon={
                       <SvgIcon fontSize="small">
                         <ArrowUpOnSquareIcon />
                       </SvgIcon>
-                    )}
+                    }
                   >
                     Import
                   </Button>
                   <Button
                     color="inherit"
-                    startIcon={(
+                    startIcon={
                       <SvgIcon fontSize="small">
                         <ArrowDownOnSquareIcon />
                       </SvgIcon>
-                    )}
+                    }
                   >
                     Export
                   </Button>
@@ -134,11 +115,11 @@ const Page = () => {
               </Stack>
               <div>
                 <Button
-                  startIcon={(
+                  startIcon={
                     <SvgIcon fontSize="small">
                       <PlusIcon />
                     </SvgIcon>
-                  )}
+                  }
                   variant="contained"
                 >
                   Add
@@ -166,10 +147,6 @@ const Page = () => {
   );
 };
 
-Page.getLayout = (page) => (
-  <DashboardLayout>
-    {page}
-  </DashboardLayout>
-);
+Page.getLayout = (page) => <DashboardLayout>{page}</DashboardLayout>;
 
 export default Page;

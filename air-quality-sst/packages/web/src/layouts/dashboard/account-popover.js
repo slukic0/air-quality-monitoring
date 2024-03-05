@@ -7,23 +7,20 @@ import { useAuth } from 'src/hooks/use-auth';
 export const AccountPopover = (props) => {
   const { anchorEl, onClose, open } = props;
   const router = useRouter();
-  const {signOut, user} = useAuth();
+  const { signOut, user } = useAuth();
 
-  const handleSignOut = useCallback(
-    () => {
-      onClose?.();
-      signOut();
-      router.push('/auth/login');
-    },
-    [onClose, router, signOut]
-  );
+  const handleSignOut = useCallback(() => {
+    onClose?.();
+    signOut();
+    router.push('/auth/login');
+  }, [onClose, router, signOut]);
 
   return (
     <Popover
       anchorEl={anchorEl}
       anchorOrigin={{
         horizontal: 'left',
-        vertical: 'bottom'
+        vertical: 'bottom',
       }}
       onClose={onClose}
       open={open}
@@ -32,16 +29,11 @@ export const AccountPopover = (props) => {
       <Box
         sx={{
           py: 1.5,
-          px: 2
+          px: 2,
         }}
       >
-        <Typography variant="overline">
-          Account
-        </Typography>
-        <Typography
-          color="text.secondary"
-          variant="body2"
-        >
+        <Typography variant="overline">Account</Typography>
+        <Typography color="text.secondary" variant="body2">
           {user ? user.name : ''}
         </Typography>
       </Box>
@@ -52,13 +44,11 @@ export const AccountPopover = (props) => {
         sx={{
           p: '8px',
           '& > *': {
-            borderRadius: 1
-          }
+            borderRadius: 1,
+          },
         }}
       >
-        <MenuItem onClick={handleSignOut}>
-          Sign out
-        </MenuItem>
+        <MenuItem onClick={handleSignOut}>Sign out</MenuItem>
       </MenuList>
     </Popover>
   );
@@ -67,5 +57,5 @@ export const AccountPopover = (props) => {
 AccountPopover.propTypes = {
   anchorEl: PropTypes.any,
   onClose: PropTypes.func,
-  open: PropTypes.bool.isRequired
+  open: PropTypes.bool.isRequired,
 };
