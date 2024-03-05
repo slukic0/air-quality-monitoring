@@ -29,74 +29,47 @@ import DeviceDialog from 'src/sections/device/devcies-dialog';
 
 function Device(props) {
   const { device, user } = props;
-  const[open, setOpen] = useState(false);
-  
-  const handleRemove = async(deviceId, userId, token) => {
-    await RemoveUser(deviceId, userId, token)
-  }
+  const [open, setOpen] = useState(false);
+
+  const handleRemove = async (deviceId, userId, token) => {
+    await RemoveUser(deviceId, userId, token);
+  };
 
   return (
     <Fragment>
       <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
         <TableCell>
           <IconButton
-            aria-label='expand device'
-            size='small'
-            onClick={() => {setOpen(!open)}}
+            aria-label="expand device"
+            size="small"
+            onClick={() => {
+              setOpen(!open);
+            }}
           >
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
-        <TableCell
-          component="th"
-          scope="device"
-        >
-            {device.deviceId}
+        <TableCell component="th" scope="device">
+          {device.deviceId}
         </TableCell>
-        <TableCell align='right'>
-          {device.name? device.name : "NA"}
-        </TableCell>
-        <TableCell align='right'>
-          {device.adminId.name}
-        </TableCell>
-        <TableCell align='right'>
-          {device.adminId.email}
-        </TableCell>
-        <TableCell align='right'>
+        <TableCell align="right">{device.name ? device.name : 'NA'}</TableCell>
+        <TableCell align="right">{device.adminId.name}</TableCell>
+        <TableCell align="right">{device.adminId.email}</TableCell>
+        <TableCell align="right">
           <DeviceDialog />
         </TableCell>
       </TableRow>
       <TableRow>
-        <TableCell 
-          style={{ paddingBottom: 0, paddingTop: 0 }}
-          colSpan={6}
-        >
-          <Collapse in={open} 
-            timeout='auto'
-            unmountOnExit
-          >
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+          <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
-              <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  spacing={4}
-                  
-                >
-                    <Stack spacing={1}>
-                      <Typography variant="p">
-                        Users
-                      </Typography>
-                      <Stack
-                        alignItems="center"
-                        direction="row"
-                        spacing={1}
-                      >
-                      </Stack>
-                    </Stack>
-                  </Stack>
-              <Table size='small' 
-                aria-label='Users'
-              >
+              <Stack direction="row" justifyContent="space-between" spacing={4}>
+                <Stack spacing={1}>
+                  <Typography variant="p">Users</Typography>
+                  <Stack alignItems="center" direction="row" spacing={1}></Stack>
+                </Stack>
+              </Stack>
+              <Table size="small" aria-label="Users">
                 <TableHead>
                   <TableRow>
                     <TableCell>User Name</TableCell>
@@ -106,17 +79,15 @@ function Device(props) {
                 </TableHead>
                 <TableBody>
                   {device.authorizedUsers.map((authedUser) => {
-                    console.log("devId ", device.deviceId, " usrId ", authedUser.userId);
+                    console.log('devId ', device.deviceId, ' usrId ', authedUser.userId);
                     return (
                       <TableRow key={authedUser.userId}>
-                        <TableCell 
-                        component='th' 
-                        scope='device'
-                        align='left'
-                        >
-                          {authedUser.name ?? authedUser.userId ?? "NA"}
+                        <TableCell component="th" scope="device" align="left">
+                          {authedUser.name ?? authedUser.userId ?? 'NA'}
                         </TableCell>
-                        <TableCell align='left'>{authedUser.email? authedUser.email : "NA"}</TableCell>
+                        <TableCell align="left">
+                          {authedUser.email ? authedUser.email : 'NA'}
+                        </TableCell>
                         {/*<TableCell align='right'>
                           <Button
                             startIcon={(
@@ -132,16 +103,17 @@ function Device(props) {
                           </Button>
                         </TableCell>*/}
                       </TableRow>
-                    )})}
-                  </TableBody>
+                    );
+                  })}
+                </TableBody>
               </Table>
             </Box>
           </Collapse>
         </TableCell>
       </TableRow>
     </Fragment>
-  )
-};
+  );
+}
 
 Device.propTypes = {
   device: PropTypes.shape({
@@ -149,45 +121,29 @@ Device.propTypes = {
     name: PropTypes.string,
     email: PropTypes.string,
   }),
-  user: PropTypes.object.isRequired
+  user: PropTypes.object.isRequired,
 };
 
 export const DevicesTable = (props) => {
-  const {
-    count = 0,
-    items = [],
-    user,
-  } = props;
+  const { count = 0, items = [], user } = props;
 
   return (
     <TableContainer component={Paper}>
-      <Table aria-label='Device Table'>
+      <Table aria-label="Device Table">
         <TableHead>
           <TableRow>
             <TableCell />
-            <TableCell>
-              Device ID
-            </TableCell>
-            <TableCell align='right'>
-              Device Name
-            </TableCell>
-            <TableCell align='right'>
-              Owner Name
-            </TableCell>
-            <TableCell align='right'>
-              Email
-            </TableCell>
-            <TableCell align='right' />
+            <TableCell>Device ID</TableCell>
+            <TableCell align="right">Device Name</TableCell>
+            <TableCell align="right">Owner Name</TableCell>
+            <TableCell align="right">Email</TableCell>
+            <TableCell align="right" />
           </TableRow>
         </TableHead>
         <TableBody>
-          {console.log("items",items)}
+          {console.log('items', items)}
           {items.map((device) => (
-            <Device 
-              key={device.deviceId} 
-              device={device}
-              user={user}
-            />
+            <Device key={device.deviceId} device={device} user={user} />
           ))}
         </TableBody>
       </Table>
@@ -198,5 +154,5 @@ export const DevicesTable = (props) => {
 DevicesTable.propTypes = {
   count: PropTypes.number,
   items: PropTypes.array,
-  user: PropTypes.object.isRequired
+  user: PropTypes.object.isRequired,
 };

@@ -13,13 +13,10 @@ export const Layout = (props) => {
       component="main"
       sx={{
         display: 'flex',
-        flex: '1 1 auto'
+        flex: '1 1 auto',
       }}
     >
-      <Grid
-        container
-        sx={{ flex: '1 1 auto' }}
-      >
+      <Grid container sx={{ flex: '1 1 auto' }}>
         <Grid
           xs={12}
           lg={6}
@@ -27,7 +24,7 @@ export const Layout = (props) => {
             backgroundColor: 'background.paper',
             display: 'flex',
             flexDirection: 'column',
-            position: 'relative'
+            position: 'relative',
           }}
         >
           <Box
@@ -37,7 +34,7 @@ export const Layout = (props) => {
               p: 3,
               position: 'fixed',
               top: 0,
-              width: '100%'
+              width: '100%',
             }}
           >
             <Box
@@ -46,7 +43,7 @@ export const Layout = (props) => {
               sx={{
                 display: 'inline-flex',
                 height: 32,
-                width: 32
+                width: 32,
               }}
             >
               <Logo />
@@ -64,8 +61,8 @@ export const Layout = (props) => {
             display: 'flex',
             justifyContent: 'center',
             '& img': {
-              maxWidth: '100%'
-            }
+              maxWidth: '100%',
+            },
           }}
         >
           <Box sx={{ p: 3 }}>
@@ -75,16 +72,12 @@ export const Layout = (props) => {
               sx={{
                 fontSize: '24px',
                 lineHeight: '32px',
-                mb: 4
+                mb: 4,
               }}
               variant="h1"
             >
               Welcome to{' '}
-              <Box
-                component="a"
-                sx={{ color: '#bae7e0' }}
-                target="_blank"
-              >
+              <Box component="a" sx={{ color: '#bae7e0' }} target="_blank">
                 Air Quality Monitoring
               </Box>
             </Typography>
@@ -95,10 +88,7 @@ export const Layout = (props) => {
             >
               Subtitle text here.
             </Typography> */}
-            <img
-              alt=""
-              src="/assets/auth-background.png"
-            />
+            <img alt="" src="/assets/auth-background.png" />
           </Box>
         </Grid>
       </Grid>
@@ -107,5 +97,5 @@ export const Layout = (props) => {
 };
 
 Layout.prototypes = {
-  children: PropTypes.node
+  children: PropTypes.node,
 };

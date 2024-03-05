@@ -17,7 +17,7 @@ export const items = [
       <SvgIcon fontSize="small">
         <ChartBarIcon />
       </SvgIcon>
-    )
+    ),
   },
   {
     title: 'Data',
@@ -26,7 +26,7 @@ export const items = [
       <SvgIcon fontSize="small">
         <BookOpenIcon />
       </SvgIcon>
-    )
+    ),
   },
   {
     title: 'Device Managment',
@@ -35,7 +35,7 @@ export const items = [
       <SvgIcon fontSize="small">
         <UsersIcon />
       </SvgIcon>
-    )
+    ),
   },
   {
     title: 'Administration',
@@ -44,7 +44,7 @@ export const items = [
       <SvgIcon fontSize="small">
         <UserPlusIcon />
       </SvgIcon>
-    )
+    ),
   },
   {
     title: 'Companies',
@@ -53,7 +53,7 @@ export const items = [
       <SvgIcon fontSize="small">
         <ShoppingBagIcon />
       </SvgIcon>
-    )
+    ),
   },
   {
     title: 'Account',
@@ -62,7 +62,7 @@ export const items = [
       <SvgIcon fontSize="small">
         <UserIcon />
       </SvgIcon>
-    )
+    ),
   },
   {
     title: 'Settings',
@@ -71,7 +71,7 @@ export const items = [
       <SvgIcon fontSize="small">
         <CogIcon />
       </SvgIcon>
-    )
+    ),
   },
   {
     title: 'Login',
@@ -80,7 +80,7 @@ export const items = [
       <SvgIcon fontSize="small">
         <LockClosedIcon />
       </SvgIcon>
-    )
+    ),
   },
   {
     title: 'Register',
@@ -89,7 +89,7 @@ export const items = [
       <SvgIcon fontSize="small">
         <UserPlusIcon />
       </SvgIcon>
-    )
+    ),
   },
   {
     title: 'Error',
@@ -98,6 +98,6 @@ export const items = [
       <SvgIcon fontSize="small">
         <XCircleIcon />
       </SvgIcon>
-    )
-  }
+    ),
+  },
 ];

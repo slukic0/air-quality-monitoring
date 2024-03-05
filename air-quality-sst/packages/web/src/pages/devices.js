@@ -10,60 +10,41 @@ import { getDevicesData } from 'src/utils/get-devices-data';
 import AddDeviceDialog from 'src/sections/device/add-device-dialog';
 
 const Page = () => {
-    const { user } = useAuth();
-    const [devices, setDevices] = useState([]);
+  const { user } = useAuth();
+  const [devices, setDevices] = useState([]);
 
-    useEffect(() => {
-      const getDevices = async () => {
-        setDevices(await getDevicesData(user));
-      };
-      getDevices();
-    }, [ user ]);
+  useEffect(() => {
+    const getDevices = async () => {
+      setDevices(await getDevicesData(user));
+    };
+    getDevices();
+  }, [user]);
 
-    
   // TODO: Pagination
   return (
     <>
       <Head>
-        <title>
-          Device Management | Air Quality Monitoring
-        </title>
+        <title>Device Management | Air Quality Monitoring</title>
       </Head>
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          py: 8
+          py: 8,
         }}
       >
         <Container maxWidth="xl">
           <Stack spacing={3}>
-            <Stack
-              direction="row"
-              justifyContent="space-between"
-              spacing={4}
-              
-            >
+            <Stack direction="row" justifyContent="space-between" spacing={4}>
               <Stack spacing={1}>
-                <Typography variant="h4">
-                  Device Management
-                </Typography>
-                <Stack
-                  alignItems="center"
-                  direction="row"
-                  spacing={1}
-                >
-                </Stack>
+                <Typography variant="h4">Device Management</Typography>
+                <Stack alignItems="center" direction="row" spacing={1}></Stack>
               </Stack>
-              <AddDeviceDialog/>
+              <AddDeviceDialog />
             </Stack>
             {/*<DevicesSearch /> TODO search for devices*/}
-            
-            <DevicesTable
-              count={devices.length}
-              items={devices}
-              user={user}
-            />
+
+            <DevicesTable count={devices.length} items={devices} user={user} />
           </Stack>
         </Container>
       </Box>
@@ -71,10 +52,6 @@ const Page = () => {
   );
 };
 
-Page.getLayout = (page) => (
-  <DashboardLayout>
-    {page}
-  </DashboardLayout>
-);
+Page.getLayout = (page) => <DashboardLayout>{page}</DashboardLayout>;
 
 export default Page;

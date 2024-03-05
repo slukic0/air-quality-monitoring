@@ -26,23 +26,16 @@ const App = (props) => {
   return (
     <CacheProvider value={emotionCache}>
       <Head>
-        <title>
-          Air Quality Monitoring
-        </title>
-        <meta
-          name="viewport"
-          content="initial-scale=1, width=device-width"
-        />
+        <title>Air Quality Monitoring</title>
+        <meta name="viewport" content="initial-scale=1, width=device-width" />
       </Head>
       <LocalizationProvider dateAdapter={AdapterDateFns}>
         <AuthProvider>
           <ThemeProvider theme={theme}>
             <CssBaseline />
             <AuthConsumer>
-              {
-                (auth) => auth.isLoading
-                  ? <SplashScreen />
-                  : getLayout(<Component {...pageProps} />)
+              {(auth) =>
+                auth.isLoading ? <SplashScreen /> : getLayout(<Component {...pageProps} />)
               }
             </AuthConsumer>
           </ThemeProvider>

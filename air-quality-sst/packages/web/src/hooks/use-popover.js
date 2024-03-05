@@ -21,6 +21,6 @@ export function usePopover() {
     handleClose,
     handleOpen,
     handleToggle,
-    open
+    open,
   };
 }

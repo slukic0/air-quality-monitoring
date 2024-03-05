@@ -1,17 +1,14 @@
 import PropTypes from 'prop-types';
 import {
-    Button,
-    TextField,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle
+  Button,
+  TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from '@mui/material';
-import {
-    Fragment,
-    useState
-} from 'react';
+import { Fragment, useState } from 'react';
 import axios from 'axios';
 import { result } from 'lodash';
 import { useAuth } from 'src/hooks/use-auth';
@@ -37,10 +34,7 @@ export default function AddDeviceDialog() {
 
   return (
     <Fragment>
-      <Button 
-        variant="contained"
-        onClick={handleClickOpen}
-      >
+      <Button variant="contained" onClick={handleClickOpen}>
         Register new Device
       </Button>
       <Dialog
@@ -56,7 +50,11 @@ export default function AddDeviceDialog() {
 
             const url = `${process.env.NEXT_PUBLIC_API_URL}/api/devices/registerDevice`;
             try {
-              await axios.post(url, {deviceId: deviceId}, {headers: {'Authorization': `Bearer ${user.token}`}});
+              await axios.post(
+                url,
+                { deviceId: deviceId },
+                { headers: { Authorization: `Bearer ${user.token}` } }
+              );
             } catch (err) {
               if (err.response.status === 409) {
                 setDeviceIdErrorText('Device already registered');
@@ -67,13 +65,11 @@ export default function AddDeviceDialog() {
       >
         <DialogTitle>Register Device</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            Enter the device ID
-          </DialogContentText>
+          <DialogContentText>Enter the device ID</DialogContentText>
           <TextField
             autoFocus
             required
-            margin="dense"  
+            margin="dense"
             id="name"
             name="text"
             label="Device Id"

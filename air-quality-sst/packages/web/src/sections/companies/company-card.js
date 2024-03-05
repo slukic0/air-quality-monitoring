@@ -11,7 +11,7 @@ export const CompanyCard = (props) => {
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        height: '100%'
+        height: '100%',
       }}
     >
       <CardContent>
@@ -19,25 +19,15 @@ export const CompanyCard = (props) => {
           sx={{
             display: 'flex',
             justifyContent: 'center',
-            pb: 3
+            pb: 3,
           }}
         >
-          <Avatar
-            src={company.logo}
-            variant="square"
-          />
+          <Avatar src={company.logo} variant="square" />
         </Box>
-        <Typography
-          align="center"
-          gutterBottom
-          variant="h5"
-        >
+        <Typography align="center" gutterBottom variant="h5">
           {company.title}
         </Typography>
-        <Typography
-          align="center"
-          variant="body1"
-        >
+        <Typography align="center" variant="body1">
           {company.description}
         </Typography>
       </CardContent>
@@ -50,41 +40,19 @@ export const CompanyCard = (props) => {
         spacing={2}
         sx={{ p: 2 }}
       >
-        <Stack
-          alignItems="center"
-          direction="row"
-          spacing={1}
-        >
-          <SvgIcon
-            color="action"
-            fontSize="small"
-          >
+        <Stack alignItems="center" direction="row" spacing={1}>
+          <SvgIcon color="action" fontSize="small">
             <ClockIcon />
           </SvgIcon>
-          <Typography
-            color="text.secondary"
-            display="inline"
-            variant="body2"
-          >
+          <Typography color="text.secondary" display="inline" variant="body2">
             Updated 2hr ago
           </Typography>
         </Stack>
-        <Stack
-          alignItems="center"
-          direction="row"
-          spacing={1}
-        >
-          <SvgIcon
-            color="action"
-            fontSize="small"
-          >
+        <Stack alignItems="center" direction="row" spacing={1}>
+          <SvgIcon color="action" fontSize="small">
             <ArrowDownOnSquareIcon />
           </SvgIcon>
-          <Typography
-            color="text.secondary"
-            display="inline"
-            variant="body2"
-          >
+          <Typography color="text.secondary" display="inline" variant="body2">
             {company.downloads} Downloads
           </Typography>
         </Stack>
@@ -94,5 +62,5 @@ export const CompanyCard = (props) => {
 };
 
 CompanyCard.propTypes = {
-  company: PropTypes.object.isRequired
+  company: PropTypes.object.isRequired,
 };

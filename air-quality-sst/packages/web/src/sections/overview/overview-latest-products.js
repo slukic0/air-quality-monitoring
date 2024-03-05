@@ -14,7 +14,7 @@ import {
   ListItem,
   ListItemAvatar,
   ListItemText,
-  SvgIcon
+  SvgIcon,
 } from '@mui/material';
 
 export const OverviewLatestProducts = (props) => {
@@ -29,35 +29,28 @@ export const OverviewLatestProducts = (props) => {
           const ago = formatDistanceToNow(product.updatedAt);
 
           return (
-            <ListItem
-              divider={hasDivider}
-              key={product.id}
-            >
+            <ListItem divider={hasDivider} key={product.id}>
               <ListItemAvatar>
-                {
-                  product.image
-                    ? (
-                      <Box
-                        component="img"
-                        src={product.image}
-                        sx={{
-                          borderRadius: 1,
-                          height: 48,
-                          width: 48
-                        }}
-                      />
-                    )
-                    : (
-                      <Box
-                        sx={{
-                          borderRadius: 1,
-                          backgroundColor: 'neutral.200',
-                          height: 48,
-                          width: 48
-                        }}
-                      />
-                    )
-                }
+                {product.image ? (
+                  <Box
+                    component="img"
+                    src={product.image}
+                    sx={{
+                      borderRadius: 1,
+                      height: 48,
+                      width: 48,
+                    }}
+                  />
+                ) : (
+                  <Box
+                    sx={{
+                      borderRadius: 1,
+                      backgroundColor: 'neutral.200',
+                      height: 48,
+                      width: 48,
+                    }}
+                  />
+                )}
               </ListItemAvatar>
               <ListItemText
                 primary={product.name}
@@ -78,11 +71,11 @@ export const OverviewLatestProducts = (props) => {
       <CardActions sx={{ justifyContent: 'flex-end' }}>
         <Button
           color="inherit"
-          endIcon={(
+          endIcon={
             <SvgIcon fontSize="small">
               <ArrowRightIcon />
             </SvgIcon>
-          )}
+          }
           size="small"
           variant="text"
         >
@@ -95,5 +88,5 @@ export const OverviewLatestProducts = (props) => {
 
 OverviewLatestProducts.propTypes = {
   products: PropTypes.array,
-  sx: PropTypes.object
+  sx: PropTypes.object,
 };

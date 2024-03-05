@@ -1,17 +1,14 @@
 import PropTypes from 'prop-types';
 import {
-    Button,
-    TextField,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle
+  Button,
+  TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from '@mui/material';
-import {
-    Fragment,
-    useState
-} from 'react';
+import { Fragment, useState } from 'react';
 
 export default function DeviceDialog() {
   const [open, setOpen] = useState(false);
@@ -26,10 +23,7 @@ export default function DeviceDialog() {
 
   return (
     <Fragment>
-      <Button 
-        variant="outlined" 
-        onClick={handleClickOpen}
-      >
+      <Button variant="outlined" onClick={handleClickOpen}>
         Open Edit Menu
       </Button>
       <Dialog
