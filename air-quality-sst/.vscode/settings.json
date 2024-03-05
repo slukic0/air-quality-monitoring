@@ -1,5 +1,9 @@
 {
   "search.exclude": {
     "**/.sst": true
-  }
+  },
+  "eslint.workingDirectories": [
+    { "pattern": "./packages/functions/**" },
+    { "pattern": "./packages/web/**" },
+  ]
 }
