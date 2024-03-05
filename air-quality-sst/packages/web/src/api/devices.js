@@ -3,6 +3,8 @@ import { getTimestampHour, getTimestampHoursAgo } from 'src/utils/timestamps';
 
 export const deviceAggregateDataPeriods = ['24 Hours'];
 
+export const deviceMetrics = ['tgasResistance', 'thumidity', 'tiaq', 'tpressure', 'ttemperature']
+
 export const getDeviceAggregateDataChartData = async (token, deviceId, period) => {
   const url = `${process.env.NEXT_PUBLIC_API_URL}/api/sensorData/${deviceId}/average`;
   const now = Date.now();
