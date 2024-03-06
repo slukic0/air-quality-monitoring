@@ -20,6 +20,19 @@ const Page = () => {
     getDevices();
   }, [user]);
 
+  const onDevicesChange = (value) => {
+    const newDevice = {
+      'deviceId': value,
+      'adminId': {
+        'name': user.name,
+        'email': user.email,
+        'userId': user.userId
+      },
+      'authorizedUsers': [],
+    };
+    setDevices([...devices, newDevice]);
+  };
+
   // TODO: Pagination
   return (
     <>
@@ -40,7 +53,7 @@ const Page = () => {
                 <Typography variant="h4">Device Management</Typography>
                 <Stack alignItems="center" direction="row" spacing={1}></Stack>
               </Stack>
-              <AddDeviceDialog />
+              <AddDeviceDialog onChange={onDevicesChange} />
             </Stack>
             {/*<DevicesSearch /> TODO search for devices*/}
 

@@ -10,10 +10,11 @@ import {
 } from '@mui/material';
 import { Fragment, useState } from 'react';
 import axios from 'axios';
-import { result } from 'lodash';
 import { useAuth } from 'src/hooks/use-auth';
 
-export default function AddDeviceDialog() {
+export default function AddDeviceDialog(props) {
+  const { onChange } = props;
+
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [deviceId, setDeviceId] = useState('');
@@ -52,14 +53,19 @@ export default function AddDeviceDialog() {
 
             const url = `${process.env.NEXT_PUBLIC_API_URL}/api/devices/registerDevice`;
             try {
-              await axios.post(
+              const response = await axios.post(
                 url,
                 { deviceId: deviceId },
                 { headers: { Authorization: `Bearer ${user.token}` } }
               );
+              onChange(formJson.text);
+              handleClose();
             } catch (err) {
               if (err.response.status === 409) {
                 setDeviceIdErrorText('Device already registered');
+              }
+              else {
+                setDeviceIdErrorText('An error has occurred, plase try again later');
               }
             }
           },
@@ -90,4 +96,8 @@ export default function AddDeviceDialog() {
       </Dialog>
     </Fragment>
   );
+};
+
+AddDeviceDialog.propTypes = {
+  onChange: PropTypes.func.isRequired,
 }

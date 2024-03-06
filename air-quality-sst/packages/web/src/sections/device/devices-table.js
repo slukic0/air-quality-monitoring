@@ -22,9 +22,7 @@ import {
 import { Fragment, useState } from 'react';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import { PlusIcon, TrashIcon } from '@heroicons/react/24/solid';
 import { RemoveUser } from 'src/utils/remove-user';
-import { useAuth } from 'src/hooks/use-auth';
 import DeviceDialog from 'src/sections/device/devcies-dialog';
 
 function Device(props) {

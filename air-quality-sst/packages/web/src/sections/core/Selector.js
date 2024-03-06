@@ -32,6 +32,6 @@ export const Selector = (props) => {
 Selector.protoTypes = {
   defaultText: PropTypes.string,
   items: PropTypes.array.isRequired,
-  onChange: PropTypes.array.isRequired,
+  onChange: PropTypes.func.isRequired,
   defaultItem: PropTypes.any,
 };
