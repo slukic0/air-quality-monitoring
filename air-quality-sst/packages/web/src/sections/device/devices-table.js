@@ -54,7 +54,9 @@ function Device(props) {
         <TableCell align="right">{device.adminId.name}</TableCell>
         <TableCell align="right">{device.adminId.email}</TableCell>
         <TableCell align="right">
-          <DeviceDialog />
+          {user.userId === device.adminId.userId && (
+            <DeviceDialog />
+          )}
         </TableCell>
       </TableRow>
       <TableRow>

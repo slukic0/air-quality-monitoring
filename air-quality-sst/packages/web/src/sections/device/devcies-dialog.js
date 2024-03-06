@@ -20,6 +20,10 @@ export default function DeviceDialog() {
     setOpen(false);
   };
 
+  const handleRemove = () => {
+    console.log('TODO');
+  }
+
   return (
     <Fragment>
       <Button variant="outlined" onClick={handleClickOpen}>
@@ -58,6 +62,7 @@ export default function DeviceDialog() {
           />
         </DialogContent>
         <DialogActions>
+          <Button onClick={handleRemove}>Remove Device</Button>
           <Button onClick={handleClose}>Cancel</Button>
           <Button type="submit">Save Changes</Button>
         </DialogActions>
