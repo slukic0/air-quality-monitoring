@@ -20,12 +20,11 @@ import { useMemo, useState } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 export default function DeviceEditTable(props) {
-  const { deviceAuthorizedUsers } = props;
+  const { deviceAuthorizedUsers, onRemove } = props;
   const [users, setUsers] = useState([...deviceAuthorizedUsers]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [removedUsers, setRemovedUsers] = useState([]);
-  const [changesPending, setChangesPending] = useState(false);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -42,12 +41,12 @@ export default function DeviceEditTable(props) {
     [users, page, rowsPerPage]
   );
 
-  const handleRemoveUser = (authorizedUser) => {
-    const removed = [...removedUsers, authorizedUser];
+  const handleRemoveUser = (userToRemove) => {
+    const removed = [...removedUsers, userToRemove];
     setRemovedUsers(removed);
-    const newUserData = users.filter((user) => user.userId !== authorizedUser.userId);
+    onRemove(users);
+    const newUserData = users.filter((user) => user.userId !== userToRemove.userId);
     setUsers(newUserData);
-    setChangesPending(true);
   };
 
   return (
@@ -59,10 +58,10 @@ export default function DeviceEditTable(props) {
           id="tableTitle"
           component="div"
         >
-          Current Authorized Users
+          Existing Authorized Users
         </Typography>
         <TableContainer>
-          <Table sx={{ minWidth: 600 }} aria-labelledby="tableTitle" size="medium">
+          <Table sx={{ width: '100' }} aria-labelledby="tableTitle" size="medium">
             <TableHead>
               <TableRow>
                 <TableCell align="center" padding="normal">
@@ -76,7 +75,7 @@ export default function DeviceEditTable(props) {
             </TableHead>
             <TableBody>
               {visibleRows.map((deviceUser, index) => {
-                const labelId = `device-edit-table-checkbox-${index}`;
+                const labelId = `device-edit-table-${index}`;
 
                 return (
                   <TableRow role="checkbox" tabIndex={-1} key={deviceUser.userId}>
@@ -126,4 +125,5 @@ export default function DeviceEditTable(props) {
 
 DeviceEditTable.propTypes = {
   deviceAuthorizedUsers: PropTypes.array.isRequired,
+  onRemove: PropTypes.func.isRequired,
 };

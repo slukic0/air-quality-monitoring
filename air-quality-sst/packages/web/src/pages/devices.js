@@ -20,7 +20,7 @@ const Page = () => {
     getDevices();
   }, [user]);
 
-  const onDevicesChange = (value) => {
+  const onRegisterDevice = (value) => {
     const newDevice = {
       deviceId: value,
       adminId: {
@@ -31,6 +31,22 @@ const Page = () => {
       authorizedUsers: [],
     };
     setDevices([...devices, newDevice]);
+  };
+
+  const onRemovedUsers = (deviceId, removedUsers) => {
+    const devicesCopy = [...devices];
+    const removedUserIds = removedUsers.map((userObj) => userObj.userId);
+
+    const updatedDevices = devicesCopy.map((device) => {
+      if (device.deviceId === deviceId) {
+        device.authorizedUsers = device.authorizedUsers.filter(
+          (user) => !removedUserIds.includes(user.userId)
+        );
+      }
+      return device;
+    });
+
+    setDevices(updatedDevices);
   };
 
   // TODO: Pagination
@@ -53,11 +69,16 @@ const Page = () => {
                 <Typography variant="h4">Device Management</Typography>
                 <Stack alignItems="center" direction="row" spacing={1}></Stack>
               </Stack>
-              <AddDeviceDialog onChange={onDevicesChange} />
+              <AddDeviceDialog onChange={onRegisterDevice} />
             </Stack>
             {/*<DevicesSearch /> TODO search for devices*/}
 
-            <DevicesTable count={devices.length} items={devices} user={user} />
+            <DevicesTable
+              count={devices.length}
+              items={devices}
+              user={user}
+              onRemoveUsers={onRemovedUsers}
+            />
           </Stack>
         </Container>
       </Box>

@@ -22,11 +22,10 @@ import {
 import { Fragment, useState } from 'react';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import { RemoveUser } from 'src/utils/remove-user';
 import DeviceDialog from 'src/sections/device/devcies-dialog';
 
 function Device(props) {
-  const { device, user } = props;
+  const { device, user, onRemoveUsers } = props;
   const [open, setOpen] = useState(false);
 
   return (
@@ -51,7 +50,12 @@ function Device(props) {
         <TableCell align="right">{device.adminId.email}</TableCell>
         <TableCell align="right">
           {user.userId === device.adminId.userId && (
-            <DeviceDialog deviceAuthorizedUsers={device.authorizedUsers} />
+            <DeviceDialog
+              deviceAuthorizedUsers={device.authorizedUsers}
+              deviceId={device.deviceId}
+              token={user.token}
+              onRemove={onRemoveUsers}
+            />
           )}
         </TableCell>
       </TableRow>
@@ -118,10 +122,11 @@ Device.propTypes = {
     email: PropTypes.string,
   }),
   user: PropTypes.object.isRequired,
+  onRemoveUsers: PropTypes.func.isRequired,
 };
 
 export const DevicesTable = (props) => {
-  const { count = 0, items = [], user } = props;
+  const { count = 0, items = [], user, onRemoveUsers } = props;
 
   return (
     <TableContainer component={Paper}>
@@ -139,7 +144,12 @@ export const DevicesTable = (props) => {
         <TableBody>
           {console.log('items', items)}
           {items.map((device) => (
-            <Device key={device.deviceId} device={device} user={user} />
+            <Device
+              key={device.deviceId}
+              device={device}
+              user={user}
+              onRemoveUsers={onRemoveUsers}
+            />
           ))}
         </TableBody>
       </Table>
@@ -151,4 +161,5 @@ DevicesTable.propTypes = {
   count: PropTypes.number,
   items: PropTypes.array,
   user: PropTypes.object.isRequired,
+  onRemoveUsers: PropTypes.func.isRequired,
 };

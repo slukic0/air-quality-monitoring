@@ -53,7 +53,7 @@ export default function AddDeviceDialog(props) {
 
             const url = `${process.env.NEXT_PUBLIC_API_URL}/api/devices/registerDevice`;
             try {
-              const response = await axios.post(
+              await axios.post(
                 url,
                 { deviceId: deviceId },
                 { headers: { Authorization: `Bearer ${user.token}` } }
