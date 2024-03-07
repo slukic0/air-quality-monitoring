@@ -63,8 +63,7 @@ export default function AddDeviceDialog(props) {
             } catch (err) {
               if (err.response.status === 409) {
                 setDeviceIdErrorText('Device already registered');
-              }
-              else {
+              } else {
                 setDeviceIdErrorText('An error has occurred, plase try again later');
               }
             }
@@ -96,8 +95,8 @@ export default function AddDeviceDialog(props) {
       </Dialog>
     </Fragment>
   );
-};
+}
 
 AddDeviceDialog.propTypes = {
   onChange: PropTypes.func.isRequired,
-}
+};

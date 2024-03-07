@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import {
   Button,
   TextField,
@@ -8,8 +9,10 @@ import {
   DialogTitle,
 } from '@mui/material';
 import { Fragment, useState } from 'react';
+import DeviceEditTable from './edit-dialog-selectable-table';
 
-export default function DeviceDialog() {
+export default function DeviceDialog(props) {
+  const { deviceAuthorizedUsers } = props;
   const [open, setOpen] = useState(false);
 
   const handleClickOpen = () => {
@@ -22,7 +25,7 @@ export default function DeviceDialog() {
 
   const handleRemove = () => {
     console.log('TODO');
-  }
+  };
 
   return (
     <Fragment>
@@ -61,12 +64,23 @@ export default function DeviceDialog() {
             variant="standard"
           />
         </DialogContent>
+        <DeviceEditTable deviceAuthorizedUsers={deviceAuthorizedUsers} />
         <DialogActions>
-          <Button onClick={handleRemove}>Remove Device</Button>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button type="submit">Save Changes</Button>
+          <Button onClick={handleRemove} variant="outlined" color="error">
+            Remove Device
+          </Button>
+          <Button onClick={handleClose} variant="outlined" color="primary">
+            Cancel
+          </Button>
+          <Button type="submit" variant="outlined" color="success">
+            Save Changes
+          </Button>
         </DialogActions>
       </Dialog>
     </Fragment>
   );
 }
+
+DeviceDialog.propTypes = {
+  deviceAuthorizedUsers: PropTypes.array.isRequired,
+};

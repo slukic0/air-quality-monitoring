@@ -22,13 +22,13 @@ const Page = () => {
 
   const onDevicesChange = (value) => {
     const newDevice = {
-      'deviceId': value,
-      'adminId': {
-        'name': user.name,
-        'email': user.email,
-        'userId': user.userId
+      deviceId: value,
+      adminId: {
+        name: user.name,
+        email: user.email,
+        userId: user.userId,
       },
-      'authorizedUsers': [],
+      authorizedUsers: [],
     };
     setDevices([...devices, newDevice]);
   };

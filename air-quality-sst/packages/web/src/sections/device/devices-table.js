@@ -1,10 +1,10 @@
 import PropTypes from 'prop-types';
-import { format } from 'date-fns';
 import {
   Box,
   Button,
   Card,
   Collapse,
+  CircularProgress,
   IconButton,
   Paper,
   Stack,
@@ -29,10 +29,6 @@ function Device(props) {
   const { device, user } = props;
   const [open, setOpen] = useState(false);
 
-  const handleRemove = async (deviceId, userId, token) => {
-    await RemoveUser(deviceId, userId, token);
-  };
-
   return (
     <Fragment>
       <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
@@ -55,7 +51,7 @@ function Device(props) {
         <TableCell align="right">{device.adminId.email}</TableCell>
         <TableCell align="right">
           {user.userId === device.adminId.userId && (
-            <DeviceDialog />
+            <DeviceDialog deviceAuthorizedUsers={device.authorizedUsers} />
           )}
         </TableCell>
       </TableRow>
