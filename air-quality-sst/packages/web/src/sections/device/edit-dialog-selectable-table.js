@@ -45,8 +45,9 @@ export default function DeviceEditTable(props) {
   const handleRemoveUser = (authorizedUser) => {
     const removed = [...removedUsers, authorizedUser];
     setRemovedUsers(removed);
-    const newUserData = users.filter((userId) => userId !== authorizedUser.userId);
+    const newUserData = users.filter((user) => user.userId !== authorizedUser.userId);
     setUsers(newUserData);
+    setChangesPending(true);
   };
 
   return (
