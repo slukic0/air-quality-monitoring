@@ -169,15 +169,10 @@ export default function DeviceDialog(props) {
           <DeviceEditTable deviceAuthorizedUsers={deviceAuthorizedUsers} onRemove={onRemoveUsers} />
         </DialogContent>
         <DialogActions>
-          <Button
-            aria-describedby={id}
-            onClick={handlePopoverClick}
-            variant="outlined"
-            color="error"
-          >
+          <Button aria-describedby={id} onClick={handleRemove} variant="outlined" color="error">
             Remove Device
           </Button>
-          <Popover
+          {/* <Popover
             id={id}
             open={openPopover}
             anchorEl={anchorEl}
@@ -206,7 +201,7 @@ export default function DeviceDialog(props) {
                 </TableRow>
               </TableBody>
             </Table>
-          </Popover>
+          </Popover> */}
           <Button onClick={handleClose} variant="outlined" color="primary">
             Cancel
           </Button>
