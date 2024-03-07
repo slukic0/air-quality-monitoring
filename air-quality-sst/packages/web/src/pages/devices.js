@@ -73,12 +73,7 @@ const Page = () => {
             </Stack>
             {/*<DevicesSearch /> TODO search for devices*/}
 
-            <DevicesTable
-              count={devices.length}
-              items={devices}
-              user={user}
-              onRemoveUsers={onRemovedUsers}
-            />
+            <DevicesTable items={devices} user={user} onRemoveUsers={onRemovedUsers} />
           </Stack>
         </Container>
       </Box>

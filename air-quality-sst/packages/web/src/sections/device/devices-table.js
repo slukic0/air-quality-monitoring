@@ -1,21 +1,15 @@
 import PropTypes from 'prop-types';
 import {
   Box,
-  Button,
-  Card,
   Collapse,
-  CircularProgress,
   IconButton,
   Paper,
   Stack,
-  SvgIcon,
   Table,
   TableBody,
   TableCell,
   TableContainer,
-  TableFooter,
   TableHead,
-  TablePagination,
   TableRow,
   Typography,
 } from '@mui/material';
@@ -23,6 +17,44 @@ import { Fragment, useState } from 'react';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import DeviceDialog from 'src/sections/device/devcies-dialog';
+
+export const DevicesTable = (props) => {
+  const { items = [], user, onRemoveUsers } = props;
+
+  return (
+    <TableContainer component={Paper}>
+      <Table aria-label="Device Table">
+        <TableHead>
+          <TableRow>
+            <TableCell />
+            <TableCell>Device ID</TableCell>
+            <TableCell align="right">Device Name</TableCell>
+            <TableCell align="right">Owner Name</TableCell>
+            <TableCell align="right">Email</TableCell>
+            <TableCell align="right" />
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {console.log('items', items)}
+          {items.map((device) => (
+            <Device
+              key={device.deviceId}
+              device={device}
+              user={user}
+              onRemoveUsers={onRemoveUsers}
+            />
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+};
+
+DevicesTable.propTypes = {
+  items: PropTypes.array,
+  user: PropTypes.object.isRequired,
+  onRemoveUsers: PropTypes.func.isRequired,
+};
 
 function Device(props) {
   const { device, user, onRemoveUsers } = props;
@@ -121,45 +153,6 @@ Device.propTypes = {
     name: PropTypes.string,
     email: PropTypes.string,
   }),
-  user: PropTypes.object.isRequired,
-  onRemoveUsers: PropTypes.func.isRequired,
-};
-
-export const DevicesTable = (props) => {
-  const { count = 0, items = [], user, onRemoveUsers } = props;
-
-  return (
-    <TableContainer component={Paper}>
-      <Table aria-label="Device Table">
-        <TableHead>
-          <TableRow>
-            <TableCell />
-            <TableCell>Device ID</TableCell>
-            <TableCell align="right">Device Name</TableCell>
-            <TableCell align="right">Owner Name</TableCell>
-            <TableCell align="right">Email</TableCell>
-            <TableCell align="right" />
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {console.log('items', items)}
-          {items.map((device) => (
-            <Device
-              key={device.deviceId}
-              device={device}
-              user={user}
-              onRemoveUsers={onRemoveUsers}
-            />
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  );
-};
-
-DevicesTable.propTypes = {
-  count: PropTypes.number,
-  items: PropTypes.array,
   user: PropTypes.object.isRequired,
   onRemoveUsers: PropTypes.func.isRequired,
 };
