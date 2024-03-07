@@ -18,6 +18,7 @@ import {
   TableHead,
   TableRow,
   Typography,
+  Popover,
 } from '@mui/material';
 import { Fragment, useState } from 'react';
 import DeviceEditTable from './edit-dialog-selectable-table';
@@ -30,6 +31,7 @@ export default function DeviceDialog(props) {
   const [changesPending, setChangesPending] = useState(false);
   const [searchedUsers, setSearchedUsers] = useState([]);
   const [usersToAdd, setUsersToAdd] = useState([]);
+  const [anchorEl, setAnchorEl] = React.useState(null);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -63,6 +65,17 @@ export default function DeviceDialog(props) {
       setSearchedUsers(searchedUsers_filtered);
     }
   };
+
+  const handlePopoverClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handlePopoverClose = () => {
+    setAnchorEl(null);
+  };
+
+  const openPopover = Boolean(anchorEl);
+  const popoverId = open ? 'remove-deivec-popover' : undefined;
 
   return (
     <Fragment>
@@ -156,9 +169,44 @@ export default function DeviceDialog(props) {
           <DeviceEditTable deviceAuthorizedUsers={deviceAuthorizedUsers} onRemove={onRemoveUsers} />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleRemove} variant="outlined" color="error">
+          <Button
+            aria-describedby={id}
+            onClick={handlePopoverClick}
+            variant="outlined"
+            color="error"
+          >
             Remove Device
           </Button>
+          <Popover
+            id={id}
+            open={openPopover}
+            anchorEl={anchorEl}
+            onClose={handlePopoverClose}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left',
+            }}
+          >
+            <Typography sx={{ p: 2 }} variant="p">
+              Confirm deletion
+            </Typography>
+            <Table>
+              <TableBody>
+                <TableRow>
+                  <TableCell>
+                    <Button onClick={handlePopoverClose} variant="outlined" color="primary">
+                      Cancel
+                    </Button>
+                  </TableCell>
+                  <TableCell>
+                    <Button onClick={handleRemove} variant="outlined" color="primary">
+                      Confirm
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </Popover>
           <Button onClick={handleClose} variant="outlined" color="primary">
             Cancel
           </Button>

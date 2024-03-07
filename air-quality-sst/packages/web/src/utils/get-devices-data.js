@@ -12,7 +12,7 @@ export const getDevicesData = async (user) => {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/api/device/${deviceId}?hydrate=true`;
     devicePromises.push(axios.get(url, { headers: { Authorization: `Bearer ${user.token}` } }));
   });
-  const resolvedDevicePromises = await Promise.all(devicePromises);
+  const resolvedDevicePromises = await Promise.allSettled(devicePromises);
   const deviceData = [];
   resolvedDevicePromises.forEach((result) => {
     deviceData.push(result.data);

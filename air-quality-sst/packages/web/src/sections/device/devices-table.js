@@ -36,14 +36,17 @@ export const DevicesTable = (props) => {
         </TableHead>
         <TableBody>
           {console.log('items', items)}
-          {items.map((device) => (
-            <Device
-              key={device.deviceId}
-              device={device}
-              user={user}
-              onRemoveUsers={onRemoveUsers}
-            />
-          ))}
+          {items.map(
+            (device) =>
+              device ?? (
+                <Device
+                  key={device.deviceId}
+                  device={device}
+                  user={user}
+                  onRemoveUsers={onRemoveUsers}
+                />
+              )
+          )}
         </TableBody>
       </Table>
     </TableContainer>

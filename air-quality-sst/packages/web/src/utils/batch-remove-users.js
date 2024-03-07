@@ -12,5 +12,5 @@ export const removeUsersFromDevice = async (deviceId, removedUsers, token) => {
       )
     );
   });
-  await Promise.all(devicePromises);
+  await Promise.allSettled(devicePromises);
 };

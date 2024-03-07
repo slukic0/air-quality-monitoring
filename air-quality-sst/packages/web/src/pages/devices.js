@@ -15,7 +15,11 @@ const Page = () => {
 
   useEffect(() => {
     const getDevices = async () => {
-      setDevices(await getDevicesData(user));
+      try {
+        setDevices(await getDevicesData(user));
+      } catch (err) {
+        console.log(err);
+      }
     };
     getDevices();
   }, [user]);
