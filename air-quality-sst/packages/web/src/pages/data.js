@@ -25,7 +25,7 @@ const useChartOptions = (categories) => {
         show: true,
       },
     },
-    colors: [theme.palette.primary.main, alpha(theme.palette.primary.main, 0.25)],
+    // colors: [theme.palette.primary.main],
     dataLabels: {
       enabled: false,
     },
