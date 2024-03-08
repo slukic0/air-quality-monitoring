@@ -5,13 +5,15 @@ export const deviceAggregateDataPeriods = ['24 Hours'];
 
 export const deviceMetrics = ['tgasResistance', 'thumidity', 'tiaq', 'tpressure', 'ttemperature'];
 
+export const numSensors = 7;
+
 export const getDeviceAggregateDataChartData = async (token, deviceId, period) => {
   const url = `${process.env.NEXT_PUBLIC_API_URL}/api/sensorData/${deviceId}/average`;
   const now = Date.now();
 
   if (period === deviceAggregateDataPeriods[0]) {
-    const currentUtcHour = new Date(getTimestampHour(now)).getUTCHours();
-    const last24Hours = Array.from({ length: 25 }, (_, i) => (currentUtcHour + 1 + i) % 24);
+    const currentHour = new Date(getTimestampHour(now)).getHours();
+    const last24Hours = Array.from({ length: 25 }, (_, i) => (currentHour + i) % 24);
 
     const nullData = {
       x: last24Hours,
@@ -32,13 +34,6 @@ export const getDeviceAggregateDataChartData = async (token, deviceId, period) =
       if (data.length === 0) {
         return nullData;
       }
-
-      data.forEach((item) => {
-        if (item) {
-          const timestamp = item.hourTimestamp;
-          item.hour = new Date(timestamp).getUTCHours();
-        }
-      });
 
       return {
         x: last24Hours,
