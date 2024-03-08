@@ -19,7 +19,7 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import DeviceDialog from 'src/sections/device/devcies-dialog';
 
 export const DevicesTable = (props) => {
-  const { items = [], user, onRemoveUsers } = props;
+  const { items = [], user, onRemoveUsers, onRemoveDevice } = props;
 
   return (
     <TableContainer component={Paper}>
@@ -36,17 +36,15 @@ export const DevicesTable = (props) => {
         </TableHead>
         <TableBody>
           {console.log('items', items)}
-          {items.map(
-            (device) =>
-              device ?? (
-                <Device
-                  key={device.deviceId}
-                  device={device}
-                  user={user}
-                  onRemoveUsers={onRemoveUsers}
-                />
-              )
-          )}
+          {items.map((device) => (
+            <Device
+              key={device.deviceId}
+              device={device}
+              user={user}
+              onRemoveUsers={onRemoveUsers}
+              onRemoveDevice={onRemoveDevice}
+            />
+          ))}
         </TableBody>
       </Table>
     </TableContainer>
@@ -57,10 +55,11 @@ DevicesTable.propTypes = {
   items: PropTypes.array,
   user: PropTypes.object.isRequired,
   onRemoveUsers: PropTypes.func.isRequired,
+  onRemoveDevice: PropTypes.func.isRequired,
 };
 
 function Device(props) {
-  const { device, user, onRemoveUsers } = props;
+  const { device, user, onRemoveUsers, onRemoveDevice } = props;
   const [open, setOpen] = useState(false);
 
   return (
@@ -90,6 +89,7 @@ function Device(props) {
               deviceId={device.deviceId}
               token={user.token}
               onRemove={onRemoveUsers}
+              onDeviceRemove={onRemoveDevice}
             />
           )}
         </TableCell>
@@ -158,4 +158,5 @@ Device.propTypes = {
   }),
   user: PropTypes.object.isRequired,
   onRemoveUsers: PropTypes.func.isRequired,
+  onRemoveDevice: PropTypes.func.isRequired,
 };

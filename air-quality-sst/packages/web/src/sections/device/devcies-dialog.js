@@ -50,6 +50,21 @@ export default function DeviceDialog(props) {
     setChangesPending(true);
   };
 
+  const removeDevice = async () => {
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/devices/unregisterDevice`;
+    try {
+      await axios.post(
+        url,
+        { deviceId: deviceId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      onDeviceRemove(deviceId);
+      handleClose();
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   const handleSearchUsers = async (event) => {
     if (event.target.value.length === 1) {
       const url = `${process.env.NEXT_PUBLIC_API_URL}/api/users/${event.target.value}`;
@@ -169,10 +184,15 @@ export default function DeviceDialog(props) {
           <DeviceEditTable deviceAuthorizedUsers={deviceAuthorizedUsers} onRemove={onRemoveUsers} />
         </DialogContent>
         <DialogActions>
-          <Button aria-describedby={id} onClick={handleRemove} variant="outlined" color="error">
+          <Button
+            aria-describedby={id}
+            onClick={handlePopoverClick}
+            variant="outlined"
+            color="error"
+          >
             Remove Device
           </Button>
-          {/* <Popover
+          <Popover
             id={id}
             open={openPopover}
             anchorEl={anchorEl}
@@ -194,14 +214,14 @@ export default function DeviceDialog(props) {
                     </Button>
                   </TableCell>
                   <TableCell>
-                    <Button onClick={handleRemove} variant="outlined" color="primary">
+                    <Button onClick={() => removeDevice} variant="outlined" color="primary">
                       Confirm
                     </Button>
                   </TableCell>
                 </TableRow>
               </TableBody>
             </Table>
-          </Popover> */}
+          </Popover>
           <Button onClick={handleClose} variant="outlined" color="primary">
             Cancel
           </Button>
@@ -218,5 +238,6 @@ DeviceDialog.propTypes = {
   deviceAuthorizedUsers: PropTypes.array.isRequired,
   deviceId: PropTypes.string.isRequired,
   onRemove: PropTypes.func.isRequired,
+  onDeviceRemove: PropTypes.func.isRequired,
   token: PropTypes.string.isRequired,
 };

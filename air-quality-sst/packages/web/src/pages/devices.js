@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
 import Head from 'next/head';
-import { Box, Button, Container, Stack, SvgIcon, Typography } from '@mui/material';
+import { Box, Container, Stack, Typography } from '@mui/material';
 import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import { DevicesTable } from 'src/sections/device/devices-table';
-import { DevicesSearch } from 'src/sections/device/devices-search';
-import { applyPagination } from 'src/utils/apply-pagination';
 import { useAuth } from 'src/hooks/use-auth';
 import { getDevicesData } from 'src/utils/get-devices-data';
 import AddDeviceDialog from 'src/sections/device/add-device-dialog';
@@ -35,6 +33,16 @@ const Page = () => {
       authorizedUsers: [],
     };
     setDevices([...devices, newDevice]);
+  };
+
+  const onRemoveDevice = (deviceId) => {
+    const devicesCopy = [...devices];
+    const updatedDevices = devicesCopy.map((device) => {
+      if (device.deviceId !== deviceId) {
+        return device;
+      }
+    });
+    setDevices(updatedDevices);
   };
 
   const onRemovedUsers = (deviceId, removedUsers) => {
@@ -77,7 +85,12 @@ const Page = () => {
             </Stack>
             {/*<DevicesSearch /> TODO search for devices*/}
 
-            <DevicesTable items={devices} user={user} onRemoveUsers={onRemovedUsers} />
+            <DevicesTable
+              items={devices}
+              user={user}
+              onRemoveUsers={onRemovedUsers}
+              onRemoveDevice={onRemoveDevice}
+            />
           </Stack>
         </Container>
       </Box>
