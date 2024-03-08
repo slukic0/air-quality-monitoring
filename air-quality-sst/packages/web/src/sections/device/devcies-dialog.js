@@ -31,7 +31,7 @@ export default function DeviceDialog(props) {
   const [changesPending, setChangesPending] = useState(false);
   const [searchedUsers, setSearchedUsers] = useState([]);
   const [usersToAdd, setUsersToAdd] = useState([]);
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -74,8 +74,9 @@ export default function DeviceDialog(props) {
         console.log(err);
       }
     } else if (event.target.value.length !== 0) {
-      const searchedUsers_filtered = searchedUsers.filter((user) =>
-        user.userId.startsWith(event.target.value)
+      const searchedUsers_filtered = searchedUsers.filter(
+        (user) =>
+          user.name.startsWith(event.target.value) || user.email.startsWith(event.target.value)
       );
       setSearchedUsers(searchedUsers_filtered);
     }
