@@ -46,6 +46,10 @@ export const main: APIGatewayProxyHandlerV2 = async (event: any) => {
   const resolvedQueryPromises = await Promise.all(queryPromises);
 
   // Get the data from each device and calculate the averages
+  //
+  // NOTE: for tgasResistance, we also want to get the average of each sensor
+  // since the MOX sensors have some variance when reading values.
+  // For other measurements, we can just group the readings together.
   const dataLastHour: Record<string, any> = {};
   resolvedQueryPromises.forEach((result) => {
     const count = result.Count ?? 0;
@@ -55,15 +59,22 @@ export const main: APIGatewayProxyHandlerV2 = async (event: any) => {
       const deviceId = items[0].deviceId;
       const numSensors = items[0].payload.data.length;
       const deviceData = [];
+      const deviceGasData: Array<Record<number, number>> = [];
 
-      for (const item of items) {
-        const data = item.payload.data;
-        for (const sensorReading of data) {
-          deviceData.push(sensorReading);
+      for (let i = 0; i < items.length; i++) {
+        const data = items[i].payload.data;
+        deviceGasData.push({});
+
+        for (let j = 0; j < data.length; j++) {
+          // add the tgasResistance to our gas array
+          deviceGasData[i][j] = data[j].tgasResistance;
+
+          // add the rest of the sensor readings to our array
+          deviceData.push(data[j]);
         }
       }
 
-      // sum all the sensor values
+      // sum all the data sensor values
       const deviceDataAverage = deviceData.reduce((accumulator: Record<string, number>, currentValue) => {
         for (const key of Object.keys(accumulator)) {
           accumulator[key] += currentValue[key];
@@ -77,11 +88,28 @@ export const main: APIGatewayProxyHandlerV2 = async (event: any) => {
         thumidity: 0,
       });
 
+      // sum all the gas sensor values
+      const sensorNumbers: number[] = Array.from({ length: numSensors }, (_, i) => (i));
+      const deviceGasAverage = deviceGasData.reduce((accumulator: Record<number, number>, currentValue) => {
+        for (const key of Object.keys(accumulator)) {
+          // @ts-expect-error TS complaining that key isn't a number even though it is
+          accumulator[key] += currentValue[key];
+        }
+        return accumulator;
+      }, {
+        ...sensorNumbers,
+      });
+
       // divide the sums
       for (const [key, value] of Object.entries(deviceDataAverage)) {
         deviceDataAverage[key] = value / (count * numSensors);
       }
-      dataLastHour[deviceId] = deviceDataAverage;
+
+      for (const [key, value] of Object.entries(deviceGasAverage)) {
+        // @ts-expect-error TS complaining that key isn't a number even though it is
+        deviceGasAverage[key] = value / (count);
+      }
+      dataLastHour[deviceId] = { ...deviceDataAverage, ...{ tgasResistanceIndividualSensors: deviceGasAverage } };
     }
   });
 
@@ -110,8 +138,8 @@ export const main: APIGatewayProxyHandlerV2 = async (event: any) => {
       },
     };
 
-    const res = await dynamoDb.batchWrite(batchWriteParams).promise();
-    return createJsonBody(200, { dataLastHour, res });
+    const { UnprocessedItems } = await dynamoDb.batchWrite(batchWriteParams).promise();
+    return createJsonBody(200, { dataLastHour, UnprocessedItems });
   } else {
     return createJsonBody(200, dataLastHour);
   }

@@ -9,6 +9,7 @@ import { useSession } from 'sst/node/auth';
 import jsonBodyParser from '@middy/http-json-body-parser';
 import httpErrorHandler from '@middy/http-error-handler';
 import { type AttributeValue } from '@aws-sdk/client-dynamodb';
+import executePaginatedQuery from '@air-quality-sst/core/src/dynamo/executePaginatedQuery';
 
 const dynamoDb = new DynamoDB.DocumentClient();
 
@@ -133,9 +134,9 @@ const getDataHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any) =
 
   // Get sensor data for this device
   const params = createQueryUsingTimestamps(Table.SensorData.tableName, 'deviceId', deviceId, 'recordedTimestamp', recordedTimestampStartNumber, recordedTimestampEndNumber);
-  const results = await dynamoDb.query(params).promise();
+  const results = await executePaginatedQuery(dynamoDb, params);
 
-  return createJsonBody(200, results.Items);
+  return createJsonBody(200, results);
 });
 
 const getAverageHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any) => {
@@ -176,9 +177,9 @@ const getAverageHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any
   }
 
   const params = createQueryUsingTimestamps(Table.SensorDataAggregate.tableName, 'deviceId', deviceId, 'hourTimestamp', recordedTimestampStartNumber, recordedTimestampEndNumber);
-  const results = await dynamoDb.query(params).promise();
+  const results = await executePaginatedQuery(dynamoDb, params);
 
-  if (results.Items) {
+  if (results.length > 0) {
     // Results are sorted since the SK is a number (https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_Query.html)
     // Entries will not exist for devices that did not write in that hour
     // We need to fill in these "missing" hours to make it easier to use the API
@@ -198,7 +199,7 @@ const getAverageHandler: APIGatewayProxyHandlerV2 = ApiHandler(async (event: any
     }
 
     // Fill in array with our results from dynamo
-    for (const item of results.Items) {
+    for (const item of results) {
       const timestamp = item.hourTimestamp;
       const index = timestampIndices[timestamp] ?? timestampIndices[getTimestampHour(Number(timestamp))];
       delete item.deviceId; // don't need the deviceId

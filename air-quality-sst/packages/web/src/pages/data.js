@@ -10,6 +10,7 @@ import {
   deviceAggregateDataPeriods,
   getDeviceAggregateDataChartData,
   deviceMetrics,
+  numSensors,
 } from 'src/api/devices';
 import { cloneDeep } from 'lodash';
 
@@ -24,7 +25,7 @@ const useChartOptions = (categories) => {
         show: true,
       },
     },
-    colors: [theme.palette.primary.main, alpha(theme.palette.primary.main, 0.25)],
+    // colors: [theme.palette.primary.main],
     dataLabels: {
       enabled: false,
     },
@@ -62,7 +63,7 @@ const useChartOptions = (categories) => {
     xaxis: {
       categories,
       title: {
-        text: 'Time (UTC)',
+        text: 'Time',
       },
       axisBorder: {
         color: theme.palette.divider,
@@ -152,14 +153,33 @@ const Page = () => {
   // Filter device data to only plot the desired metric
   useEffect(() => {
     if (deviceData.y.length > 0) {
-      const data = cloneDeep(deviceData);
+      if (metric !== deviceMetrics[0]) {
+        const metricData = deviceData.y[0].data.map((item) => {
+          return !!item && item[metric] ? Number(item[metric]) : null;
+        });
+        setDeviceChartData({ x: cloneDeep(deviceData.x), y: [{ name: metric, data: metricData }] });
+      } else {
+        // gas is a special case where we want to plot each gas sensor individually
 
-      data.y[0].data = data.y[0].data.map((item) => {
-        return !!item && item[metric] ? Number(item[metric]) : null;
-      });
-      data.y[0].name = metric;
+        const gasSensorMap = {};
+        for (let i = 0; i < numSensors; i++) {
+          gasSensorMap[i] = { name: `sensor_${i}`, data: [] };
+        }
 
-      setDeviceChartData(data);
+        const metricData = deviceData.y[0].data;
+
+        metricData.forEach((sensorDataItem) => {
+          Object.keys(gasSensorMap).forEach((key) => {
+            gasSensorMap[key].data.push(
+              !!sensorDataItem?.tgasResistanceIndividualSensors
+                ? sensorDataItem.tgasResistanceIndividualSensors[key]
+                : sensorDataItem?.tgasResistance ?? null
+            );
+          });
+        });
+
+        setDeviceChartData({ x: cloneDeep(deviceData.x), y: Object.values(gasSensorMap) });
+      }
     }
   }, [deviceData, metric]);
 
