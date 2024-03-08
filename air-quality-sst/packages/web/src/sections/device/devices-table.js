@@ -19,7 +19,7 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import DeviceDialog from 'src/sections/device/devcies-dialog';
 
 export const DevicesTable = (props) => {
-  const { items = [], user, onRemoveUsers, onRemoveDevice } = props;
+  const { items, user, onRemoveUsers, onRemoveDevice } = props;
 
   return (
     <TableContainer component={Paper}>

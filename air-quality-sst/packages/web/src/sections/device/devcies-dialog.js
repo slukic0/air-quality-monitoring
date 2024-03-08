@@ -69,15 +69,22 @@ export default function DeviceDialog(props) {
     if (event.target.value.length === 1) {
       const url = `${process.env.NEXT_PUBLIC_API_URL}/api/users/${event.target.value}`;
       try {
-        setSearchedUsers(await axios.get(url, { headers: { Authorization: `Bearer ${token}` } }));
+        const newSearchedUsers = await axios.get(url, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setSearchedUsers(newSearchedUsers.map((user) => user.name));
       } catch (err) {
         console.log(err);
       }
-    } else if (event.target.value.length !== 0) {
-      const searchedUsers_filtered = searchedUsers.filter(
-        (user) =>
-          user.name.startsWith(event.target.value) || user.email.startsWith(event.target.value)
-      );
+    } else if (event.target.value.length === 0) {
+      setSearchedUsers([]);
+    } else {
+      const searchedUsers_filtered = searchedUsers
+        .filter(
+          (user) =>
+            user.name.startsWith(event.target.value) || user.email.startsWith(event.target.value)
+        )
+        .map((user) => user.name);
       setSearchedUsers(searchedUsers_filtered);
     }
   };
@@ -186,7 +193,7 @@ export default function DeviceDialog(props) {
         </DialogContent>
         <DialogActions>
           <Button
-            aria-describedby={id}
+            aria-describedby={popoverId}
             onClick={handlePopoverClick}
             variant="outlined"
             color="error"
@@ -194,7 +201,7 @@ export default function DeviceDialog(props) {
             Remove Device
           </Button>
           <Popover
-            id={id}
+            id={popoverId}
             open={openPopover}
             anchorEl={anchorEl}
             onClose={handlePopoverClose}
