@@ -10,11 +10,12 @@ import {
   deviceAggregateDataPeriods,
   getDeviceAggregateDataChartData,
   deviceMetrics,
+  deviceMetricLabels,
   numSensors,
 } from 'src/api/devices';
 import { cloneDeep } from 'lodash';
 
-const useChartOptions = (categories) => {
+const useChartOptions = (categories, yaxisLabel) => {
   const theme = useTheme();
 
   return {
@@ -74,16 +75,19 @@ const useChartOptions = (categories) => {
         show: true,
       },
       labels: {
-        offsetY: 5,
+        // offsetY: 5,
         style: {
           colors: theme.palette.text.secondary,
         },
       },
     },
     yaxis: {
+      title: {
+        text: yaxisLabel,
+      },
       labels: {
         formatter: (value) => (value > 1000 ? `${value / 1000}K` : `${value}`),
-        offsetX: -10,
+        // offsetX: -10,
         style: {
           colors: theme.palette.text.secondary,
         },
@@ -125,6 +129,7 @@ const Page = () => {
   const [metric, setMetric] = useState(deviceMetrics[0]);
   const [deviceData, setDeviceData] = useState({ x: [], y: [] });
   const [deviceChartData, setDeviceChartData] = useState({ x: [], y: [] });
+  const [yAxisLabel, setyAxisLabel] = useState(null);
 
   const onDeviceSelectorChange = (value) => {
     setDevice(value);
@@ -136,7 +141,7 @@ const Page = () => {
     setMetric(value);
   };
 
-  const chartOptions = useChartOptions(deviceChartData.x);
+  const chartOptions = useChartOptions(deviceChartData.x, yAxisLabel);
 
   // Get device data
   useEffect(() => {
@@ -181,6 +186,8 @@ const Page = () => {
         setDeviceChartData({ x: cloneDeep(deviceData.x), y: Object.values(gasSensorMap) });
       }
     }
+    // Set the y axis label
+    setyAxisLabel(deviceMetricLabels[deviceMetrics.findIndex((element) => element === metric)]);
   }, [deviceData, metric]);
 
   return (
