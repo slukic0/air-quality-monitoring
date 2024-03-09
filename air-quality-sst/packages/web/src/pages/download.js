@@ -1,17 +1,19 @@
 import Head from 'next/head';
 import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
-import { Chart } from 'src/components/chart';
-import { alpha, useTheme } from '@mui/material/styles';
 import { useAuth } from 'src/hooks/use-auth';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Selector } from 'src/sections/core/Selector';
+import { getDeviceSensorData } from 'src/api/devices';
 import {
-  deviceAggregateDataPeriods,
-  getDeviceAggregateDataChartData,
-  deviceMetrics,
-  getDeviceSensorData,
-} from 'src/api/devices';
-import { Box, Container, Stack, Typography, FormControl, Button, Grid } from '@mui/material';
+  Box,
+  Container,
+  Stack,
+  Typography,
+  FormControl,
+  Button,
+  Grid,
+  CircularProgress,
+} from '@mui/material';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -25,17 +27,31 @@ const Page = () => {
   const [device, setDevice] = useState('');
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState();
+  const [isLoading, setIsLoading] = useState(false);
 
   const onDeviceSelectorChange = (value) => {
     setDevice(value);
   };
 
   const handleSubmit = async () => {
-    console.log('Selected Device:', device);
-    console.log('Start Date:', startDate);
-    console.log('End Date:', endDate);
+    setIsLoading(true);
     const data = await getDeviceSensorData(user.token, device, startDate, endDate);
-    console.log(data);
+
+    // Create a Blob object from the JSON data
+    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+    setIsLoading(false);
+
+    // Create a download link
+    const downloadLink = document.createElement('a');
+    downloadLink.href = window.URL.createObjectURL(blob);
+    downloadLink.download = `${device}_data.json`;
+
+    // Append the link to the body and trigger the download
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+
+    // Clean up by removing the link from the body
+    document.body.removeChild(downloadLink);
   };
 
   const lastDate = new Date();
@@ -46,7 +62,7 @@ const Page = () => {
 
   const limitStartTime = !startDate || startDate.getDay() === lastDate.getDay();
   const limitEndTime = !endDate || endDate.getDay() === lastDate.getDay();
-  const isSubmitDisabled = !startDate || !endDate || !device;
+  const isSubmitDisabled = !startDate || !endDate || !device || isLoading;
 
   return (
     <>
@@ -116,17 +132,16 @@ const Page = () => {
                       </Grid>
                     </Grid>
                   </Grid>
-                  <Grid item xs={12}>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={handleSubmit}
-                      disabled={isSubmitDisabled}
-                    >
-                      Submit
-                    </Button>
-                  </Grid>
                 </Grid>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleSubmit}
+                  disabled={isSubmitDisabled}
+                  sx={{ mt: 2 }}
+                >
+                  {isLoading ? <CircularProgress size={24} /> : 'Download'}
+                </Button>
               </FormControl>
             </div>
           </Stack>
