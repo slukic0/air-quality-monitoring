@@ -49,3 +49,25 @@ export const getDeviceAggregateDataChartData = async (token, deviceId, period) =
     return nullData;
   }
 };
+
+export const getDeviceSensorData = async (token, deviceId, startDate, endDate) => {
+  const url = `${process.env.NEXT_PUBLIC_API_URL}/api/sensorData/${deviceId}`;
+  const recordedTimestampStart = startDate.getTime();
+  const recordedTimestampEnd = endDate.getTime();
+
+  try {
+    const { data } = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params: {
+        recordedTimestampEnd,
+        recordedTimestampStart,
+      },
+    });
+    return data;
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+};

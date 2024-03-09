@@ -9,20 +9,9 @@ import {
   deviceAggregateDataPeriods,
   getDeviceAggregateDataChartData,
   deviceMetrics,
+  getDeviceSensorData,
 } from 'src/api/devices';
-import {
-  Box,
-  Container,
-  Stack,
-  Typography,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Button,
-  Grid,
-  TextField,
-} from '@mui/material';
+import { Box, Container, Stack, Typography, FormControl, Button, Grid } from '@mui/material';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -33,8 +22,6 @@ const Page = () => {
     [user]
   );
 
-  const [deviceData, setDeviceData] = useState({ x: [], y: [] });
-
   const [device, setDevice] = useState('');
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState();
@@ -43,10 +30,12 @@ const Page = () => {
     setDevice(value);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     console.log('Selected Device:', device);
     console.log('Start Date:', startDate);
     console.log('End Date:', endDate);
+    const data = await getDeviceSensorData(user.token, device, startDate, endDate);
+    console.log(data);
   };
 
   const lastDate = new Date();
