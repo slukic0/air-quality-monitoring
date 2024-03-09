@@ -38,6 +38,7 @@ export default function DeviceDialog(props) {
   };
 
   const handleClose = () => {
+    setSearchedUsers([]);
     setOpen(false);
   };
 
@@ -67,26 +68,26 @@ export default function DeviceDialog(props) {
   };
 
   const handleSearchUsers = async (event) => {
-    console.log('serach text ', event.target.value);
+    console.log('search text ', event.target.value);
+    console.log('search text len ', event.target.value.length);
     if (event.target.value.length === 1) {
       const url = `${process.env.NEXT_PUBLIC_API_URL}/api/users/${event.target.value}`;
       try {
         const newSearchedUsers = await axios.get(url, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setSearchedUsers(newSearchedUsers.map((user) => user.name));
+        console.log(newSearchedUsers.data);
+        setSearchedUsers(newSearchedUsers.data);
       } catch (err) {
         console.log(err);
       }
     } else if (event.target.value.length === 0) {
       setSearchedUsers([]);
     } else {
-      const searchedUsers_filtered = searchedUsers
-        .filter(
-          (user) =>
-            user.name.startsWith(event.target.value) || user.email.startsWith(event.target.value)
-        )
-        .map((user) => user.name);
+      const searchedUsers_filtered = searchedUsers.filter(
+        (user) =>
+          user.name.startsWith(event.target.value) || user.email.startsWith(event.target.value)
+      );
       setSearchedUsers(searchedUsers_filtered);
     }
     console.log('search results ', searchedUsers);
@@ -129,22 +130,17 @@ export default function DeviceDialog(props) {
           },
         }}
       >
-        <DialogTitle>Manage users for this Device</DialogTitle>
+        <DialogTitle>{`Manage users for ${deviceId}`}</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Enter the email or name of a user to allow access to this device
+            Enter the email address of a user to allow access to this device
           </DialogContentText>
           <Autocomplete
             disablePortal
             id="users-search"
-            options={searchedUsers.map((user) => user.name ?? user.userId)}
+            options={searchedUsers.map((user) => user.email)}
             renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Name or Email Address"
-                fullWidth
-                onChange={() => handleSearchUsers}
-              />
+              <TextField {...params} label="Email Address" fullWidth onChange={handleSearchUsers} />
             )}
           />
           <Box sx={{ width: '100%' }}>
@@ -216,22 +212,6 @@ export default function DeviceDialog(props) {
             <Typography sx={{ p: 2, mt: 2 }} variant="p">
               Confirm deletion
             </Typography>
-            {/* <Table>
-              <TableBody>
-                <TableRow>
-                  <TableCell>
-                    <Button onClick={handlePopoverClose} variant="outlined" color="primary">
-                      Cancel
-                    </Button>
-                  </TableCell>
-                  <TableCell>
-                    <Button onClick={() => removeDevice} variant="outlined" color="primary">
-                      Confirm
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table> */}
             <div>
               <Button sx={{ m: 1 }} onClick={handlePopoverClose} variant="outlined" color="primary">
                 Cancel
