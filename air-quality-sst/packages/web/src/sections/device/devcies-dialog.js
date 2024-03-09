@@ -25,19 +25,20 @@ import DeviceEditTable from './edit-dialog-selectable-table';
 import { removeUsersFromDevice } from 'src/utils/batch-remove-users';
 
 export default function DeviceDialog(props) {
-  const { deviceAuthorizedUsers, deviceId, token, onRemove } = props;
+  const { deviceAuthorizedUsers, deviceId, token, onRemove, onDeviceRemove } = props;
   const [open, setOpen] = useState(false);
   const [removedUsers, setRemovedUsers] = useState([]);
   const [changesPending, setChangesPending] = useState(false);
   const [searchedUsers, setSearchedUsers] = useState([]);
   const [usersToAdd, setUsersToAdd] = useState([]);
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const handleClickOpen = () => {
     setOpen(true);
   };
 
   const handleClose = () => {
+    setSearchedUsers([]);
     setOpen(false);
   };
 
@@ -59,6 +60,7 @@ export default function DeviceDialog(props) {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       onDeviceRemove(deviceId);
+      handlePopoverClose();
       handleClose();
     } catch (err) {
       console.log(err);
@@ -66,19 +68,29 @@ export default function DeviceDialog(props) {
   };
 
   const handleSearchUsers = async (event) => {
+    console.log('search text ', event.target.value);
+    console.log('search text len ', event.target.value.length);
     if (event.target.value.length === 1) {
       const url = `${process.env.NEXT_PUBLIC_API_URL}/api/users/${event.target.value}`;
       try {
-        setSearchedUsers(await axios.get(url, { headers: { Authorization: `Bearer ${token}` } }));
+        const newSearchedUsers = await axios.get(url, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        console.log(newSearchedUsers.data);
+        setSearchedUsers(newSearchedUsers.data);
       } catch (err) {
         console.log(err);
       }
-    } else if (event.target.value.length !== 0) {
-      const searchedUsers_filtered = searchedUsers.filter((user) =>
-        user.userId.startsWith(event.target.value)
+    } else if (event.target.value.length === 0) {
+      setSearchedUsers([]);
+    } else {
+      const searchedUsers_filtered = searchedUsers.filter(
+        (user) =>
+          user.name.startsWith(event.target.value) || user.email.startsWith(event.target.value)
       );
       setSearchedUsers(searchedUsers_filtered);
     }
+    console.log('search results ', searchedUsers);
   };
 
   const handlePopoverClick = (event) => {
@@ -118,22 +130,17 @@ export default function DeviceDialog(props) {
           },
         }}
       >
-        <DialogTitle>Manage users for this Device</DialogTitle>
+        <DialogTitle>{`Manage users for ${deviceId}`}</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Enter the email or name of a user to allow access to this device
+            Enter the email address of a user to allow access to this device
           </DialogContentText>
           <Autocomplete
             disablePortal
             id="users-search"
-            options={searchedUsers.map((user) => user.name ?? user.userId)}
+            options={searchedUsers.map((user) => user.email)}
             renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Name or Email Address"
-                fullWidth
-                onChange={() => handleSearchUsers}
-              />
+              <TextField {...params} label="Email Address" fullWidth onChange={handleSearchUsers} />
             )}
           />
           <Box sx={{ width: '100%' }}>
@@ -185,7 +192,7 @@ export default function DeviceDialog(props) {
         </DialogContent>
         <DialogActions>
           <Button
-            aria-describedby={id}
+            aria-describedby={popoverId}
             onClick={handlePopoverClick}
             variant="outlined"
             color="error"
@@ -193,7 +200,7 @@ export default function DeviceDialog(props) {
             Remove Device
           </Button>
           <Popover
-            id={id}
+            id={popoverId}
             open={openPopover}
             anchorEl={anchorEl}
             onClose={handlePopoverClose}
@@ -202,25 +209,17 @@ export default function DeviceDialog(props) {
               horizontal: 'left',
             }}
           >
-            <Typography sx={{ p: 2 }} variant="p">
+            <Typography sx={{ p: 2, mt: 2 }} variant="p">
               Confirm deletion
             </Typography>
-            <Table>
-              <TableBody>
-                <TableRow>
-                  <TableCell>
-                    <Button onClick={handlePopoverClose} variant="outlined" color="primary">
-                      Cancel
-                    </Button>
-                  </TableCell>
-                  <TableCell>
-                    <Button onClick={() => removeDevice} variant="outlined" color="primary">
-                      Confirm
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
+            <div>
+              <Button sx={{ m: 1 }} onClick={handlePopoverClose} variant="outlined" color="primary">
+                Cancel
+              </Button>
+              <Button sx={{ m: 1 }} onClick={() => removeDevice()} variant="outlined" color="error">
+                Confirm
+              </Button>
+            </div>
           </Popover>
           <Button onClick={handleClose} variant="outlined" color="primary">
             Cancel

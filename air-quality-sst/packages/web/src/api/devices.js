@@ -4,6 +4,13 @@ import { getTimestampHour, getTimestampHoursAgo } from 'src/utils/timestamps';
 export const deviceAggregateDataPeriods = ['24 Hours'];
 
 export const deviceMetrics = ['tgasResistance', 'thumidity', 'tiaq', 'tpressure', 'ttemperature'];
+export const deviceMetricLabels = [
+  'Gas Resistance in Ohms',
+  '% Humidity',
+  'Air Quality',
+  'Pressure in Pa',
+  'Degrees Celcius',
+];
 
 export const numSensors = 7;
 

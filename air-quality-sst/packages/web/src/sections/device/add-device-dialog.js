@@ -61,7 +61,9 @@ export default function AddDeviceDialog(props) {
               onChange(formJson.text);
               handleClose();
             } catch (err) {
-              if (err.response.status === 409) {
+              if (err.response.status === 401) {
+                setDeviceIdErrorText('Unauthorized');
+              } else if (err.response.status === 409) {
                 setDeviceIdErrorText('Device already registered');
               } else {
                 setDeviceIdErrorText('An error has occurred, plase try again later');
