@@ -36,12 +36,7 @@ const Page = () => {
   };
 
   const onRemoveDevice = (deviceId) => {
-    const devicesCopy = [...devices];
-    const updatedDevices = devicesCopy.map((device) => {
-      if (device.deviceId !== deviceId) {
-        return device;
-      }
-    });
+    const updatedDevices = devices.filter((device) => device.deviceId !== deviceId);
     setDevices(updatedDevices);
   };
 

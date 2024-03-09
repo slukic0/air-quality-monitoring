@@ -25,7 +25,7 @@ import DeviceEditTable from './edit-dialog-selectable-table';
 import { removeUsersFromDevice } from 'src/utils/batch-remove-users';
 
 export default function DeviceDialog(props) {
-  const { deviceAuthorizedUsers, deviceId, token, onRemove } = props;
+  const { deviceAuthorizedUsers, deviceId, token, onRemove, onDeviceRemove } = props;
   const [open, setOpen] = useState(false);
   const [removedUsers, setRemovedUsers] = useState([]);
   const [changesPending, setChangesPending] = useState(false);
@@ -59,6 +59,7 @@ export default function DeviceDialog(props) {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       onDeviceRemove(deviceId);
+      handlePopoverClose();
       handleClose();
     } catch (err) {
       console.log(err);
@@ -66,6 +67,7 @@ export default function DeviceDialog(props) {
   };
 
   const handleSearchUsers = async (event) => {
+    console.log('serach text ', event.target.value);
     if (event.target.value.length === 1) {
       const url = `${process.env.NEXT_PUBLIC_API_URL}/api/users/${event.target.value}`;
       try {
@@ -87,6 +89,7 @@ export default function DeviceDialog(props) {
         .map((user) => user.name);
       setSearchedUsers(searchedUsers_filtered);
     }
+    console.log('search results ', searchedUsers);
   };
 
   const handlePopoverClick = (event) => {
@@ -210,10 +213,10 @@ export default function DeviceDialog(props) {
               horizontal: 'left',
             }}
           >
-            <Typography sx={{ p: 2 }} variant="p">
+            <Typography sx={{ p: 2, mt: 2 }} variant="p">
               Confirm deletion
             </Typography>
-            <Table>
+            {/* <Table>
               <TableBody>
                 <TableRow>
                   <TableCell>
@@ -228,7 +231,15 @@ export default function DeviceDialog(props) {
                   </TableCell>
                 </TableRow>
               </TableBody>
-            </Table>
+            </Table> */}
+            <div>
+              <Button sx={{ m: 1 }} onClick={handlePopoverClose} variant="outlined" color="primary">
+                Cancel
+              </Button>
+              <Button sx={{ m: 1 }} onClick={() => removeDevice()} variant="outlined" color="error">
+                Confirm
+              </Button>
+            </div>
           </Popover>
           <Button onClick={handleClose} variant="outlined" color="primary">
             Cancel
