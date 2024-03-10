@@ -1,7 +1,7 @@
 import axios from 'axios';
 import PropTypes from 'prop-types';
 import {
-  Autocomplete,
+  autocompleteClasses,
   Box,
   Button,
   TextField,
@@ -10,7 +10,9 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  useAutocomplete,
   Paper,
+  styled,
   Table,
   TableBody,
   TableCell,
@@ -20,16 +22,142 @@ import {
   Typography,
   Popover,
 } from '@mui/material';
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import DeviceEditTable from './edit-dialog-selectable-table';
+import { addUsersToDevice } from 'src/utils/batch-add-users';
 import { removeUsersFromDevice } from 'src/utils/batch-remove-users';
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
+
+const InputWrapper = styled('div')(
+  ({ theme }) => `
+  width: 100%;
+  border: 1px solid ${theme.palette.mode === 'dark' ? '#434343' : '#d9d9d9'};
+  background-color: ${theme.palette.mode === 'dark' ? '#141414' : '#fff'};
+  border-radius: 4px;
+  padding: 1px;
+  display: flex;
+  flex-wrap: wrap;
+
+  &:hover {
+    border-color: ${theme.palette.mode === 'dark' ? '#177ddc' : '#40a9ff'};
+  }
+
+  &.focused {
+    border-color: ${theme.palette.mode === 'dark' ? '#177ddc' : '#40a9ff'};
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+  }
+
+  & input {
+    background-color: ${theme.palette.mode === 'dark' ? '#141414' : '#fff'};
+    color: ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.65)' : 'rgba(0,0,0,.85)'};
+    height: 30px;
+    box-sizing: border-box;
+    padding: 4px 6px;
+    width: 0;
+    min-width: 30px;
+    flex-grow: 1;
+    border: 0;
+    margin: 0;
+    outline: 0;
+  }
+`
+);
+
+const StyledTag = styled(Tag)(
+  ({ theme }) => `
+  display: flex;
+  align-items: center;
+  height: 24px;
+  margin: 2px;
+  line-height: 22px;
+  background-color: ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : '#fafafa'};
+  border: 1px solid ${theme.palette.mode === 'dark' ? '#303030' : '#e8e8e8'};
+  border-radius: 2px;
+  box-sizing: content-box;
+  padding: 0 4px 0 10px;
+  outline: 0;
+  overflow: hidden;
+
+  &:focus {
+    border-color: ${theme.palette.mode === 'dark' ? '#177ddc' : '#40a9ff'};
+    background-color: ${theme.palette.mode === 'dark' ? '#003b57' : '#e6f7ff'};
+  }
+
+  & span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  & svg {
+    font-size: 12px;
+    cursor: pointer;
+    padding: 4px;
+  }
+`
+);
+
+const Listbox = styled('ul')(
+  ({ theme }) => `
+  width: 100%;
+  margin: 2px 0 0;
+  padding: 0;
+  position: absolute;
+  list-style: none;
+  background-color: ${theme.palette.mode === 'dark' ? '#141414' : '#fff'};
+  overflow: auto;
+  max-height: 250px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1;
+
+  & li {
+    padding: 5px 12px;
+    display: flex;
+
+    & span {
+      flex-grow: 1;
+    }
+
+    & svg {
+      color: transparent;
+    }
+  }
+
+  & li[aria-selected='true'] {
+    background-color: ${theme.palette.mode === 'dark' ? '#2b2b2b' : '#fafafa'};
+    font-weight: 600;
+
+    & svg {
+      color: #1890ff;
+    }
+  }
+
+  & li.${autocompleteClasses.focused} {
+    background-color: ${theme.palette.mode === 'dark' ? '#003b57' : '#e6f7ff'};
+    cursor: pointer;
+
+    & svg {
+      color: currentColor;
+    }
+  }
+`
+);
 
 export default function DeviceDialog(props) {
-  const { deviceAuthorizedUsers, deviceId, token, onRemove, onDeviceRemove } = props;
+  const {
+    deviceAuthorizedUsers,
+    deviceId,
+    userId,
+    token,
+    onAddNewUsers,
+    onRemove,
+    onDeviceRemove,
+  } = props;
   const [open, setOpen] = useState(false);
   const [removedUsers, setRemovedUsers] = useState([]);
   const [changesPending, setChangesPending] = useState(false);
-  const [searchedUsers, setSearchedUsers] = useState([]);
   const [usersToAdd, setUsersToAdd] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -38,17 +166,16 @@ export default function DeviceDialog(props) {
   };
 
   const handleClose = () => {
-    setSearchedUsers([]);
     setOpen(false);
-  };
-
-  const handleRemove = () => {
-    console.log('TODO');
   };
 
   const onRemoveUsers = (removed) => {
     setRemovedUsers(removed);
     setChangesPending(true);
+  };
+
+  const onAddUsers = (addedUsers) => {
+    setUsersToAdd(addedUsers);
   };
 
   const removeDevice = async () => {
@@ -65,32 +192,6 @@ export default function DeviceDialog(props) {
     } catch (err) {
       console.log(err);
     }
-  };
-
-  const handleSearchUsers = async (event) => {
-    console.log('search text ', event.target.value);
-    console.log('search text len ', event.target.value.length);
-    if (event.target.value.length === 1) {
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/users/${event.target.value}`;
-      try {
-        const newSearchedUsers = await axios.get(url, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        console.log(newSearchedUsers.data);
-        setSearchedUsers(newSearchedUsers.data);
-      } catch (err) {
-        console.log(err);
-      }
-    } else if (event.target.value.length === 0) {
-      setSearchedUsers([]);
-    } else {
-      const searchedUsers_filtered = searchedUsers.filter(
-        (user) =>
-          user.name.startsWith(event.target.value) || user.email.startsWith(event.target.value)
-      );
-      setSearchedUsers(searchedUsers_filtered);
-    }
-    console.log('search results ', searchedUsers);
   };
 
   const handlePopoverClick = (event) => {
@@ -123,6 +224,8 @@ export default function DeviceDialog(props) {
             try {
               await removeUsersFromDevice(deviceId, removedUsers, token);
               onRemove(deviceId, removedUsers);
+              await addUsersToDevice(deviceId, usersToAdd, token);
+              onAddNewUsers(deviceId, usersToAdd);
               handleClose();
             } catch (err) {
               console.log(err);
@@ -135,14 +238,7 @@ export default function DeviceDialog(props) {
           <DialogContentText>
             Enter the email address of a user to allow access to this device
           </DialogContentText>
-          <Autocomplete
-            disablePortal
-            id="users-search"
-            options={searchedUsers.map((user) => user.email)}
-            renderInput={(params) => (
-              <TextField {...params} label="Email Address" fullWidth onChange={handleSearchUsers} />
-            )}
-          />
+          <CustomizedHook addUsersCallback={onAddUsers} userId={userId} token={token} />
           <Box sx={{ width: '100%' }}>
             <Paper sx={{ width: '100%', mb: 2 }}>
               <Typography
@@ -236,7 +332,109 @@ export default function DeviceDialog(props) {
 DeviceDialog.propTypes = {
   deviceAuthorizedUsers: PropTypes.array.isRequired,
   deviceId: PropTypes.string.isRequired,
+  onAddNewUsers: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
   onDeviceRemove: PropTypes.func.isRequired,
+  userId: PropTypes.string.isRequired,
   token: PropTypes.string.isRequired,
+};
+
+function CustomizedHook(props) {
+  const { addUsersCallback, userId, token } = props;
+  const [searchedUsers, setSearchedUsers] = useState([]);
+
+  const {
+    getRootProps,
+    getInputProps,
+    getTagProps,
+    getListboxProps,
+    getOptionProps,
+    groupedOptions,
+    value,
+    focused,
+    setAnchorEl,
+  } = useAutocomplete({
+    id: 'search-users-bar',
+    multiple: true,
+    options: searchedUsers,
+    getOptionLabel: (user) => user.email,
+  });
+
+  const defaultOnChange = getInputProps().onChange;
+  const handleSearchUsers = async (event) => {
+    defaultOnChange(event);
+    if (event.target.value.length === 1) {
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/users/${event.target.value}`;
+      try {
+        const newSearchedUsers = await axios.get(url, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setSearchedUsers(newSearchedUsers.data.filter((user) => user.userId !== userId));
+      } catch (err) {
+        console.log(err);
+      }
+    } else if (event.target.value.length === 0) {
+      setSearchedUsers([]);
+    } else {
+      const searchedUsers_filtered = searchedUsers.filter(
+        (user) =>
+          (user.name.startsWith(event.target.value) || user.email.startsWith(event.target.value)) &&
+          user.userId !== userId
+      );
+      setSearchedUsers(searchedUsers_filtered);
+    }
+  };
+
+  useEffect(() => {
+    addUsersCallback(value);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+
+  return (
+    <Fragment>
+      <div {...getRootProps()}>
+        <InputWrapper ref={setAnchorEl} className={focused ? 'focused' : ''}>
+          <input {...getInputProps()} onChange={handleSearchUsers} />
+          {value.map((user, index) => (
+            <StyledTag
+              label={user.email ?? user.userId}
+              {...getTagProps({ index })}
+              key={user.userId}
+            />
+          ))}
+        </InputWrapper>
+      </div>
+      {groupedOptions.length > 0 ? (
+        <Listbox {...getListboxProps()}>
+          {groupedOptions.map((user, index) => (
+            <li {...getOptionProps({ option: user, index })} key={index}>
+              <span>{user.email ?? user.userId}</span>
+              <CheckIcon fontSize="inherit" />
+            </li>
+          ))}
+        </Listbox>
+      ) : null}
+    </Fragment>
+  );
+}
+
+CustomizedHook.propTypes = {
+  addUsersCallback: PropTypes.func.isRequired,
+  userId: PropTypes.string.isRequired,
+  token: PropTypes.string.isRequired,
+};
+
+function Tag(props) {
+  const { label, onDelete, ...other } = props;
+  return (
+    <div {...other}>
+      <span>{label}</span>
+      <CloseIcon fontSize="inherit" onClick={onDelete} />
+    </div>
+  );
+}
+
+Tag.propTypes = {
+  label: PropTypes.string.isRequired,
+  onDelete: PropTypes.func.isRequired,
 };

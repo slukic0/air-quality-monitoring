@@ -19,7 +19,7 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import DeviceDialog from 'src/sections/device/devcies-dialog';
 
 export const DevicesTable = (props) => {
-  const { items, user, onRemoveUsers, onRemoveDevice } = props;
+  const { items, user, onAddUsers, onRemoveUsers, onRemoveDevice } = props;
 
   return (
     <TableContainer component={Paper}>
@@ -41,6 +41,7 @@ export const DevicesTable = (props) => {
               key={device.deviceId}
               device={device}
               user={user}
+              onAddUsers={onAddUsers}
               onRemoveUsers={onRemoveUsers}
               onRemoveDevice={onRemoveDevice}
             />
@@ -54,12 +55,13 @@ export const DevicesTable = (props) => {
 DevicesTable.propTypes = {
   items: PropTypes.array,
   user: PropTypes.object.isRequired,
+  onAddUsers: PropTypes.func.isRequired,
   onRemoveUsers: PropTypes.func.isRequired,
   onRemoveDevice: PropTypes.func.isRequired,
 };
 
 function Device(props) {
-  const { device, user, onRemoveUsers, onRemoveDevice } = props;
+  const { device, user, onAddUsers, onRemoveUsers, onRemoveDevice } = props;
   const [open, setOpen] = useState(false);
 
   return (
@@ -87,7 +89,9 @@ function Device(props) {
             <DeviceDialog
               deviceAuthorizedUsers={device.authorizedUsers}
               deviceId={device.deviceId}
+              userId={user.userId}
               token={user.token}
+              onAddUsers={onAddUsers}
               onRemove={onRemoveUsers}
               onDeviceRemove={onRemoveDevice}
             />
@@ -157,6 +161,7 @@ Device.propTypes = {
     email: PropTypes.string,
   }),
   user: PropTypes.object.isRequired,
+  onAddUsers: PropTypes.func.isRequired,
   onRemoveUsers: PropTypes.func.isRequired,
   onRemoveDevice: PropTypes.func.isRequired,
 };

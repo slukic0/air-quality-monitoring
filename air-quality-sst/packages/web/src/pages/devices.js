@@ -42,6 +42,17 @@ const Page = () => {
     setDevices(updatedDevices);
   };
 
+  const onAddNewUsers = (deviceId, addedUsers) => {
+    const devicesCopy = [...devices];
+    const updatedDevices = devicesCopy.map((device) => {
+      if (device.deviceId === deviceId) {
+        device.authorizedUsers = [...device.authorizedUsers, addedUsers];
+      }
+      return device;
+    });
+    setDevices(updatedDevices);
+  };
+
   const onRemovedUsers = (deviceId, removedUsers) => {
     const devicesCopy = [...devices];
     const removedUserIds = removedUsers.map((userObj) => userObj.userId);
@@ -89,6 +100,7 @@ const Page = () => {
               <DevicesTable
                 items={devices}
                 user={user}
+                onAddUsers={onAddNewUsers}
                 onRemoveUsers={onRemovedUsers}
                 onRemoveDevice={onRemoveDevice}
               />
