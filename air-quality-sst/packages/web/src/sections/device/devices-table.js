@@ -35,7 +35,6 @@ export const DevicesTable = (props) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {console.log('items', items)}
           {items.map((device) => (
             <Device
               key={device.deviceId}
@@ -91,7 +90,7 @@ function Device(props) {
               deviceId={device.deviceId}
               userId={user.userId}
               token={user.token}
-              onAddUsers={onAddUsers}
+              onAddNewUsers={onAddUsers}
               onRemove={onRemoveUsers}
               onDeviceRemove={onRemoveDevice}
             />

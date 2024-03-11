@@ -157,7 +157,6 @@ export default function DeviceDialog(props) {
   } = props;
   const [open, setOpen] = useState(false);
   const [removedUsers, setRemovedUsers] = useState([]);
-  const [changesPending, setChangesPending] = useState(false);
   const [usersToAdd, setUsersToAdd] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -167,11 +166,11 @@ export default function DeviceDialog(props) {
 
   const handleClose = () => {
     setOpen(false);
+    setAnchorEl(null);
   };
 
   const onRemoveUsers = (removed) => {
     setRemovedUsers(removed);
-    setChangesPending(true);
   };
 
   const onAddUsers = (addedUsers) => {
