@@ -48,15 +48,6 @@ export const items = [
     ),
   },
   {
-    title: 'Administration',
-    path: '/administration',
-    icon: (
-      <SvgIcon fontSize="small">
-        <UserPlusIcon />
-      </SvgIcon>
-    ),
-  },
-  {
     title: 'Companies',
     path: '/companies',
     icon: (
