@@ -28,6 +28,7 @@ import { addUsersToDevice } from 'src/utils/batch-add-users';
 import { removeUsersFromDevice } from 'src/utils/batch-remove-users';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
+import { isEqual } from 'lodash';
 
 const InputWrapper = styled('div')(
   ({ theme }) => `
@@ -368,7 +369,7 @@ function CustomizedHook(props) {
         const newSearchedUsers = await axios.get(url, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setSearchedUsers(newSearchedUsers.data.filter((user) => user.userId !== userId));
+        setSearchedUsers(newSearchedUsers.data.filter((user) => user.userId !== userId || !value.find((selectedUser) => isEqual(user, selectedUser))));
       } catch (err) {
         console.log(err);
       }
@@ -377,8 +378,8 @@ function CustomizedHook(props) {
     } else {
       const searchedUsers_filtered = searchedUsers.filter(
         (user) =>
-          (user.name.startsWith(event.target.value) || user.email.startsWith(event.target.value)) &&
-          user.userId !== userId
+          user.email.startsWith(event.target.value) &&
+          (user.userId !== userId || !value.find((selectedUser) => isEqual(user, selectedUser)))
       );
       setSearchedUsers(searchedUsers_filtered);
     }
