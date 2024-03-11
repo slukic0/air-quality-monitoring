@@ -7,6 +7,7 @@ import UserPlusIcon from '@heroicons/react/24/solid/UserPlusIcon';
 import UsersIcon from '@heroicons/react/24/solid/UsersIcon';
 import XCircleIcon from '@heroicons/react/24/solid/XCircleIcon';
 import BookOpenIcon from '@heroicons/react/24/solid/BookOpenIcon';
+import ArrowDownTrayIcon from '@heroicons/react/24/solid/ArrowDownTrayIcon';
 import { SvgIcon } from '@mui/material';
 
 export const items = [
@@ -25,6 +26,15 @@ export const items = [
     icon: (
       <SvgIcon fontSize="small">
         <BookOpenIcon />
+      </SvgIcon>
+    ),
+  },
+  {
+    title: 'Download',
+    path: '/download',
+    icon: (
+      <SvgIcon fontSize="small">
+        <ArrowDownTrayIcon />
       </SvgIcon>
     ),
   },
