@@ -17,6 +17,7 @@
     "@emotion/server": "11.11.0",
     "@emotion/styled": "11.11.0",
     "@heroicons/react": "2.0.18",
+    "@mui/icons-material": "^5.15.11",
     "@mui/lab": "5.0.0-alpha.155",
     "@mui/material": "5.14.20",
     "@mui/system": "5.14.20",

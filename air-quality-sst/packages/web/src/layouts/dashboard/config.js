@@ -29,11 +29,20 @@ export const items = [
     ),
   },
   {
-    title: 'Devices',
+    title: 'Device Managment',
     path: '/devices',
     icon: (
       <SvgIcon fontSize="small">
         <UsersIcon />
+      </SvgIcon>
+    ),
+  },
+  {
+    title: 'Administration',
+    path: '/administration',
+    icon: (
+      <SvgIcon fontSize="small">
+        <UserPlusIcon />
       </SvgIcon>
     ),
   },
