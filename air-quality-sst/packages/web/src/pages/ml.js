@@ -70,6 +70,11 @@ const Page = () => {
                 {isLoading ? <CircularProgress size={24} /> : 'Submit'}
               </Button>
             </div>
+            {!!response && (
+              <div>
+                <Typography>{response.message}</Typography>
+              </div>
+            )}
           </Stack>
         </Container>
       </Box>
