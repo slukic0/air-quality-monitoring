@@ -54,7 +54,7 @@ export function ApiStack({ stack, app }: StackContext) {
       "GET /api/user/{userId}": "packages/functions/src/users.getUser",
 
       // call sagemaker endpoint
-      "POST /api/ml": "packages/functions/src/sagemaker.handler",
+      "GET /api/ml/{deviceId}": "packages/functions/src/sagemaker.handler",
 
 
       /* Cron job testing */
