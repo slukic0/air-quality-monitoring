@@ -369,7 +369,12 @@ function CustomizedHook(props) {
         const newSearchedUsers = await axios.get(url, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setSearchedUsers(newSearchedUsers.data.filter((user) => user.userId !== userId || !value.find((selectedUser) => isEqual(user, selectedUser))));
+        setSearchedUsers(
+          newSearchedUsers.data.filter(
+            (user) =>
+              user.userId !== userId && !value.find((selectedUser) => isEqual(user, selectedUser))
+          )
+        );
       } catch (err) {
         console.log(err);
       }
@@ -379,7 +384,7 @@ function CustomizedHook(props) {
       const searchedUsers_filtered = searchedUsers.filter(
         (user) =>
           user.email.startsWith(event.target.value) &&
-          (user.userId !== userId || !value.find((selectedUser) => isEqual(user, selectedUser)))
+          (user.userId !== userId && !value.find((selectedUser) => isEqual(user, selectedUser)))
       );
       setSearchedUsers(searchedUsers_filtered);
     }
