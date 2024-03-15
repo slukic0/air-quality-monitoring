@@ -4,7 +4,6 @@ import {
   autocompleteClasses,
   Box,
   Button,
-  TextField,
   Dialog,
   DialogActions,
   DialogContent,
@@ -16,7 +15,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
   TableRow,
   Typography,
@@ -369,7 +367,12 @@ function CustomizedHook(props) {
         const newSearchedUsers = await axios.get(url, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setSearchedUsers(newSearchedUsers.data.filter((user) => user.userId !== userId || !value.find((selectedUser) => isEqual(user, selectedUser))));
+        setSearchedUsers(
+          newSearchedUsers.data.filter(
+            (user) =>
+              user.userId !== userId || !value.find((selectedUser) => isEqual(user, selectedUser))
+          )
+        );
       } catch (err) {
         console.log(err);
       }
