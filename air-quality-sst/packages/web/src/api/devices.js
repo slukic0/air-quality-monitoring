@@ -1,7 +1,11 @@
 import axios from 'axios';
-import { getTimestampHour, getTimestampHoursAgo } from 'src/utils/timestamps';
+import {
+  getTimestampHour,
+  getTimestampMinutesAgo,
+  getTimestampHoursAgo,
+} from 'src/utils/timestamps';
 
-export const deviceAggregateDataPeriods = ['24 Hours'];
+export const deviceDataPeriods = ['Last 24 Hours', 'Last 30 mins'];
 
 export const deviceMetrics = ['tgasResistance', 'thumidity', 'tiaq', 'tpressure', 'ttemperature'];
 export const deviceMetricLabels = [
@@ -15,12 +19,14 @@ export const deviceMetricLabels = [
 export const numSensors = 7;
 
 export const getDeviceAggregateDataChartData = async (token, deviceId, period) => {
-  const url = `${process.env.NEXT_PUBLIC_API_URL}/api/sensorData/${deviceId}/average`;
   const now = Date.now();
 
-  if (period === deviceAggregateDataPeriods[0]) {
+  if (period === deviceDataPeriods[0]) {
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/sensorData/${deviceId}/average`;
     const currentHour = new Date(getTimestampHour(now)).getHours();
-    const last24Hours = Array.from({ length: 25 }, (_, i) => (currentHour + i) % 24);
+    const last24Hours = Array.from({ length: 25 }, (_, i) => (currentHour + i) % 24).map(
+      (hour) => `${hour}:00`
+    );
 
     const nullData = {
       x: last24Hours,
@@ -45,6 +51,99 @@ export const getDeviceAggregateDataChartData = async (token, deviceId, period) =
       return {
         x: last24Hours,
         y: [{ name: deviceId, data }],
+      };
+    } catch (error) {
+      console.log(error);
+      return nullData;
+    }
+  } else if (period === deviceDataPeriods[1]) {
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/sensorData/${deviceId}`;
+
+    const now = new Date();
+    const currentMin = now.getMinutes();
+    const currentHour = now.getHours();
+
+    // Calculate the minutes for the last 30 minutes
+    let last30mins = [];
+    for (let i = 0; i < 30; i++) {
+      let minute = (currentMin - i) % 60;
+      let hour = currentHour;
+
+      // If minute becomes negative, decrement the hour
+      if (minute < 0) {
+        minute += 60;
+        hour--;
+      }
+
+      // Convert to a string format like 'hh:mm'
+      let formattedHour = hour.toString().padStart(2, '0');
+      let formattedMinute = minute.toString().padStart(2, '0');
+      last30mins.unshift(`${formattedHour}:${formattedMinute}`);
+    }
+
+    const nullData = {
+      x: last30mins,
+      y: [{ name: deviceId, data: Array.from({ length: 30 }, () => null) }],
+    };
+
+    try {
+      const { data } = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          recordedTimestampEnd: now.getTime(),
+          recordedTimestampStart: getTimestampMinutesAgo(30, now.getTime()),
+        },
+      });
+
+      if (data.length === 0) {
+        return nullData;
+      }
+
+      // map data
+      const sensorData = data.map((element) => {
+        const { deviceId, recordedTimestamp, payload } = element;
+        return { deviceId, recordedTimestamp, ...payload.data };
+      });
+
+      const averagedSensorData = sensorData.map((reading) => {
+        const tgasResistanceIndividualSensors = [];
+        const sensorReadings = [];
+
+        // get all the sensor readings into an array
+        for (let i = 0; i < numSensors; i++) {
+          sensorReadings.push(reading[i]);
+          tgasResistanceIndividualSensors.push(reading[i].tgasResistance);
+        }
+
+        // get the sum of the other sensor values
+        const deviceDataAverage = sensorReadings.reduce(
+          (accumulator, currentValue) => {
+            for (const key of Object.keys(accumulator)) {
+              accumulator[key] += currentValue[key];
+            }
+            return accumulator;
+          },
+          {
+            tgasResistance: 0,
+            tiaq: 0,
+            tpressure: 0,
+            ttemperature: 0,
+            thumidity: 0,
+          }
+        );
+
+        // divide the sums
+        for (const [key, value] of Object.entries(deviceDataAverage)) {
+          deviceDataAverage[key] = value / numSensors;
+        }
+        return { tgasResistanceIndividualSensors, ...deviceDataAverage };
+      });
+
+      return {
+        x: last30mins,
+        y: [{ name: deviceId, data: averagedSensorData }],
       };
     } catch (error) {
       console.log(error);

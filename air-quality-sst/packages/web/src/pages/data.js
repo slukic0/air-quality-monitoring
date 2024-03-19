@@ -7,7 +7,7 @@ import { useAuth } from 'src/hooks/use-auth';
 import { useEffect, useMemo, useState } from 'react';
 import { Selector } from 'src/sections/core/Selector';
 import {
-  deviceAggregateDataPeriods,
+  deviceDataPeriods,
   getDeviceAggregateDataChartData,
   deviceMetrics,
   deviceMetricLabels,
@@ -86,7 +86,12 @@ const useChartOptions = (categories, yaxisLabel) => {
         text: yaxisLabel,
       },
       labels: {
-        formatter: (value) => (value > 1000 ? `${value / 1000}K` : `${value}`),
+        formatter: (value) => {
+          if (!value) return 'N/A';
+          const roundedVal = value.toFixed(2);
+          const roundedValinK = (value / 1000).toFixed(2);
+          return value > 1000 ? `${roundedValinK}.K` : `${roundedVal}`;
+        },
         // offsetX: -10,
         style: {
           colors: theme.palette.text.secondary,
@@ -150,6 +155,7 @@ const Page = () => {
         return;
       }
       const data = await getDeviceAggregateDataChartData(user.token, device, period);
+      console.log(data);
       setDeviceData(data);
     };
     getDeviceData();
@@ -233,7 +239,7 @@ const Page = () => {
                 <Grid item sm={3} xs={6}>
                   <Selector
                     defaultText={'Select Period'}
-                    items={deviceAggregateDataPeriods}
+                    items={deviceDataPeriods}
                     onChange={onPeriodSelectorChange}
                   />
                 </Grid>
