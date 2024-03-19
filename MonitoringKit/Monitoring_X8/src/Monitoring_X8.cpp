@@ -276,7 +276,7 @@ void errLeds(void) {
 }
 
 /* Buffer to avoid publishing too many messages */
-const int NUMBER_OF_SKIPPED_SAMPLES = NUM_OF_SENS * 9; // Number of samples to skip
+const int NUMBER_OF_SKIPPED_SAMPLES = NUM_OF_SENS * 19; // Number of samples to skip
 
 void newDataCallback(const bme68xData data, const bsecOutputs outputs, Bsec2 bsec) {
     if (!outputs.nOutputs) {
