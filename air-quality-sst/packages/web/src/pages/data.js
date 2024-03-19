@@ -90,7 +90,7 @@ const useChartOptions = (categories, yaxisLabel) => {
           if (!value) return 'N/A';
           const roundedVal = value.toFixed(2);
           const roundedValinK = (value / 1000).toFixed(2);
-          return value > 1000 ? `${roundedValinK}.K` : `${roundedVal}`;
+          return value > 1000 ? `${roundedValinK}K` : `${roundedVal}`;
         },
         // offsetX: -10,
         style: {
