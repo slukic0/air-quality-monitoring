@@ -149,7 +149,7 @@ void setupMqtt() {
   client.setCallback(messageHandler);
 
   // Needed if publish intervals exceed 15 seconds
-  client.setKeepAlive(33); // + 3 secs for buffer room
+  client.setKeepAlive(70); // + 10 secs for buffer room
 
   while (!client.connect(THINGNAME)) {
     Serial.print(".");
