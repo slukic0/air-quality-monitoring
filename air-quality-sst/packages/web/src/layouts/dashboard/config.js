@@ -3,6 +3,7 @@ import UserIcon from '@heroicons/react/24/solid/UserIcon';
 import UsersIcon from '@heroicons/react/24/solid/UsersIcon';
 import BookOpenIcon from '@heroicons/react/24/solid/BookOpenIcon';
 import ArrowDownTrayIcon from '@heroicons/react/24/solid/ArrowDownTrayIcon';
+import CpuChipIcon from '@heroicons/react/24/solid/CpuChipIcon';
 import { SvgIcon } from '@mui/material';
 
 export const items = [
@@ -48,6 +49,15 @@ export const items = [
     icon: (
       <SvgIcon fontSize="small">
         <UserIcon />
+      </SvgIcon>
+    ),
+  },
+  {
+    title: 'ML',
+    path: '/ml',
+    icon: (
+      <SvgIcon fontSize="small">
+        <CpuChipIcon />
       </SvgIcon>
     ),
   },

@@ -4,7 +4,6 @@ import {
   autocompleteClasses,
   Box,
   Button,
-  TextField,
   Dialog,
   DialogActions,
   DialogContent,
@@ -16,7 +15,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
   TableRow,
   Typography,
@@ -384,7 +382,8 @@ function CustomizedHook(props) {
       const searchedUsers_filtered = searchedUsers.filter(
         (user) =>
           user.email.startsWith(event.target.value) &&
-          (user.userId !== userId && !value.find((selectedUser) => isEqual(user, selectedUser)))
+          user.userId !== userId &&
+          !value.find((selectedUser) => isEqual(user, selectedUser))
       );
       setSearchedUsers(searchedUsers_filtered);
     }

@@ -1,5 +1,6 @@
 import { Api, use, StackContext } from "sst/constructs";
 import { StorageStack } from "./StorageStack";
+import * as iam from "aws-cdk-lib/aws-iam";
 
 
 export function ApiStack({ stack, app }: StackContext) {
@@ -52,12 +53,24 @@ export function ApiStack({ stack, app }: StackContext) {
       // get user by userId
       "GET /api/user/{userId}": "packages/functions/src/users.getUser",
 
+      // call sagemaker endpoint
+      "GET /api/ml/{deviceId}": "packages/functions/src/sagemaker.handler",
 
 
       /* Cron job testing */
       // "PUT /api/data/aggregate": "packages/functions/src/deviceDataAggregator.main",
     },
   });
+
+  api.attachPermissions([
+    new iam.PolicyStatement({
+      actions: ["sagemaker:InvokeEndpoint"],
+      effect: iam.Effect.ALLOW,
+      resources: [
+        '*',
+      ],
+    }),
+  ])
 
   // Show the API endpoint in the output
   stack.addOutputs({
