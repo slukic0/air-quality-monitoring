@@ -18,7 +18,7 @@ export const deviceMetricLabels = [
 
 export const numSensors = 7;
 
-export const getDeviceAggregateDataChartData = async (token, deviceId, period) => {
+export const getDeviceChartData = async (token, deviceId, period) => {
   const now = Date.now();
 
   if (period === deviceDataPeriods[0]) {
@@ -81,6 +81,7 @@ export const getDeviceAggregateDataChartData = async (token, deviceId, period) =
       last30mins.unshift(`${formattedHour}:${formattedMinute}`);
     }
 
+    // TODO this doesn't fully work if we don't have a full 30 mins of data ( but should be fine to demo :) )
     const nullData = {
       x: last30mins,
       y: [{ name: deviceId, data: Array.from({ length: 30 }, () => null) }],

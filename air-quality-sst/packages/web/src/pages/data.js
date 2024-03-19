@@ -1,19 +1,20 @@
 import Head from 'next/head';
-import { Box, Container, Stack, Typography, Grid, Paper } from '@mui/material';
+import { Box, Container, Stack, Typography, Grid, IconButton } from '@mui/material';
 import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import { Chart } from 'src/components/chart';
-import { alpha, useTheme } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
 import { useAuth } from 'src/hooks/use-auth';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { Selector } from 'src/sections/core/Selector';
 import {
   deviceDataPeriods,
-  getDeviceAggregateDataChartData,
+  getDeviceChartData,
   deviceMetrics,
   deviceMetricLabels,
   numSensors,
 } from 'src/api/devices';
 import { cloneDeep } from 'lodash';
+import RefreshIcon from '@mui/icons-material/Refresh';
 
 const useChartOptions = (categories, yaxisLabel) => {
   const theme = useTheme();
@@ -148,18 +149,19 @@ const Page = () => {
 
   const chartOptions = useChartOptions(deviceChartData.x, yAxisLabel);
 
+  const getDeviceData = useCallback(async () => {
+    if (device === '' || period === '') {
+      return;
+    }
+    const data = await getDeviceChartData(user.token, device, period);
+    console.log(data);
+    setDeviceData(data);
+  }, [device, period, user.token]);
+
   // Get device data
   useEffect(() => {
-    const getDeviceData = async () => {
-      if (device === '' || period === '') {
-        return;
-      }
-      const data = await getDeviceAggregateDataChartData(user.token, device, period);
-      console.log(data);
-      setDeviceData(data);
-    };
     getDeviceData();
-  }, [device, period, user.token]);
+  }, [getDeviceData]);
 
   // Filter device data to only plot the desired metric
   useEffect(() => {
@@ -214,9 +216,20 @@ const Page = () => {
               <Typography variant="h4">Data</Typography>
             </div>
             <div>
-              <Typography variant="body1">
-                Select a device and time period to view more information
-              </Typography>
+              <Grid container alignItems="center" justify="space-between">
+                <Grid item xs={11}>
+                  <Typography variant="body1">
+                    Select a device and time period to view more information
+                  </Typography>
+                </Grid>
+                <Grid item xs={1} justify="flex-end">
+                  <Box display="flex" justifyContent="flex-end">
+                    <IconButton aria-label="delete" onClick={getDeviceData}>
+                      <RefreshIcon />
+                    </IconButton>
+                  </Box>
+                </Grid>
+              </Grid>
             </div>
             <div>
               <Chart
