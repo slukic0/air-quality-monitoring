@@ -43,11 +43,17 @@ How2Electronics has a great [guide](https://how2electronics.com/connecting-esp32
 At a high level, you must enable the AWS IOT Core MQTT broker and download the device certificate, device private key, and the Amazon root CA certificate.  
 These files can then be used to connect the ESP32 to AWS and publish and subscribe to channels as needed.  
 
+Next, IoT Core rules can be used to automatically write MQTT messages from devices into DynamoDB.
+
+### Setup Google Login Support
+
+See this [guide](https://sst.dev/examples/how-to-add-google-login-to-your-sst-apps.html) from SST regarding the steps needed to allow Google logins.
+
 ### Monitoring Kit Hardware
 
-#### Single Sensor
+#### Single Sensor Prototype
 
-The current single sensor prototype of the monitoring kit utilizes a Huzzah ESP32 connected to a BME688 sensor using I2C.
+The single sensor prototype of the monitoring kit utilizes a Huzzah ESP32 connected to a BME688 sensor using I2C.
 Two LEDs are also used to indicate the WIFI and MQTT broker connection status.
 
 Sensor data is periodically encoded into a JSON format, which is then published to a topic by sending the JSON to AWS IOT Core.  
@@ -57,6 +63,6 @@ Sensor data is periodically encoded into a JSON format, which is then published 
 #### Dev Board
 
 The Dev board utilizes eight BME688 sensors connected to the stacked headers of the ESP32.  
-Sensor data from each sensor is logged periodically and eventually sent to IoT core.  
+Sensor data from each sensor is logged periodically and sent to IoT core.  
 
 <img src="./images/x8_prototype.jpg" alt="dev board prototype" width="500"/>
