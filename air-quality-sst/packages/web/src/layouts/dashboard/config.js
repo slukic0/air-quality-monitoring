@@ -8,7 +8,7 @@ import { SvgIcon } from '@mui/material';
 
 export const items = [
   {
-    title: 'Overview',
+    title: 'Home',
     path: '/',
     icon: (
       <SvgIcon fontSize="small">
@@ -44,20 +44,20 @@ export const items = [
     ),
   },
   {
-    title: 'Account',
-    path: '/account',
-    icon: (
-      <SvgIcon fontSize="small">
-        <UserIcon />
-      </SvgIcon>
-    ),
-  },
-  {
     title: 'ML',
     path: '/ml',
     icon: (
       <SvgIcon fontSize="small">
         <CpuChipIcon />
+      </SvgIcon>
+    ),
+  },
+  {
+    title: 'Account',
+    path: '/account',
+    icon: (
+      <SvgIcon fontSize="small">
+        <UserIcon />
       </SvgIcon>
     ),
   },
