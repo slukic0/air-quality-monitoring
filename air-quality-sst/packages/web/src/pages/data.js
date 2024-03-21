@@ -21,6 +21,9 @@ const useChartOptions = (categories, yaxisLabel) => {
 
   return {
     chart: {
+      zoom: {
+        enabled: false,
+      },
       background: 'transparent',
       stacked: false,
       toolbar: {
