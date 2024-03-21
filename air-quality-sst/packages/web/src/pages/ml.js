@@ -48,7 +48,7 @@ const Page = () => {
 
   useEffect(() => {
     if (response && typeof response === 'object' && response.length > 0) {
-      setResult(`Mode: ${getMode(response)}, Results: ${response}`);
+      setResult(`Mode: ${getMode(response)}, Last 5 Minutes: ${response}`);
     } else {
       setResult(!!response ? 'No Data' : '');
     }
