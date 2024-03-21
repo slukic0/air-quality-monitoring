@@ -2,7 +2,6 @@ import { createJsonBody } from '@air-quality-sst/core/jsonUtil';
 import { type APIGatewayProxyHandlerV2 } from 'aws-lambda';
 import { DynamoDB, SageMakerRuntime } from 'aws-sdk';
 import { ApiHandler, usePathParams } from 'sst/node/api';
-import executePaginatedQuery from '@air-quality-sst/core/src/dynamo/executePaginatedQuery';
 import { Table } from 'sst/node/table';
 import { useSession } from 'sst/node/auth';
 
@@ -28,8 +27,9 @@ const parseDynamoData = (data: any[]): any[] => {
 
 export const handler: APIGatewayProxyHandlerV2 = ApiHandler(
   async (event: any) => {
+    const minutes = 15;
     const now = new Date();
-    const prev = new Date(now.getTime() - 1000 * 60 * 15);
+    const prev = new Date(now.getTime() - 1000 * 60 * minutes);
 
     // const session = useSession();
     // if (session.type !== 'user') {
@@ -37,10 +37,9 @@ export const handler: APIGatewayProxyHandlerV2 = ApiHandler(
     // }
 
     const { deviceId } = usePathParams();
-    console.log('Received event: ', JSON.stringify(event, null, 2));
 
     // Get sensor data for this device
-    const dynamoParams = {
+    const queryParams = {
       TableName: Table.SensorData.tableName,
       KeyConditionExpression: 'deviceId = :hkey AND recordedTimestamp BETWEEN :recordedTimestampStart AND :recordedTimestampEnd',
       ExpressionAttributeValues: {
@@ -48,19 +47,18 @@ export const handler: APIGatewayProxyHandlerV2 = ApiHandler(
         ':recordedTimestampStart': prev.getTime(),
         ':recordedTimestampEnd': now.getTime(),
       },
+      ScanIndexForward: false, // newest results first
     };
-    const dynamoData = await executePaginatedQuery(dynamoDb, dynamoParams);
+    const { Items: dynamoData } = await dynamoDb.query(queryParams).promise();
 
-    if (dynamoData.length === 0) {
+    if (!dynamoData || dynamoData.length === 0) {
+      console.log('No data');
       return createJsonBody(200, 'No Data');
     }
 
-    console.log('dynamoData');
-    console.log(dynamoData);
-
     const dynamoDataArray = parseDynamoData(dynamoData);
-    console.log('dynamoDataArray');
-    console.log(dynamoDataArray);
+    // console.log('dynamoDataArray');
+    // console.log(dynamoDataArray);
 
     const body = {
       Input: dynamoDataArray,
@@ -75,7 +73,7 @@ export const handler: APIGatewayProxyHandlerV2 = ApiHandler(
       Body: JSON.stringify(body),
     };
 
-    console.log('Invoking endpoint', ENDPOINT_NAME);
+    console.log('Invoking endpoint', ENDPOINT_NAME, 'with data', body);
 
     try {
       const response: SageMakerRuntime.Types.InvokeEndpointOutput =
@@ -85,7 +83,7 @@ export const handler: APIGatewayProxyHandlerV2 = ApiHandler(
 
       // eslint-disable-next-line @typescript-eslint/no-base-to-string
       const result = JSON.parse(response.Body.toString());
-      console.log(result);
+      console.log('Returning result', result);
       return createJsonBody(200, result);
     } catch (err) {
       console.error(err);
