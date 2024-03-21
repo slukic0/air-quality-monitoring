@@ -374,12 +374,11 @@ function CustomizedHook(props) {
         });
         setSearchedUsers(
           newSearchedUsers.data.filter(
-            (user) => (
-                user.userId !== userId &&
-                !value.find((selectedUser) => isEqual(user, selectedUser)) &&
-                !authorizedUsers.find((authUser) => isEqual(user, authUser))
-              )
-            )
+            (user) =>
+              user.userId !== userId &&
+              !value.find((selectedUser) => isEqual(user, selectedUser)) &&
+              !authorizedUsers.find((authUser) => isEqual(user, authUser))
+          )
         );
       } catch (err) {
         console.log(err);
@@ -388,12 +387,11 @@ function CustomizedHook(props) {
       setSearchedUsers([]);
     } else {
       const searchedUsers_filtered = searchedUsers.filter(
-        (user) => (
+        (user) =>
           user.email.startsWith(event.target.value) &&
           user.userId !== userId &&
           !value.find((selectedUser) => isEqual(user, selectedUser)) &&
           !authorizedUsers.find((authUser) => isEqual(user, authUser))
-        )
       );
       setSearchedUsers(searchedUsers_filtered);
     }
