@@ -31,10 +31,10 @@ export const handler: APIGatewayProxyHandlerV2 = ApiHandler(
     const now = new Date();
     const prev = new Date(now.getTime() - 1000 * 60 * minutes);
 
-    // const session = useSession();
-    // if (session.type !== 'user') {
-    //   return createJsonMessage(401, 'Unauthorized');
-    // }
+    const session = useSession();
+    if (session.type !== 'user') {
+      return createJsonBody(401, 'Unauthorized');
+    }
 
     const { deviceId } = usePathParams();
 
