@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import { useAuth } from 'src/hooks/use-auth';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Selector } from 'src/sections/core/Selector';
 import { getMlData } from 'src/api/ml';
 import { Box, Container, Stack, Typography, Button, CircularProgress } from '@mui/material';
@@ -15,6 +15,7 @@ const Page = () => {
 
   const [device, setDevice] = useState('');
   const [response, setResponse] = useState();
+  const [result, setResult] = useState();
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -29,6 +30,15 @@ const Page = () => {
     console.log(data);
     setResponse(data);
   };
+
+  useEffect(() => {
+    if (response && response.length > 0) {
+      const sum = response.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+      setResult(sum / response.length);
+    } else {
+      setResult(!!response ? 'No Data' : '');
+    }
+  }, [response]);
 
   return (
     <>
@@ -72,7 +82,7 @@ const Page = () => {
             </div>
             {!!response && (
               <div>
-                <Typography>{response}</Typography>
+                <Typography>{result}</Typography>
               </div>
             )}
           </Stack>

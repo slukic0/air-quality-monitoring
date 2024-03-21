@@ -8,6 +8,7 @@ export const getMlData = async (token, deviceId) => {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      timeout: 30000,
     });
     return data;
   } catch (error) {
