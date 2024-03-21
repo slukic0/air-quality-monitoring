@@ -72,7 +72,7 @@ const Page = () => {
             </div>
             {!!response && (
               <div>
-                <Typography>{response.message}</Typography>
+                <Typography>{response}</Typography>
               </div>
             )}
           </Stack>

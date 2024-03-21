@@ -1,30 +1,18 @@
-import { createJsonBody, createJsonMessage } from '@air-quality-sst/core/jsonUtil';
+import { createJsonBody } from '@air-quality-sst/core/jsonUtil';
 import { type APIGatewayProxyHandlerV2 } from 'aws-lambda';
 import { DynamoDB, SageMakerRuntime } from 'aws-sdk';
 import { ApiHandler, usePathParams } from 'sst/node/api';
-import { useSession } from 'sst/node/auth';
 import executePaginatedQuery from '@air-quality-sst/core/src/dynamo/executePaginatedQuery';
 import { Table } from 'sst/node/table';
+import { useSession } from 'sst/node/auth';
 
-// grab environment variables
-const ENDPOINT_NAME: string = 'ml-aq-endpoint';
+const ENDPOINT_NAME: string = 'sklearn-local-ep2024-03-21-02-54-09';
 const runtime: SageMakerRuntime = new SageMakerRuntime();
 
 const dynamoDb = new DynamoDB.DocumentClient();
 
-const arrayToCSV = (arrays: any[]): string => {
-  // Join each inner array with commas
-  const csvRows = arrays.map(row => row.join(','));
-
-  // Join rows with newline characters
-  const csvString = csvRows.join('\n');
-
-  return csvString;
-};
-
 const parseDynamoData = (data: any[]): any[] => {
-  const headers = ['Sensor 1', 'Sensor 2', 'Sensor 3', 'Sensor 4', 'Sensor 5', 'Sensor 6', 'Sensor 7', 'Sensor 8'];
-  const csvArray: any[] = [headers];
+  const arr: any[] = [];
 
   data.forEach((item) => {
     const sensorData = item.payload.data;
@@ -32,10 +20,10 @@ const parseDynamoData = (data: any[]): any[] => {
     sensorData.forEach((sensorReading: { tgasResistance: any }) => {
       row.push(sensorReading.tgasResistance);
     });
-    csvArray.push(row);
+    arr.push(row);
   });
 
-  return csvArray;
+  return arr;
 };
 
 export const handler: APIGatewayProxyHandlerV2 = ApiHandler(
@@ -62,6 +50,11 @@ export const handler: APIGatewayProxyHandlerV2 = ApiHandler(
       },
     };
     const dynamoData = await executePaginatedQuery(dynamoDb, dynamoParams);
+
+    if (dynamoData.length === 0) {
+      return createJsonBody(200, 'No Data');
+    }
+
     console.log('dynamoData');
     console.log(dynamoData);
 
@@ -69,14 +62,17 @@ export const handler: APIGatewayProxyHandlerV2 = ApiHandler(
     console.log('dynamoDataArray');
     console.log(dynamoDataArray);
 
-    const dynamoCsv = arrayToCSV(dynamoDataArray);
-    console.log('dynamoCsv');
-    console.log(dynamoCsv);
+    const body = {
+      Input: dynamoDataArray,
+    };
+    // const body = { // this returns 1
+    //   Input: [[-1.30087652, -1.64633815, -1.60981466, -1.72198166, -1.42560473, -1.55332533, -1.10534774, -1.27594878]],
+    // };
 
     const params: SageMakerRuntime.Types.InvokeEndpointInput = {
       EndpointName: ENDPOINT_NAME,
-      ContentType: 'text/csv',
-      Body: dynamoCsv,
+      ContentType: 'application/json',
+      Body: JSON.stringify(body),
     };
 
     console.log('Invoking endpoint', ENDPOINT_NAME);
