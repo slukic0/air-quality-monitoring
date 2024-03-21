@@ -43,10 +43,10 @@ const Page = () => {
   };
 
   const onAddNewUsers = (deviceId, addedUsers) => {
-    const devicesCopy = [...devices];
+    const devicesCopy = devices;
     const updatedDevices = devicesCopy.map((device) => {
       if (device.deviceId === deviceId) {
-        device.authorizedUsers = [...device.authorizedUsers, addedUsers];
+        addedUsers.map((userToAdd) => device.authorizedUsers.push(userToAdd))
       }
       return device;
     });
@@ -54,7 +54,7 @@ const Page = () => {
   };
 
   const onRemovedUsers = (deviceId, removedUsers) => {
-    const devicesCopy = [...devices];
+    const devicesCopy = devices;
     const removedUserIds = removedUsers.map((userObj) => userObj.userId);
 
     const updatedDevices = devicesCopy.map((device) => {
