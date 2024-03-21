@@ -13,6 +13,21 @@ const Page = () => {
     [user]
   );
 
+  const getMode = (arr) => {
+    const frequencyMap = new Map();
+
+    // Count occurrences of each element
+    arr.forEach((element) => {
+      frequencyMap.set(element, (frequencyMap.get(element) || 0) + 1);
+    });
+
+    // Find the mode(s)
+    let maxFrequency = Math.max(...frequencyMap.values());
+    let mode = [...frequencyMap.keys()].find((key) => frequencyMap.get(key) === maxFrequency);
+
+    return mode;
+  };
+
   const [device, setDevice] = useState('');
   const [response, setResponse] = useState();
   const [result, setResult] = useState();
@@ -32,9 +47,8 @@ const Page = () => {
   };
 
   useEffect(() => {
-    if (response && response.length > 0) {
-      const sum = response.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
-      setResult(sum / response.length);
+    if (response && typeof response === 'object' && response.length > 0) {
+      setResult(`Mode: ${getMode(response)}, Results: ${response}`);
     } else {
       setResult(!!response ? 'No Data' : '');
     }

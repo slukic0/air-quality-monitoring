@@ -4,13 +4,14 @@ import { DynamoDB, SageMakerRuntime } from 'aws-sdk';
 import { ApiHandler, usePathParams } from 'sst/node/api';
 import { Table } from 'sst/node/table';
 import { useSession } from 'sst/node/auth';
+import { fit_transform } from '@air-quality-sst/core/scalar';
 
 const ENDPOINT_NAME: string = 'sklearn-local-ep2024-03-21-02-54-09';
 const runtime: SageMakerRuntime = new SageMakerRuntime();
 
 const dynamoDb = new DynamoDB.DocumentClient();
 
-const parseDynamoData = (data: any[]): any[] => {
+const parseDynamoData = (data: any[]): any[][] => {
   const arr: any[] = [];
 
   data.forEach((item) => {
@@ -51,17 +52,21 @@ export const handler: APIGatewayProxyHandlerV2 = ApiHandler(
     };
     const { Items: dynamoData } = await dynamoDb.query(queryParams).promise();
 
+    console.log('dynamoData', dynamoData);
+
     if (!dynamoData || dynamoData.length === 0) {
       console.log('No data');
       return createJsonBody(200, 'No Data');
     }
 
     const dynamoDataArray = parseDynamoData(dynamoData);
-    // console.log('dynamoDataArray');
-    // console.log(dynamoDataArray);
+    console.log('dynamoDataArray');
+    console.log(dynamoDataArray);
+
+    const transformedData = fit_transform(dynamoDataArray);
 
     const body = {
-      Input: dynamoDataArray,
+      Input: transformedData,
     };
     // const body = { // this returns 1
     //   Input: [[-1.30087652, -1.64633815, -1.60981466, -1.72198166, -1.42560473, -1.55332533, -1.10534774, -1.27594878]],
