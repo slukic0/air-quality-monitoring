@@ -4,9 +4,8 @@ import { DynamoDB, SageMakerRuntime } from 'aws-sdk';
 import { ApiHandler, usePathParams } from 'sst/node/api';
 import { Table } from 'sst/node/table';
 import { useSession } from 'sst/node/auth';
-import { fit_transform } from '@air-quality-sst/core/scalar';
 
-const ENDPOINT_NAME: string = 'sklearn-local-ep2024-03-21-02-54-09';
+const ENDPOINT_NAME: string = 'sklearn-local-ep2024-03-21-17-10-02';
 const runtime: SageMakerRuntime = new SageMakerRuntime();
 
 const dynamoDb = new DynamoDB.DocumentClient();
@@ -63,14 +62,9 @@ export const handler: APIGatewayProxyHandlerV2 = ApiHandler(
     console.log('dynamoDataArray');
     console.log(dynamoDataArray);
 
-    const transformedData = fit_transform(dynamoDataArray);
-
     const body = {
-      Input: transformedData,
+      Input: dynamoDataArray,
     };
-    // const body = { // this returns 1
-    //   Input: [[-1.30087652, -1.64633815, -1.60981466, -1.72198166, -1.42560473, -1.55332533, -1.10534774, -1.27594878]],
-    // };
 
     const params: SageMakerRuntime.Types.InvokeEndpointInput = {
       EndpointName: ENDPOINT_NAME,
