@@ -23,7 +23,7 @@ const Page = () => {
               <Typography variant="h4">Home</Typography>
             </div>
             <div>
-              <Typography variant="h6">{`Hello ${user.name}`}</Typography>
+              <Typography variant="h6">{`Hello ${user?.name ?? ''}`}</Typography>
             </div>
             <div>
               <Typography variant="body1">Select a page to view more information</Typography>
