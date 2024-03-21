@@ -27,7 +27,7 @@ const parseDynamoData = (data: any[]): any[] => {
 
 export const handler: APIGatewayProxyHandlerV2 = ApiHandler(
   async (event: any) => {
-    const minutes = 15;
+    const minutes = 5;
     const now = new Date();
     const prev = new Date(now.getTime() - 1000 * 60 * minutes);
 
