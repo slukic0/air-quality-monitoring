@@ -64,6 +64,8 @@ export const getDeviceChartData = async (token, deviceId, period) => {
     const currentHour = now.getHours();
 
     // Calculate the minutes for the last 30 minutes
+    let last30minsIndex = {};
+    const resultArray = [];
     let last30mins = [];
     for (let i = 0; i < 30; i++) {
       let minute = (currentMin - i) % 60;
@@ -75,13 +77,16 @@ export const getDeviceChartData = async (token, deviceId, period) => {
         hour--;
       }
 
+      // TODO this code is basically duplicatd from the backend get aggreagate function, the backend should be refactored
+
       // Convert to a string format like 'hh:mm'
       let formattedHour = hour.toString().padStart(2, '0');
       let formattedMinute = minute.toString().padStart(2, '0');
       last30mins.unshift(`${formattedHour}:${formattedMinute}`);
+      resultArray.push(null);
+      last30minsIndex[minute] = 30 - resultArray.length - 1;
     }
 
-    // TODO this doesn't fully work if we don't have a full 30 mins of data ( but should be fine to demo :) )
     const nullData = {
       x: last30mins,
       y: [{ name: deviceId, data: Array.from({ length: 30 }, () => null) }],
@@ -139,12 +144,27 @@ export const getDeviceChartData = async (token, deviceId, period) => {
         for (const [key, value] of Object.entries(deviceDataAverage)) {
           deviceDataAverage[key] = value / numSensors;
         }
-        return { tgasResistanceIndividualSensors, ...deviceDataAverage };
+
+        const minute = new Date(reading.recordedTimestamp).getMinutes();
+        return {
+          minute,
+          tgasResistanceIndividualSensors,
+          ...deviceDataAverage,
+        };
       });
+
+      // TODO this code is basically duplicatd from the backend get aggreagate function, the backend should be refactored
+
+      // fill in our array in the right spots
+      for (const item of averagedSensorData) {
+        const minute = item.minute;
+        const index = last30minsIndex[minute];
+        resultArray[index] = item;
+      }
 
       return {
         x: last30mins,
-        y: [{ name: deviceId, data: averagedSensorData }],
+        y: [{ name: deviceId, data: resultArray }],
       };
     } catch (error) {
       console.log(error);
