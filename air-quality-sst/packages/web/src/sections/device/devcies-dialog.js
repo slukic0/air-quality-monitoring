@@ -236,7 +236,12 @@ export default function DeviceDialog(props) {
           <DialogContentText>
             Enter the email address of a user to allow access to this device
           </DialogContentText>
-          <CustomizedHook addUsersCallback={onAddUsers} userId={userId} token={token} />
+          <CustomizedHook
+            addUsersCallback={onAddUsers}
+            authorizedUsers={deviceAuthorizedUsers}
+            userId={userId}
+            token={token}
+          />
           <Box sx={{ width: '100%' }}>
             <Paper sx={{ width: '100%', mb: 2 }}>
               <Typography
@@ -338,7 +343,7 @@ DeviceDialog.propTypes = {
 };
 
 function CustomizedHook(props) {
-  const { addUsersCallback, userId, token } = props;
+  const { addUsersCallback, authorizedUsers, userId, token } = props;
   const [searchedUsers, setSearchedUsers] = useState([]);
 
   const {
@@ -370,7 +375,9 @@ function CustomizedHook(props) {
         setSearchedUsers(
           newSearchedUsers.data.filter(
             (user) =>
-              user.userId !== userId && !value.find((selectedUser) => isEqual(user, selectedUser))
+              user.userId !== userId &&
+              !value.find((selectedUser) => isEqual(user, selectedUser)) &&
+              !authorizedUsers.find((authUser) => isEqualuser(user, authUser))
           )
         );
       } catch (err) {
@@ -383,7 +390,8 @@ function CustomizedHook(props) {
         (user) =>
           user.email.startsWith(event.target.value) &&
           user.userId !== userId &&
-          !value.find((selectedUser) => isEqual(user, selectedUser))
+          !value.find((selectedUser) => isEqual(user, selectedUser)) &&
+          !authorizedUsers.find((authUser) => isEqualuser(user, authUser))
       );
       setSearchedUsers(searchedUsers_filtered);
     }
@@ -424,6 +432,7 @@ function CustomizedHook(props) {
 
 CustomizedHook.propTypes = {
   addUsersCallback: PropTypes.func.isRequired,
+  authorizedUsers: PropTypes.array.isRequired,
   userId: PropTypes.string.isRequired,
   token: PropTypes.string.isRequired,
 };
