@@ -46,7 +46,7 @@ const Page = () => {
     const devicesCopy = devices;
     const updatedDevices = devicesCopy.map((device) => {
       if (device.deviceId === deviceId) {
-        addedUsers.map((userToAdd) => device.authorizedUsers.push(userToAdd))
+        addedUsers.map((userToAdd) => device.authorizedUsers.push(userToAdd));
       }
       return device;
     });
