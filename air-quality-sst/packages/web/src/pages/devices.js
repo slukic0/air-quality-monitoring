@@ -96,7 +96,6 @@ const Page = () => {
                 </Stack>
                 <AddDeviceDialog onChange={onRegisterDevice} />
               </Stack>
-              {/*<DevicesSearch /> TODO search for devices*/}
               <DevicesTable
                 items={devices}
                 user={user}

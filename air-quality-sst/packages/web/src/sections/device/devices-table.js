@@ -117,7 +117,6 @@ function Device(props) {
                 </TableHead>
                 <TableBody>
                   {device.authorizedUsers.map((authedUser) => {
-                    console.log('devId ', device.deviceId, ' usrId ', authedUser.userId);
                     return (
                       <TableRow key={authedUser.userId}>
                         <TableCell component="th" scope="device" align="left">
@@ -126,20 +125,6 @@ function Device(props) {
                         <TableCell align="left">
                           {authedUser.email ? authedUser.email : 'NA'}
                         </TableCell>
-                        {/*<TableCell align='right'>
-                          <Button
-                            startIcon={(
-                              <SvgIcon fontSize='small'>
-                                <TrashIcon />
-                              </SvgIcon>
-                            )}
-                            variant='contained'
-                            color='error'
-                            onClick={() => handleRemove(device.deviceId, authedUser.userId, user.token)}
-                          >
-                            Remove User
-                          </Button>
-                        </TableCell>*/}
                       </TableRow>
                     );
                   })}

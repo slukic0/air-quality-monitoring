@@ -53,6 +53,7 @@ export const TopNav = (props) => {
           sx={{
             minHeight: TOP_NAV_HEIGHT,
             px: 2,
+            mx: 2,
           }}
         >
           <Avatar
