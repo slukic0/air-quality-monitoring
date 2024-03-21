@@ -259,6 +259,9 @@ void loop(void) {
      * check if it is time to read new data from the sensor  
      * and process it.
      */
+    while (WiFi.status() != WL_CONNECTED) {
+        setupWifi();
+    }
     for (sensor = 0; sensor < NUM_OF_SENS; sensor++) {
         if (!envSensor[sensor].run()) {
          checkBsecStatus(envSensor[sensor]);
