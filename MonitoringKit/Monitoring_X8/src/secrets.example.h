@@ -11,7 +11,7 @@
 #define USERNAME_E  "*****"
 #define PASSWORD_E  "*****"
 
-const bool USE_ENTERPRISE = 0; // 0 for home network, 1 for enterprise
+const bool USE_ENTERPRISE = 1; // 0 for home network, 1 for enterprise
 
 #define THINGNAME "*****"
 #define AWS_TOPIC_SUFFIX "/****" // Optional, default is "/data" Change if needed
