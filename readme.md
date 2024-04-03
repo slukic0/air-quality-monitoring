@@ -13,7 +13,8 @@ Pranav Hari
   - `Monitoring_Breakout`: Code for single breakout BME 688 sensor  
   - `Monitoring_X8`: Code for development board with 8x BME688
   - `Monitoring_X8_3S`: Code for development board with 8x BME688 taking a sample every 3 seconds
-- `air-quality-sst`: AWS Infrastructure. Contains backend code and frontend web app.  
+- `air-quality-sst`: AWS Infrastructure. Contains backend code and frontend web app.
+- `ml`: Sagemaker machine learning code
 - `docs`: Relevant datasheets and documentation
 - `images`: Image files
 - `examples`: Code examples  
