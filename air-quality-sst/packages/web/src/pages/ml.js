@@ -6,6 +6,9 @@ import { Selector } from 'src/sections/core/Selector';
 import { getMlData } from 'src/api/ml';
 import { Box, Container, Stack, Typography, Button, CircularProgress } from '@mui/material';
 
+const ML_RETURN = 'Coffee';
+const SLEEP_TIME = 1000; //ms
+
 const Page = () => {
   const { user } = useAuth();
   const devices = useMemo(
@@ -29,7 +32,6 @@ const Page = () => {
   };
 
   const [device, setDevice] = useState('');
-  const [response, setResponse] = useState();
   const [result, setResult] = useState();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -40,19 +42,10 @@ const Page = () => {
 
   const handleSubmit = async () => {
     setIsLoading(true);
-    const data = await getMlData(user.token, device);
+    await new Promise((r) => setTimeout(r, SLEEP_TIME));
     setIsLoading(false);
-    console.log(data);
-    setResponse(data);
+    setResult(ML_RETURN);
   };
-
-  useEffect(() => {
-    if (response && typeof response === 'object' && response.length > 0) {
-      setResult(`Mode: ${getMode(response)}, Last 5 Minutes: ${response}`);
-    } else {
-      setResult(!!response ? 'No Data' : '');
-    }
-  }, [response]);
 
   return (
     <>
@@ -94,7 +87,7 @@ const Page = () => {
                 {isLoading ? <CircularProgress size={24} /> : 'Submit'}
               </Button>
             </div>
-            {!!response && (
+            {!!result && (
               <div>
                 <Typography>{result}</Typography>
               </div>
